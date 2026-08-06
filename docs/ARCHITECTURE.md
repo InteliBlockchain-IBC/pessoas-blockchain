@@ -1,6 +1,6 @@
 # Arquitetura — Inteli Blockchain Gestão de Pessoas
 
-**Última atualização:** 2026-05-07
+**Última atualização:** 2026-08-06
 
 ## Sumário
 
@@ -11,6 +11,7 @@
    - [Enums](#41-enums)
    - [Modelos](#42-modelos)
    - [Regras de Integridade](#43-regras-de-integridade)
+   - [Regras do Seed](#44-regras-do-seed)
 5. [Backend (NestJS)](#5-backend-nestjs)
    - [Módulos](#51-módulos)
    - [Padrão de Resposta](#52-padrão-de-resposta)
@@ -233,6 +234,37 @@ model PdiEntryRevision {
 | CandidateEvaluation.evaluatorId → User | SetNull |
 | PdiEntry.authorId → User | SetNull |
 | PdiEntryRevision.editorId → User | SetNull |
+
+### 4.4. Regras do Seed
+
+O script `backend/scripts/seed.ts` popula o banco a partir das planilhas em `data/`. As regras abaixo definem **como** a planilha vira registro — não são deriváveis do schema.
+
+**Mapeamento de cargo → `Department`** (`mapDepartment`, comparação case-insensitive):
+
+| Cargo contém | `Department` |
+|---|---|
+| "pessoas" | `PEOPLE` |
+| "marketing" | `MARKETING` |
+| "projetos" / "projeto" | `PROJECTS` |
+| "educacional" | `EDUCATIONAL` |
+| qualquer outro | `null` |
+
+**Resposta do candidato vs. avaliação do entrevistador** — a distinção não é óbvia e é fonte recorrente de erro:
+
+| Origem | Modelo gerado | Observação |
+|---|---|---|
+| Questão de formulário | `SelectionAnswer` | texto respondido pelo candidato |
+| Questão de entrevista **com** nota | `CandidateEvaluation` | `score` + `notes` |
+| Questão de entrevista **sem** nota | `CandidateEvaluation` com `score: null` | observação do entrevistador — **nunca** `SelectionAnswer` |
+
+**Demais regras:**
+
+- Todo candidato recebe `StageResult` para **todas** as etapas, inclusive Formulário.
+- Membros `ACTIVE` com `department = 'PEOPLE'` recebem `User` com `role: 'PEOPLE'`.
+- O admin recebe `role: 'ADMIN'` e o UUID fixo `00000000-0000-0000-0000-000000000001`.
+- O seed imprime todos os `x-user-id` gerados no output final — é assim que se obtém um ID para autenticar após popular o banco.
+
+> **Nota:** `backend/scripts/` e `data/` são gitignored (contêm dados pessoais de membros). Esta seção documenta as regras; os arquivos existem apenas nas máquinas de quem opera o seed.
 
 ---
 
