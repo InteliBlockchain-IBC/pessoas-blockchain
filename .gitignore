@@ -4,6 +4,7 @@ contexts/
 plan/
 .agents/
 ai/
+docs/superpowers/
 .claude/
 
 # Pasta com dados privados

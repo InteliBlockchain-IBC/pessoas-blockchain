@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Contexto rápido para IA. Para entendimento completo, **sempre ler `ai/contexts/essential.md` primeiro**.
+Contexto rápido para IA. Para entendimento completo, **sempre ler `docs/ARCHITECTURE.md` primeiro**.
 
 ## O que é
 
@@ -15,9 +15,13 @@ Plataforma interna do clube **Inteli Blockchain** (Messias é presidente) para s
 
 ## Workflow obrigatório
 
-`ai/WORKFLOW.md` define: para feature/fix não-trivial, **criar plano em `ai/plans/<nome>.md` antes de implementar** e aguardar aprovação. Após implementar, atualizar `ai/contexts/essential.md`. Convenção: `feature-*`, `fix-*`, `refactor-*`, `chore-*`.
+Fluxo **superpowers**, sem exceção: `brainstorming` → spec → `writing-plans` → plano → execução (`executing-plans` ou `subagent-driven-development`). Cada etapa espera aprovação antes da seguinte.
 
-Pular plano só para: typo, ajuste óbvio em 1 arquivo, exploração/audit.
+- Specs em `docs/superpowers/specs/`, planos em `docs/superpowers/plans/`.
+- `docs/superpowers/` é **gitignored** — specs e planos são artefatos locais de uma sessão, não documentação do repo.
+- A documentação versionada do sistema é o `docs/ARCHITECTURE.md`. Ao implementar algo que mude arquitetura, schema ou endpoints, atualize **esse** arquivo — nunca deixe a verdade do sistema morar num artefato de sessão.
+
+Pular o fluxo só para: typo, ajuste óbvio em 1 arquivo, exploração/audit.
 
 ## Regras técnicas críticas
 
@@ -32,10 +36,7 @@ Pular plano só para: typo, ajuste óbvio em 1 arquivo, exploração/audit.
 
 | Onde | O que |
 |------|-------|
-| `ai/contexts/essential.md` | Contexto consolidado (atualizar após cada feature) |
-| `ai/WORKFLOW.md` | Processo plano → aprovação → implementação |
-| `ai/plans/` | Planos aprovados, exemplos de formato |
-| `docs/ARCHITECTURE.md` | 16 modelos Prisma, 9 enums, RBAC, 44+ endpoints |
+| `docs/ARCHITECTURE.md` | Fonte de verdade versionada: 16 modelos Prisma, 9 enums, RBAC, 44+ endpoints, regras do seed |
 | `backend/prisma/schema.prisma` | Schema fonte da verdade |
 | `backend/README.md` / `frontend/README.md` | Detalhes de cada camada |
 | Swagger | `http://localhost:3001/docs` ou `https://pessoas-blockchain.fly.dev/docs` |
@@ -51,10 +52,3 @@ cd .. && npm run dev   # frontend :3000, backend :3001
 # Primeiro acesso pós-seed:
 # http://localhost:3000/dashboard?userId=00000000-0000-0000-0000-000000000001&role=ADMIN
 ```
-
-## Estado atual (verificado 2026-05-19)
-
-- 59/59 testes backend passando (6 suites).
-- Frontend typecheck limpo (`npx tsc --noEmit`).
-- Working tree: arquivos default do Next em `frontend/public/` removidos (file.svg, globe.svg, next.svg, vercel.svg, window.svg); `favicon.ico` + `logo.png` adicionados. Não commitado ainda.
-- Branch `main`, último commit: `54e8a71 docs: atualiza readme`.
