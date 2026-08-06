@@ -19,10 +19,6 @@ Plataforma interna para gerenciar a jornada dos integrantes do clube Inteli Bloc
 ├── frontend/         # Interface web (Next.js App Router)
 ├── data/             # Planilhas xlsx para seed
 ├── docs/             # Documentação técnica (ARCHITECTURE.md)
-├── ai/               # Contexto e workflow para agentes de IA
-│   ├── contexts/     # essential.md — referência principal do projeto
-│   ├── plans/        # Planos de funcionalidades aprovados antes de implementar
-│   └── WORKFLOW.md   # Processo: contexto → plano → aprovação → implementação
 └── package.json      # Scripts do monorepo
 ```
 
@@ -156,8 +152,6 @@ npx tsc --noEmit           # verificar tipos TypeScript
 ## Documentação
 
 - **Arquitetura completa:** `docs/ARCHITECTURE.md`
-- **Contexto do projeto (IA):** `ai/contexts/essential.md`
 - **API Swagger:** `http://localhost:3001/docs` (local) ou `https://pessoas-blockchain.fly.dev/docs`
 - **Backend detalhado:** `backend/README.md`
 - **Frontend detalhado:** `frontend/README.md`
-- **Workflow de desenvolvimento:** `ai/WORKFLOW.md`

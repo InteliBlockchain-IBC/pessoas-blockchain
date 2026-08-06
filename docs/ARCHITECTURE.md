@@ -105,13 +105,8 @@ gestao_pessoas/
 │   ├── [CENTRAL] BLOCKCHAIN INTEGRANTES.xlsx
 │   └── Aprovados 2026.xlsx
 │
-├── docs/
-│   └── ARCHITECTURE.md         # Este arquivo
-│
-└── ai/
-    ├── contexts/essential.md   # Contexto consolidado do projeto (referência para IAs)
-    ├── plans/                  # Planos aprovados antes de implementar
-    └── WORKFLOW.md             # Processo de desenvolvimento com IA
+└── docs/
+    └── ARCHITECTURE.md         # Este arquivo
 ```
 
 ---
@@ -553,7 +548,6 @@ GET    /export/pdi/csv
 
 ## Referências
 
-- `ai/contexts/essential.md` — contexto consolidado para IAs (atualizado continuamente)
-- `ai/WORKFLOW.md` — processo de desenvolvimento: plano → aprovação → implementação
-- `ai/plans/` — histórico de planos implementados
+- `CLAUDE.md` — contexto rápido e workflow de desenvolvimento com IA
+- `backend/prisma/schema.prisma` — schema fonte da verdade
 - Swagger: `http://localhost:3001/docs` / `https://pessoas-blockchain.fly.dev/docs`
