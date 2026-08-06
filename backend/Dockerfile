@@ -15,7 +15,7 @@ FROM node:20-bookworm-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Reasonable defaults for production deployments. Can be overridden via Fly secrets.
+# Reasonable defaults for production deployments. Can be overridden via env vars.
 ENV PRISMA_CONNECTION_LIMIT=5
 ENV PRISMA_CONNECT_RETRIES=5
 ENV PRISMA_CONNECT_BASE_DELAY_MS=1000

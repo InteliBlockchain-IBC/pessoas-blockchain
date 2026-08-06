@@ -60,8 +60,8 @@ Fly / env da Vercel:
 
 **Backend:**
 ```
-DATABASE_URL=<a mesma URL do Supabase de hoje>
-DIRECT_URL=<a mesma URL do Supabase de hoje>
+DATABASE_URL=<URL pooler do Supabase, porta 6543>
+DIRECT_URL=<URL direta do Supabase, porta 5432 — obrigatória para as migrations>
 PORT=3000
 NODE_ENV=production
 GOOGLE_CLIENT_ID=<o mesmo client ID de hoje>
