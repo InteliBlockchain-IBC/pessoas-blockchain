@@ -244,12 +244,6 @@ npm run test:e2e    # end-to-end
 
 Suites: App, GoogleOAuth, Users, Members, Selection, PDI.
 
-## Deploy (Fly.io)
+## Deploy
 
-```bash
-fly deploy
-```
-
-`fly.toml` configura release command `npx prisma migrate deploy` automático.
-
-Dockerfile: multi-stage (builder compila TypeScript + gera Prisma → runner Node 20 slim em produção).
+Dockerfile: multi-stage (builder compila TypeScript + gera Prisma → runner Node 20 slim em produção). Migrations rodam automaticamente no start do container via `npx prisma migrate deploy && node dist/main` (ver Dockerfile CMD).

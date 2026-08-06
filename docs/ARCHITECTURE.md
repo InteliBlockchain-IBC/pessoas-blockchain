@@ -44,7 +44,7 @@ Plataforma interna para gerenciar a jornada dos integrantes do clube Inteli Bloc
 | Camada | Tecnologia | Versão | Deploy |
 |--------|-----------|--------|--------|
 | Frontend | Next.js App Router, React, Tailwind CSS v4, TypeScript | Next 15+, React 19 | Vercel |
-| Backend | NestJS, TypeScript, Swagger | NestJS 11 | Fly.io via Docker |
+| Backend | NestJS, TypeScript, Swagger | NestJS 11 | Docker |
 | ORM | Prisma | 6.x | — |
 | Banco | PostgreSQL (Supabase, AWS us-east-1) | — | Supabase |
 | Auth | Google OAuth 2.0 + DB-validated header guard | `google-auth-library` 10 | — |
@@ -82,8 +82,7 @@ gestao_pessoas/
 │   │   └── migrations/         # Histórico de migrations
 │   ├── scripts/
 │   │   └── seed.ts             # Popula banco com dados reais de xlsx
-│   ├── Dockerfile              # Multi-stage: builder + runner Node 20 slim
-│   └── fly.toml                # Fly.io: região iad, 1 vCPU, 1 GB RAM
+│   └── Dockerfile              # Multi-stage: builder + runner Node 20 slim
 │
 ├── frontend/                   # Next.js App Router (porta 3000)
 │   ├── app/
@@ -423,29 +422,9 @@ Arquivos com esse padrão: `Sidebar.tsx`, `members/page.tsx`, `members/[id]/page
 
 ## 8. Deploy e Infraestrutura
 
-### Backend (Fly.io)
+### Backend
 
-```toml
-# fly.toml
-app = 'pessoas-blockchain'
-primary_region = 'iad'     # US East
-internal_port = 3000
-memory = '1gb'
-release_command = 'npx prisma migrate deploy'
-```
-
-```dockerfile
-# Dockerfile (multi-stage)
-FROM node:20-bookworm-slim AS builder
-# npm ci --include=dev
-# prisma generate
-# npm run build
-
-FROM node:20-bookworm-slim AS runner
-# npm ci --omit=dev
-# COPY dist/ prisma/
-# CMD node dist/main
-```
+Backend deploy via Docker image (built by GitHub Actions). Migrations rodam automaticamente no container start via `npx prisma migrate deploy && node dist/main` (ver Dockerfile CMD).
 
 ### Frontend (Vercel)
 
