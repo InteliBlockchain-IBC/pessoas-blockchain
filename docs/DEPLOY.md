@@ -1,8 +1,8 @@
 # Deploy — GHCR + Easypanel
 
 Backend e frontend são buildados como imagens Docker pelo GitHub Actions,
-publicados no GHCR e deployados na VPS via Easypanel. Banco continua no
-Supabase — nada muda lá.
+publicados no GHCR e deployados na VPS via Easypanel. Banco também é
+auto-hospedado na mesma VPS, via Postgres provisionado no Easypanel.
 
 ## 1. GitHub — Secrets e Variables
 
@@ -29,7 +29,7 @@ Decidir os domínios de backend e frontend antes de seguir (ex:
 `api.pessoas.seudominio.com` / `pessoas.seudominio.com`). Eles entram em:
 - `NEXT_PUBLIC_API_URL` (variable do GitHub, acima)
 - `FRONTEND_URL` e `GOOGLE_OAUTH_REDIRECT_URI` (env do app backend no
-  Easypanel, Passo 4)
+  Easypanel, Passo 5)
 - Redirect URI autorizado no Google Cloud Console (OAuth client usado hoje)
 
 ## 3. Easypanel — apontar a imagem e pegar o webhook de deploy
@@ -41,7 +41,7 @@ Para cada app (backend e frontend) já criado no Easypanel:
    - backend: `ghcr.io/inteliblockchain-ibc/pessoas-backend:latest`
    - frontend: `ghcr.io/inteliblockchain-ibc/pessoas-frontend:latest`
 
-   Como o pacote é público (Passo 5), **nenhuma credencial de registry é
+   Como o pacote é público (Passo 6), **nenhuma credencial de registry é
    necessária** aqui — só a URL da imagem.
 
 2. Na aba **Deploy** (ou **Webhooks**, dependendo da versão do Easypanel),
@@ -53,15 +53,35 @@ Para cada app (backend e frontend) já criado no Easypanel:
 3. Na aba **Domains**, configurar o domínio decidido no Passo 2 (Easypanel
    provisiona HTTPS automaticamente via Let's Encrypt).
 
-## 4. Easypanel — variáveis de ambiente de runtime
+## 4. Easypanel — provisionar o Postgres
 
-Na aba **Environment** de cada app, replicar o que hoje está nos secrets do
-Fly / env da Vercel:
+O banco também roda na VPS, como um serviço Postgres do próprio Easypanel
+(não em código deste repo — só `docker-compose.yml` na raiz cobre o
+ambiente de desenvolvimento local, não produção):
+
+1. Criar um novo serviço no Easypanel do tipo **Postgres** (ou "Database" →
+   Postgres, dependendo da versão), imagem `postgres:15-alpine`.
+2. Configurar um volume persistente pro serviço (o próprio template de
+   Postgres do Easypanel já faz isso por padrão) — sem isso, os dados somem
+   a cada restart do container.
+3. Depois de criado, o Easypanel mostra a string de conexão interna
+   (host, porta, usuário, senha, nome do banco). Essa é a `DATABASE_URL`
+   que vai no Passo 5 — formato
+   `postgresql://<user>:<senha>@<host-interno>:5432/<db>?schema=public`,
+   sem pooler e sem `sslmode` (conexão interna na mesma rede da VPS).
+
+**Backup:** esse Postgres não tem backup automático. Duas opções pra resolver
+depois (não implementadas neste momento): um `pg_dump` agendado via cron na
+própria VPS, ou o recurso de snapshot/backup do próprio Easypanel, se a
+versão instalada tiver.
+
+## 5. Easypanel — variáveis de ambiente de runtime
+
+Na aba **Environment** de cada app, configurar:
 
 **Backend:**
 ```
-DATABASE_URL=<URL pooler do Supabase, porta 6543>
-DIRECT_URL=<URL direta do Supabase, porta 5432 — obrigatória para as migrations>
+DATABASE_URL=<URL do Postgres provisionado no Passo 4>
 PORT=3000
 NODE_ENV=production
 GOOGLE_CLIENT_ID=<o mesmo client ID de hoje>
@@ -76,7 +96,7 @@ no build (Passo 1).
 Atualizar também no Google Cloud Console (APIs & Services → Credentials) o
 redirect URI autorizado pra bater com `GOOGLE_OAUTH_REDIRECT_URI` de cima.
 
-## 5. GHCR — tornar os pacotes públicos
+## 6. GHCR — tornar os pacotes públicos
 
 Isso só é possível **depois do primeiro push** de cada workflow (o pacote
 nasce quando a primeira imagem é publicada). Depois do primeiro deploy:
@@ -88,9 +108,9 @@ nasce quando a primeira imagem é publicada). Depois do primeiro deploy:
 Sem isso, o Easypanel não consegue puxar a imagem (fica como privada,
 exigiria credencial de registry).
 
-## 6. Primeiro deploy de ponta a ponta
+## 7. Primeiro deploy de ponta a ponta
 
-Depois dos passos 1–5: qualquer push em `main` que toque `backend/**` ou
+Depois dos passos 1–6: qualquer push em `main` que toque `backend/**` ou
 `frontend/**` builda, publica e dispara o deploy automaticamente. Pra forçar
 manualmente sem mudar código: Actions → escolher o workflow → **Run workflow**
 (usa o `workflow_dispatch`).
