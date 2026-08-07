@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 /**
  * Prisma client wrapper for NestJS lifecycle hooks.
  * - Adds optional connection retry/backoff to avoid crash-loops when the DB is temporarily unavailable.
- * - Allows overriding the datasource URL to include a connection limit (useful for pgbouncer/session-mode setups).
+ * - Allows overriding the datasource URL to include a connection limit (sets a Postgres connection pool cap for this process).
  */
 @Injectable()
 export class PrismaService

@@ -8,7 +8,7 @@ Plataforma interna para gerenciar a jornada dos integrantes do clube Inteli Bloc
 |--------|-----------|--------|
 | Frontend | Next.js 15+ (App Router), React 19, Tailwind CSS v4, TypeScript | Vercel — Root Directory: `frontend` |
 | Backend | NestJS 11, TypeScript, Swagger, Prisma 6.x | Fly.io via Docker — app `pessoas-blockchain` |
-| Banco de Dados | PostgreSQL (Supabase, AWS us-east-1) | Supabase |
+| Banco de Dados | PostgreSQL 15 (auto-hospedado) | Easypanel (VPS) |
 | Auth | Google OAuth 2.0 + DB-validated header guard | `google-auth-library` |
 
 ## Estrutura do Monorepo
@@ -26,7 +26,7 @@ Plataforma interna para gerenciar a jornada dos integrantes do clube Inteli Bloc
 
 - Node.js 20+
 - npm 10+
-- Conta Supabase com banco PostgreSQL criado
+- Docker (para rodar o Postgres local via `docker compose up -d db`)
 - Credenciais Google OAuth 2.0 (Google Cloud Console)
 
 ## Setup Local
@@ -45,8 +45,7 @@ npm install --prefix frontend
 **Backend** — criar `backend/.env`:
 
 ```env
-DATABASE_URL="postgresql://user:pass@host:6543/postgres?pgbouncer=true"
-DIRECT_URL="postgresql://user:pass@host:5432/postgres"
+DATABASE_URL="postgresql://user:password@localhost:5432/gestao_pessoas?schema=public"
 PORT=3001
 NODE_ENV=development
 GOOGLE_CLIENT_ID="<seu-client-id>.apps.googleusercontent.com"

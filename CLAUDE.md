@@ -10,7 +10,7 @@ Plataforma interna do clube **Inteli Blockchain** (Messias é presidente) para s
 
 - **Frontend** — Next.js 16.x (App Router), React 19, Tailwind v4, TS — Vercel (root: `frontend`).
 - **Backend** — NestJS 11, Prisma 6, TS — Fly.io app `pessoas-blockchain`.
-- **Banco** — Postgres no Supabase (us-east-1).
+- **Banco** — Postgres auto-hospedado na VPS (Docker, sem pooler).
 - **Auth** — Google OAuth 2.0, domínio `@sou.inteli.edu.br`.
 
 ## Workflow obrigatório

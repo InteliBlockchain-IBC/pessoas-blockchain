@@ -209,7 +209,7 @@ GET /members?cursor=<uuid>&limit=20&sort=createdAt&direction=asc
 ## PDI — Auto-Revisão
 
 `PATCH /pdi/:id` cria `PdiEntryRevision` automaticamente se `content` mudou.
-Executado em `prisma.$transaction` (timeout 30s para migração com banco auto-hospedado).
+Executado em `prisma.$transaction` (timeout 30s como margem de segurança para a revisão).
 
 `authorId` e `editorId` são **nullable** — PDI funciona mesmo sem User válido no banco (migration `20260507091047_make_pdi_author_optional`).
 
