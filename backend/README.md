@@ -1,23 +1,26 @@
 # Backend — Inteli Blockchain Gestão de Pessoas
 
-API RESTful construída com NestJS 11 + Prisma 6 + PostgreSQL (Supabase).
+API RESTful construída com NestJS 11 + Prisma 6 + PostgreSQL (auto-hospedado).
 
 ## Stack
 
 - **Runtime:** Node.js 20
 - **Framework:** NestJS 11
 - **ORM:** Prisma 6.x
-- **Banco:** PostgreSQL via Supabase (pgbouncer para pool, URL direta para migrations)
+- **Banco:** PostgreSQL 15 auto-hospedado na VPS (Docker, sem pooler)
 - **Auth:** Google OAuth 2.0 (`google-auth-library`) + DB-validated header guard
 - **Docs:** Swagger em `/docs`
 - **Testes:** Jest + ts-jest (59 testes unitários em 6 suites)
-- **Deploy:** Fly.io via Docker (`pessoas-blockchain`)
+- **Deploy:** Docker via GitHub Actions + Easypanel
 
 ## Setup
 
 ```bash
 npm install
 cp .env.example .env   # editar com suas credenciais
+
+# a partir da raiz do repo: sobe um Postgres local pro dev
+docker compose up -d db
 
 npx prisma migrate deploy        # aplicar migrations
 npx prisma generate              # gerar Prisma client
@@ -29,8 +32,7 @@ npm run start:dev                # rodar com hot reload em localhost:3001
 ## Variáveis de Ambiente
 
 ```env
-DATABASE_URL="postgresql://user:pass@host:6543/postgres?pgbouncer=true"
-DIRECT_URL="postgresql://user:pass@host:5432/postgres"
+DATABASE_URL="postgresql://user:password@localhost:5432/gestao_pessoas?schema=public"
 PORT=3001
 NODE_ENV=development
 GOOGLE_CLIENT_ID="<id>.apps.googleusercontent.com"
@@ -207,7 +209,7 @@ GET /members?cursor=<uuid>&limit=20&sort=createdAt&direction=asc
 ## PDI — Auto-Revisão
 
 `PATCH /pdi/:id` cria `PdiEntryRevision` automaticamente se `content` mudou.
-Executado em `prisma.$transaction` (timeout 30s para Supabase remoto).
+Executado em `prisma.$transaction` (timeout 30s para migração com banco auto-hospedado).
 
 `authorId` e `editorId` são **nullable** — PDI funciona mesmo sem User válido no banco (migration `20260507091047_make_pdi_author_optional`).
 
