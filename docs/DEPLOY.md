@@ -70,10 +70,10 @@ ambiente de desenvolvimento local, não produção):
    `postgresql://<user>:<senha>@<host-interno>:5432/<db>?schema=public`,
    sem pooler e sem `sslmode` (conexão interna na mesma rede da VPS).
 
-**Backup:** esse Postgres não tem backup automático. Duas opções pra resolver
-depois (não implementadas neste momento): um `pg_dump` agendado via cron na
-própria VPS, ou o recurso de snapshot/backup do próprio Easypanel, se a
-versão instalada tiver.
+**Backup:** diferente do Supabase, esse Postgres não tem backup automático.
+Duas opções pra resolver depois (não implementadas neste momento): um
+`pg_dump` agendado via cron na própria VPS, ou o recurso de
+snapshot/backup do próprio Easypanel, se a versão instalada tiver.
 
 ## 5. Easypanel — variáveis de ambiente de runtime
 
