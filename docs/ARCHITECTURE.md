@@ -46,7 +46,7 @@ Plataforma interna para gerenciar a jornada dos integrantes do clube Inteli Bloc
 | Frontend | Next.js App Router, React, Tailwind CSS v4, TypeScript | Next 15+, React 19 | Vercel |
 | Backend | NestJS, TypeScript, Swagger | NestJS 11 | Docker |
 | ORM | Prisma | 6.x | — |
-| Banco | PostgreSQL (Supabase, AWS us-east-1) | — | Supabase |
+| Banco | PostgreSQL 15 (auto-hospedado) | — | Easypanel (VPS) |
 | Auth | Google OAuth 2.0 + DB-validated header guard | `google-auth-library` 10 | — |
 | Animações | Framer Motion | 12 | — |
 | PDF | pdfkit | 0.18 | — |
@@ -432,11 +432,13 @@ Backend deploy via Docker image (built by GitHub Actions). Migrations rodam auto
 - Build command: `npm run build` (auto-detectado)
 - Environment: `NEXT_PUBLIC_API_URL=https://pessoas-blockchain.fly.dev`
 
-### Banco de Dados (Supabase)
+### Banco de Dados (Postgres auto-hospedado)
 
-- Provider: AWS us-east-1
-- Duas URLs: `DATABASE_URL` (pgbouncer, porta 6543) para runtime; `DIRECT_URL` (porta 5432) para migrations Prisma.
-- Migrations aplicadas automaticamente no deploy via `prisma migrate deploy`.
+- Postgres 15 rodando na mesma VPS, como serviço do Easypanel (ver `docs/DEPLOY.md`).
+- Uma URL só: `DATABASE_URL`, conexão direta, sem pooler e sem `sslmode` (rede interna da VPS).
+- Migrations aplicadas automaticamente no deploy via `prisma migrate deploy` (CMD do container, ver `backend/Dockerfile`).
+- Backup não é automático (diferente do Supabase) — ver nota em `docs/DEPLOY.md` sobre opções (`pg_dump` via cron ou snapshot do Easypanel).
+- Desenvolvimento local: `docker-compose.yml` na raiz do repo sobe um Postgres equivalente (`docker compose up -d db`).
 
 ---
 
