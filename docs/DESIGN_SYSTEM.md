@@ -7,20 +7,6 @@ Sistema de design das **plataformas internas** do clube. Deriva do *Guia de Esti
 
 ---
 
-## Como ler este documento
-
-Cada regra é marcada com sua origem. A distinção importa: o que é **canônico** veio da Marketing e não se muda sem falar com eles; o que é **extensão** foi decidido para uso em plataforma e pode ser discutido livremente.
-
-| Marca | Significado |
-| --- | --- |
-| 🟦 **canônico** | Está literalmente no PDF do guia de estilos. Não altere por conta própria. |
-| 🟨 **extensão** | Não existe no guia. Decidido aqui porque interface precisa e o guia não cobre. Sujeito a revisão. |
-| ⚠️ **atenção** | Restrição de acessibilidade ou armadilha conhecida. Não ignore. |
-
-Todos os valores de contraste neste documento foram **calculados** (fórmula WCAG 2.1 de luminância relativa), não estimados.
-
----
-
 ## 1. Cor
 
 A arquitetura tem três camadas. **Componente nunca referencia primitiva direto** — sempre o token semântico. Isso é o que permite ter tema claro e escuro sem reescrever componente.
@@ -30,7 +16,7 @@ primitiva  →  semântica  →  componente
 #1b98e0       --accent      botão primário
 ```
 
-### 1.1 Primitivas canônicas 🟦
+### 1.1 Primitivas canônicas
 
 As sete cores da "Paleta de Cores" do guia, mais a exclusiva da paleta Educacional.
 
@@ -45,7 +31,7 @@ As sete cores da "Paleta de Cores" do guia, mais a exclusiva da paleta Educacion
 | `--ibc-magenta-600` | `#9f0e5d` | Magenta, contraponto da paleta |
 | `--ibc-plum-900` | `#380f2e` | **Só conteúdo Educacional** — ver §1.6 |
 
-### 1.2 Gradiente da marca 🟦 (valores aproximados)
+### 1.2 Gradiente da marca (valores aproximados)
 
 O símbolo em gradiente vai de ciano (canto inferior esquerdo) a roxo (canto superior direito), a ~135°.
 
@@ -53,9 +39,9 @@ O símbolo em gradiente vai de ciano (canto inferior esquerdo) a roxo (canto sup
 background: linear-gradient(135deg, #63b4c4 0%, #8c4ca9 100%);
 ```
 
-⚠️ Esses dois hex foram **extraídos por amostragem de pixel do PDF**, não lidos do arquivo-fonte. São fiéis o bastante para UI, mas para material impresso ou para o logo em si **use o SVG original** — o valor exato está no Canva, com a Giovanna. Nunca recrie o logo com esse gradiente; use o arquivo.
+Esses dois hex foram extraídos por amostragem de pixel do PDF, não lidos do arquivo-fonte. São fiéis o bastante para UI, mas para material impresso ou para o logo em si **use o SVG original** — o valor exato está no Canva, com a Giovanna. Nunca recrie o logo com esse gradiente; use o arquivo.
 
-### 1.3 Primitivas de extensão 🟨
+### 1.3 Primitivas de extensão
 
 O guia não tem nenhum cinza, nenhum verde e nenhum amarelo. Sem eles não existe borda, texto secundário nem feedback de formulário. Estes são derivados para conviver com a paleta:
 
@@ -63,7 +49,7 @@ O guia não tem nenhum cinza, nenhum verde e nenhum amarelo. Sem eles não exist
 | --- | --- | --- |
 | `--ibc-slate-400` | `#8fa3b8` | Texto secundário no escuro |
 | `--ibc-slate-500` | `#6b8299` | Texto terciário / placeholder no escuro |
-| `--ibc-slate-600` | `#456a85` | Borda de controle no escuro |
+| `--ibc-slate-600` | `#537c98` | Borda de controle no escuro |
 | `--ibc-slate-800` | `#2a4a63` | Divisória decorativa no escuro |
 | `--ibc-steel-400` | `#6b8a92` | Borda de controle no claro |
 | `--ibc-steel-200` | `#c3d3d6` | Divisória decorativa no claro |
@@ -76,6 +62,8 @@ O guia não tem nenhum cinza, nenhum verde e nenhum amarelo. Sem eles não exist
 
 Os neutros têm matiz azul deliberadamente (não são cinza puro), para não brigar com o `#081119`.
 
+`--ibc-slate-600` é `#537c98`, não o `#456a85` originalmente estimado: o valor mais escuro dava 2,59:1 como borda de campo dentro de card (`--border-interactive` sobre `--surface-raised`), abaixo do mínimo de 3:1 para elemento de UI. Ver §8.
+
 ### 1.4 Tokens semânticos
 
 Estes são os únicos que o código deve usar. O tema escuro é o padrão — o guia inteiro é escuro.
@@ -84,12 +72,12 @@ Estes são os únicos que o código deve usar. O tema escuro é o padrão — o 
 | --- | --- | --- | --- |
 | `--surface` | `#081119` | `#e8f1f2` | Fundo da página |
 | `--surface-raised` | `#13293d` | `#ffffff` | Card, modal, dropdown, cabeçalho de tabela |
-| `--surface-sunken` | `#050b11` 🟨 | `#dbe7e9` 🟨 | Poço: fundo de input, code block |
+| `--surface-sunken` | `#050b11` | `#dbe7e9` | Poço: fundo de input, code block |
 | `--text` | `#e8f1f2` | `#081119` | Texto principal |
 | `--text-muted` | `#8fa3b8` | `#42586d` | Legenda, label, texto de apoio |
 | `--text-subtle` | `#6b8299` | `#5c7d86` | Placeholder, texto desabilitado |
 | `--border` | `#2a4a63` | `#c3d3d6` | Divisória, borda de card |
-| `--border-interactive` | `#456a85` | `#6b8a92` | Borda de input, checkbox, radio |
+| `--border-interactive` | `#537c98` | `#6b8a92` | Borda de input, checkbox, radio, badge neutro |
 | `--accent` | `#1b98e0` | `#006494` | Ação primária, link, seleção |
 | `--accent-hover` | `#247ba0` | `#13293d` | Estado hover do accent |
 | `--accent-fg` | `#081119` | `#ffffff` | Texto **sobre** fundo accent — ver §1.5 |
@@ -97,22 +85,24 @@ Estes são os únicos que o código deve usar. O tema escuro é o padrão — o 
 | `--success` | `#34d399` | `#047857` | Confirmação |
 | `--warning` | `#fbbf24` | `#92400e` | Aviso |
 | `--danger` | `#f0559b` | `#9f0e5d` | Erro, ação destrutiva |
-| `--danger-surface` | `#9f0e5d` | `#9f0e5d` | Fundo sólido de erro (texto `#e8f1f2` por cima) |
+| `--danger-surface` | `#9f0e5d` | `#9f0e5d` | Fundo sólido de erro |
 | `--educational` | `#380f2e` | `#380f2e` | Conteúdo da área Educacional — ver §1.6 |
+| `--fg-on-bright` | `#081119` | — | Texto sobre `--success`/`--warning` (fundo claro/vivo) |
+| `--fg-on-deep` | `#e8f1f2` | — | Texto sobre `--danger-surface`/`--educational` (fundo escuro saturado) |
 
-⚠️ Note que `--accent` **inverte** entre os temas. `#1b98e0` sobre fundo claro dá 2,77:1 e reprova; `#006494` sobre fundo escuro dá 2,94:1 e reprova. Não existe um azul único que sirva aos dois.
+`--fg-on-bright` e `--fg-on-deep` existem para não escrever hex cru dentro de componente (`Badge.tsx`) — são a mesma decisão de `--accent-fg`, generalizada para os outros fundos sólidos que levam texto por cima.
+
+Note que `--accent` **inverte** entre os temas. `#1b98e0` sobre fundo claro dá 2,77:1 e reprova; `#006494` sobre fundo escuro dá 2,94:1 e reprova. Não existe um azul único que sirva aos dois.
 
 ### 1.5 As três armadilhas de contraste
 
 Estas custaram uma auditoria. Não as reintroduza.
 
 **1. Magenta `#9f0e5d` não pode ser texto no escuro.**
-Contraste de **2,44:1** sobre `#081119` e **1,91:1** sobre `#13293d`. Reprova não só o mínimo de texto (4,5:1) como o mínimo de elemento de UI (3:1). O magenta canônico no tema escuro serve **apenas como fundo sólido**, e aí com `#e8f1f2` por cima (6,79:1 ✓). Para *texto* de erro no escuro, use `--danger` = `#f0559b` (5,86:1 ✓), que é o mesmo magenta clareado.
+Contraste de **2,44:1** sobre `#081119` e **1,91:1** sobre `#13293d`. Reprova não só o mínimo de texto (4,5:1) como o mínimo de elemento de UI (3:1). O magenta canônico no tema escuro serve **apenas como fundo sólido**, e aí com `--fg-on-deep` por cima (6,79:1 ✓). Para *texto* de erro no escuro, use `--danger` = `#f0559b` (5,86:1 ✓), que é o mesmo magenta clareado.
 
 **2. Texto branco sobre o azul `#1b98e0` reprova.**
-`#ffffff` sobre `#1b98e0` dá **3,17:1**. Botão primário no tema escuro leva texto **escuro** (`#081119`, 5,99:1 ✓). É contraintuitivo e é por isso que existe o token `--accent-fg`.
-
-> Isto é um bug presente hoje: `.btn-primary` em `frontend/app/globals.css` usa `text-white` sobre `#1b98e0`. Corrigir ao aplicar este sistema.
+`#ffffff` sobre `#1b98e0` dá **3,17:1**. Botão primário no tema escuro leva texto **escuro** (`--accent-fg` = `#081119`, 5,99:1 ✓). É contraintuitivo e é por isso que existe o token `--accent-fg`.
 
 **3. `#006494` e `#247ba0` não são cores de texto no escuro.**
 2,94:1 e 4,00:1 respectivamente. `#247ba0` passa só para texto grande (≥24px, ou ≥19px em negrito) e para borda. `#006494` no escuro é exclusivamente superfície.
@@ -121,15 +111,15 @@ Contraste de **2,44:1** sobre `#081119` e **1,91:1** sobre `#13293d`. Reprova n�
 
 `#380f2e` (plum) aparece no guia apenas na *Paleta de Cores Educacional*. Aqui ele é a **cor de conteúdo educacional**: usada para marcar material de aula, trilha e dicionário dentro da plataforma — badge, faixa de card, fundo de destaque.
 
-Não é uma cor de estado e não tem par claro/escuro: é a mesma nos dois temas, sempre como fundo sólido com `#e8f1f2` por cima (14,34:1 ✓). Nunca como texto.
+Não é uma cor de estado e não tem par claro/escuro: é a mesma nos dois temas, sempre como fundo sólido com `--fg-on-deep` por cima (14,34:1 ✓). Nunca como texto.
 
-🟨 As outras três áreas (Projetos, Marketing, Pessoas) **não têm cor definida**. Não invente uma. Se a plataforma precisar diferenciá-las visualmente, isso é conversa com a Marketing antes de virar código.
+As outras três áreas (Projetos, Marketing, Pessoas) **não têm cor definida**. Não invente uma. Se a plataforma precisar diferenciá-las visualmente, isso é conversa com a Marketing antes de virar código.
 
 ---
 
 ## 2. Tipografia
 
-### 2.1 Famílias 🟦
+### 2.1 Famílias
 
 | Papel | Fonte | Pesos usados |
 | --- | --- | --- |
@@ -138,7 +128,7 @@ Não é uma cor de estado e não tem par claro/escuro: é a mesma nos dois temas
 
 O guia mostra Montserrat em quatro pesos e Open Sans em dois — a divisão título/corpo é a leitura natural do material.
 
-### 2.2 Escala 🟨
+### 2.2 Escala
 
 Razão 1,25 a partir de 16px. `rem` sempre, nunca `px` em texto.
 
@@ -147,40 +137,31 @@ Razão 1,25 a partir de 16px. `rem` sempre, nunca `px` em texto.
 | `--text-xs` | 0.75rem / 12px | 1.5 | Metadado, timestamp |
 | `--text-sm` | 0.875rem / 14px | 1.5 | Label, legenda, célula de tabela |
 | `--text-base` | 1rem / 16px | 1.6 | Corpo — **nunca menor que isto em parágrafo** |
-| `--text-lg` | 1.25rem / 20px | 1.5 | Subtítulo, texto de destaque |
-| `--text-xl` | 1.5rem / 24px | 1.35 | h3 |
-| `--text-2xl` | 2rem / 32px | 1.25 | h2 |
-| `--text-3xl` | 2.5rem / 40px | 1.15 | h1 |
-| `--text-4xl` | 3.5rem / 56px | 1.05 | Display, hero |
+| `--text-lg` | 1.25rem / 20px | 1.5 | Subtítulo, texto de destaque, h3 |
+| `--text-xl` | 1.5rem / 24px | 1.35 | h2 |
+| `--text-2xl` | 2rem / 32px | 1.25 | h1 |
+
+`--text-3xl` (2.5rem / 40px) e `--text-4xl` (3.5rem / 56px) existem no guia mas ficam **fora da escala de plataforma** — material de marketing, não usar em produto. Interface densa de dados não tem espaço editorial para display type; o maior heading em tela é o h1 de 32px.
 
 ### 2.3 Regras de aplicação
 
-🟦 O guia é explícito: *"brinque com cores e negritos que ajudem a entender o objetivo"*. Na prática, dentro de uma plataforma:
+O guia é explícito: *"brinque com cores e negritos que ajudem a entender o objetivo"*. Na prática, dentro de uma plataforma:
 
 - **Hierarquia por peso e cor, não por tamanho a mais.** Um título em Montserrat 900 com `--text` sobre um subtítulo em Montserrat 400 com `--text-muted` resolve quase todo caso.
 - Títulos de página em Montserrat **700**; display e chamadas em **900**.
-- ⚠️ Montserrat **300 Light** só acima de 24px. Em corpo de texto ele fica fino demais para o contraste do tema escuro.
+- Restrição: Montserrat **300 Light** só acima de 24px. Em corpo de texto ele fica fino demais para o contraste do tema escuro.
 - Destaque de palavra dentro de frase: `--accent`, como no guia. Um destaque por frase, no máximo.
-- ⚠️ Caixa alta só em rótulo curto (badge, cabeçalho de tabela, botão). Nunca em frase — o guia usa caixa alta em títulos de slide, o que não transporta para leitura de tela.
+- Restrição: caixa alta só em rótulo curto (badge, botão). Nunca em frase, e não em cabeçalho de tabela (ver §7.5) — o guia usa caixa alta em títulos de slide, o que não transporta para leitura de tela em tabela de 40 linhas.
 
 ---
 
-## 3. Espaçamento e layout 🟨
+## 3. Espaçamento e layout
 
-Base de **4px**. Todo espaço é múltiplo dela.
+Base de **4px** — a escala padrão do Tailwind já é essa, sem necessidade de token próprio.
 
-| Token | Valor |
-| --- | --- |
-| `--space-1` | 4px |
-| `--space-2` | 8px |
-| `--space-3` | 12px |
-| `--space-4` | 16px |
-| `--space-6` | 24px |
-| `--space-8` | 32px |
-| `--space-12` | 48px |
-| `--space-16` | 64px |
+Regras de uso: padding interno de card `p-6` (24px); distância entre campos de formulário `gap-4` (16px); entre seções `gap-12` (48px); largura máxima de coluna de texto **72 caracteres**.
 
-Regras práticas: padding interno de card `--space-6`; distância entre campos de formulário `--space-4`; entre seções `--space-12`; largura máxima de coluna de texto **72 caracteres**.
+`--space-6` e `p-6` eram o mesmo 24px sob dois nomes — essa duplicação de vocabulário foi como o `globals.css` original chegou ao estado que este documento corrige. Espaçamento vira regra de uso, não token.
 
 ---
 
@@ -188,30 +169,33 @@ Regras práticas: padding interno de card `--space-6`; distância entre campos d
 
 ### 4.1 Raio
 
-🟦 O guia diz, na página de Molduras: **"Arredondamento 0 ou 20"**. É uma regra de duas opções, sem meio-termo — e é o que dá a cara da marca.
+O guia diz, na página de Molduras: **"Arredondamento 0 ou 20"** — mas essa é uma regra sobre moldura de imagem, não uma regra global. Campo de formulário não existe no guia; a divisão abaixo é decisão de plataforma:
 
-| Token | Valor | Uso |
+| Raio | Onde | Origem |
 | --- | --- | --- |
-| `--radius-none` | `0` | Input, célula de tabela, divisória |
-| `--radius-lg` | `20px` | Card, botão, modal, moldura de imagem |
-| `--radius-full` | `9999px` | Badge, avatar, pill |
+| `20px` | Card, botão, modal, moldura — bloco de conteúdo | guia de estilos |
+| `12px` | Input, select, textarea — controle de formulário | decisão de plataforma |
+| `0` | Célula de tabela, divisória | decisão de plataforma |
+| `9999px` | Badge, avatar | decisão de plataforma |
 
-🟨 A divisão de qual elemento recebe qual não está no guia. O critério aqui: **20px em bloco, 0 em campo**. Um input de 36px de altura com raio 20 vira cápsula e deixa de parecer um campo editável.
+Critério: **20px em bloco, 0 em divisória, 12px em campo editável, total em pill.** Um input de 40px de altura com raio 20 vira cápsula e deixa de parecer um campo editável.
 
-⚠️ `--radius-full` é extensão. O guia não prevê pill, mas badge de status e avatar sem ele ficam estranhos em qualquer interface moderna.
+Só `12px` e `20px` viram token (`--radius-field`, `--radius-block`) — `0` e `9999px` usam os utilitários nativos do Tailwind (`rounded-none`, `rounded-full`), que já fazem exatamente isso sem precisar de um nome novo.
 
 ### 4.2 Borda
 
-🟦 O guia especifica **borda 3**.
+O guia especifica **borda 3**. Mas 3px como padrão de toda superfície é ruído: numa tela com seis cards, 3px em todos anula a hierarquia que o 3px deveria criar. O valor continua presente — muda a frequência.
 
-| Token | Valor | Uso |
-| --- | --- | --- |
-| `--border-width-strong` | `3px` | Card, botão, moldura, elemento em foco |
-| `--border-width-hairline` | `1px` 🟨 | Divisória, linha de tabela, separador |
+**1px é o padrão de toda superfície.** 3px é uma lista fechada de quatro usos:
 
-🟨 A hairline é extensão e é necessária: 3px em toda linha de uma tabela de membros transforma a tabela numa grade. A regra: **3px onde a borda é decisão de design, 1px onde ela só separa conteúdo.**
+- anel de foco de teclado
+- moldura com sombra deslocada
+- card marcado explicitamente como destaque (`featured`)
+- borda de campo em estado de erro
 
-### 4.3 Moldura com sombra deslocada 🟦
+Fora desses quatro, borda é `--border` ou `--border-interactive` em 1px.
+
+### 4.3 Moldura com sombra deslocada
 
 O detalhe mais característico da marca, direto da página de Molduras: um retângulo de borda clara com um bloco sólido colorido deslocado atrás, em ciano ou magenta.
 
@@ -223,15 +207,15 @@ O detalhe mais característico da marca, direto da página de Molduras: um retâ
 }
 ```
 
-Sem blur — é sombra sólida, deslocada. 🟨 O deslocamento de 8px é interpretação; o guia mostra o efeito sem cotar. Use para imagem em destaque e card de conteúdo, não para elemento repetido em lista.
+Sem blur — é sombra sólida, deslocada. O deslocamento de 8px é interpretação; o guia mostra o efeito sem cotar. Restrita a: hero de página, estado vazio, e no máximo um card de destaque por tela. Nunca em card de listagem.
 
-⚠️ Nada de sombra difusa (`blur`) em nenhum lugar. Não existe no guia e destoa do resto.
+Restrição: nada de sombra difusa (`blur`) em nenhum lugar. Não existe no guia e destoa do resto.
 
 ---
 
 ## 5. Marca
 
-### 5.1 Variantes de logo 🟦
+### 5.1 Variantes de logo
 
 O guia mostra quatro, cada uma com seu caso:
 
@@ -239,12 +223,12 @@ O guia mostra quatro, cada uma com seu caso:
 | --- | --- |
 | **Gradiente** (símbolo ciano→roxo + texto) | Preferencial. Sobre fundo escuro da marca. |
 | **Branca** (monocromática) | Fundo escuro onde o gradiente competiria — foto, fundo colorido, tamanho pequeno. |
-| **Preta** (monocromática) | ⚠️ **Exige fundo claro.** O guia sempre a apresenta sobre uma placa `#e8f1f2`. Nunca sobre o fundo escuro. |
+| **Preta** (monocromática) | Restrição: exige fundo claro. O guia sempre a apresenta sobre uma placa `#e8f1f2`. Nunca sobre o fundo escuro. |
 | **IBC** (monograma) | Espaço muito reduzido: favicon, avatar, selo. |
 
 O símbolo isolado (o nó geométrico, sem texto) é válido em qualquer das três colorações quando o nome do clube já está claro pelo contexto.
 
-### 5.2 Regras de uso 🟨
+### 5.2 Regras de uso
 
 O guia não define área de proteção nem lista proibições. Estas são o mínimo padrão:
 
@@ -252,19 +236,19 @@ O guia não define área de proteção nem lista proibições. Estas são o mín
 - **Tamanho mínimo:** 24px de altura para o símbolo isolado; 120px de largura para o lockup com texto (abaixo disso o "inteli" some).
 - **Não faça:** esticar sem manter proporção · recolorir fora das três variantes · aplicar sombra ou contorno · rotacionar · reconstruir o gradiente à mão em vez de usar o SVG · colocar a variante preta sobre fundo escuro.
 
-### 5.3 Mascote 🟦
+### 5.3 Mascote
 
 O clube tem um mascote — um pato de terno, boné e óculos de realidade aumentada, com o símbolo da marca na lapela. É elemento de comunicação e comunidade, não de interface: use em tela de boas-vindas, estado vazio, página de erro e material de evento. Não use como ícone funcional nem em elemento repetido.
 
-### 5.4 Padrão geométrico de fundo 🟦
+### 5.4 Padrão geométrico de fundo
 
 Losangos, hexágonos e triângulos em contorno fino, muito baixo contraste, tipicamente à direita da composição. Em plataforma: fundo de hero, cabeçalho de página e estado vazio.
 
-⚠️ Mantenha-o abaixo de ~8% de opacidade contra o fundo e **nunca atrás de texto corrido**. No guia ele é decorativo e distante do conteúdo — a mesma disciplina vale aqui.
+Restrição: mantenha-o abaixo de ~8% de opacidade contra o fundo e **nunca atrás de texto corrido**. No guia ele é decorativo e distante do conteúdo — a mesma disciplina vale aqui.
 
 ---
 
-## 6. Ícones 🟦
+## 6. Ícones
 
 O guia é direto:
 
@@ -272,9 +256,9 @@ O guia é direto:
 - **Formatos arredondados** — `stroke-linecap: round`, `stroke-linejoin: round`.
 - **Priorize os preenchidos** — quando houver versão sólida e versão contorno, use a sólida.
 
-🟨 Tamanhos: 16px (inline em texto), 20px (botão, campo), 24px (navegação, padrão), 32px (destaque). Ícone herda a cor do texto ao redor (`currentColor`) — não colora ícone individualmente.
+Tamanhos: 16px (inline em texto), 20px (botão, campo), 24px (navegação, padrão), 32px (destaque). Ícone herda a cor do texto ao redor (`currentColor`) — não colora ícone individualmente.
 
-⚠️ Ícone nunca é o único portador de significado. Status de PDI, resultado de processo seletivo, erro de formulário — todos precisam de texto junto. É o que torna a interface usável para quem não distingue as cores.
+Restrição: ícone nunca é o único portador de significado. Status de PDI, resultado de processo seletivo, erro de formulário — todos precisam de texto junto. É o que torna a interface usável para quem não distingue as cores.
 
 ---
 
@@ -284,50 +268,59 @@ Especificações mínimas. Tudo referencia token semântico.
 
 ### 7.1 Botão
 
-Altura 40px (`--space-2` vertical, `--space-6` horizontal), raio 20px, borda 3px, Montserrat 700.
+Altura 40px, raio 20px (`--radius-block`), Montserrat 700.
 
 | Variante | Fundo | Texto | Borda |
 | --- | --- | --- | --- |
-| **Primário** | `--accent` | `--accent-fg` ⚠️ escuro no tema escuro | transparente |
-| **Secundário** | transparente | `--accent` | `--accent` |
-| **Fantasma** | transparente | `--text-muted` | transparente |
-| **Destrutivo** | `--danger-surface` | `#e8f1f2` | transparente |
+| Primário | `--accent` | `--accent-fg` | nenhuma |
+| Secundário | transparente | `--accent` | 1px `--accent` |
+| Fantasma | transparente | `--text-muted` | nenhuma |
+| Destrutivo | `--danger-surface` | `--fg-on-deep` | nenhuma |
 
-Estados: **hover** troca para `--accent-hover` · **ativo** reduz para 98% de escala · **foco** ganha anel `--focus-ring` de 2px com 2px de afastamento · **desabilitado** 50% de opacidade e `cursor: not-allowed` · **carregando** spinner no lugar do texto, largura preservada.
+Estados: **hover** troca para `--accent-hover` · **ativo** reduz para 98% de escala · **foco** ganha anel `--focus-ring` de 3px com 2px de afastamento · **desabilitado** 50% de opacidade e `cursor: not-allowed` · **carregando** spinner no lugar do texto, largura preservada.
 
-⚠️ O anel de foco nunca é removido. `outline: none` sem substituto torna a plataforma inoperável por teclado.
+Restrição: o anel de foco nunca é removido. `outline: none` sem substituto torna a plataforma inoperável por teclado.
 
 ### 7.2 Campo de formulário
 
-Altura 40px, raio **0**, borda 1px `--border-interactive`, fundo `--surface-sunken`, texto `--text`, placeholder `--text-subtle`.
+Altura 40px, raio 12px (`--radius-field`), borda 1px `--border-interactive`, fundo `--surface-sunken`, texto `--text`, placeholder `--text-subtle`.
 
-Foco: borda passa a `--accent` e ganha o anel de foco. Erro: borda `--danger`, e a mensagem aparece **abaixo** do campo em `--danger` com ícone — nunca só a borda vermelha.
+Foco: borda passa a `--accent` e ganha o anel de foco. Erro: borda **3px** `--danger` (uma das quatro exceções de §4.2), e a mensagem aparece **abaixo** do campo em `--danger` com ícone — nunca só a borda vermelha.
 
 Label sempre visível acima do campo, `--text-sm`, `--text-muted`. Sem placeholder-como-label.
 
+Regra: **ícone de edição pertence a conteúdo inline editável, não a campo de formulário.** Um campo já se anuncia pela borda e pelo fundo afundado; lápis em oito campos de um formulário é ruído. Em texto clicável para editar (PDI), o lápis é o único sinal que existe de que aquele texto é editável — ali ele é necessário.
+
 ### 7.3 Card
 
-Fundo `--surface-raised`, raio 20px, borda 3px `--border`, padding `--space-6`. Card clicável ganha hover que clareia a borda para `--border-interactive`.
+Fundo `--surface-raised`, borda 1px `--border`, raio 20px (`--radius-block`), padding `p-6`. Card clicável ganha hover que clareia a borda para `--border-interactive`.
+
+Variante `educational`: fundo `--educational`, texto `--fg-on-deep`.
+
+Variante `featured`: borda **3px** + sombra sólida deslocada (§4.3), sem blur. No máximo um por tela, nunca em elemento repetido de lista.
 
 ### 7.4 Badge
 
-Raio total, `--text-xs` em Montserrat 700, padding `--space-1`/`--space-3`, fundo sólido com texto de alto contraste por cima:
+Raio total (`rounded-full`), `--text-xs` em Montserrat 700, padding `px-3 py-1`.
 
-| Semântica | Fundo | Texto |
-| --- | --- | --- |
-| Neutro | `--border` | `--text` |
-| Sucesso | `--success` | `#081119` |
-| Aviso | `--warning` | `#081119` |
-| Erro | `--danger-surface` | `#e8f1f2` |
-| Educacional | `--educational` | `#e8f1f2` |
+| Semântica | Estados | Fundo | Texto | Borda |
+| --- | --- | --- | --- | --- |
+| Sucesso | `APPROVED` `ACTIVE` `PASSED` `COMPLETED` `SCHEDULED` | `--success` | `--fg-on-bright` | nenhuma |
+| Aviso | `PENDING` `IN_REVIEW` | `--warning` | `--fg-on-bright` | nenhuma |
+| Erro | `REJECTED` `FAILED` `CANCELED` | `--danger-surface` | `--fg-on-deep` | nenhuma |
+| Neutro | `DRAFT` `SUBMITTED` `WITHDRAWN` `SKIPPED` `CANDIDATE` `INACTIVE` `ALUMNI` | transparente | `--text-muted` | 1px `--border-interactive` |
+
+O neutro usa `--border-interactive`, não `--border`: `--border` sobre `--surface` dá 2,05:1, abaixo do mínimo de 3:1 para elemento de interface. Como divisória decorativa está ok; como única fronteira de um badge, não.
+
+Regra: **`Department` não é badge** — é texto com ícone (ver §6). `--educational` (§1.6) permanece como cor de superfície de conteúdo educacional, não como chip de rótulo de área.
 
 ### 7.5 Tabela
 
-Cabeçalho `--surface-raised`, Montserrat 700, `--text-sm`, caixa alta. Linhas separadas por hairline 1px `--border`. Sem zebra — o contraste entre `--surface` e `--surface-raised` já é suficiente e a zebra briga com o fundo escuro. Hover de linha usa `--surface-raised`.
+Cabeçalho `--surface-raised`, Montserrat 700, `--text-sm`. Linhas separadas por hairline 1px `--border`. Sem zebra — o contraste entre `--surface` e `--surface-raised` já é suficiente e a zebra briga com o fundo escuro. Hover de linha usa `--surface-raised`.
 
 ### 7.6 Modal
 
-Fundo `--surface-raised`, raio 20px, borda 3px, largura máxima 560px. Sobreposição `#081119` a 70%. Foco fica preso dentro do modal; `Esc` fecha.
+Fundo `--surface-raised`, raio 20px, borda 1px `--border`, largura máxima 560px. Sobreposição `--surface` a 70-85%. Foco fica preso dentro do modal; `Esc` fecha.
 
 ### 7.7 Toast
 
@@ -339,12 +332,13 @@ Card de raio 20px com barra lateral de 3px na cor da semântica. Ícone + texto,
 
 Alvo: **WCAG 2.1 AA**.
 
-Contrastes verificados (calculados, não estimados):
+Contrastes verificados (calculados pela fórmula de luminância relativa da WCAG 2.1, não estimados — travados por `frontend/scripts/check-contrast.mjs`):
 
 | Combinação | Ratio | Veredito |
 | --- | --- | --- |
 | `--text` sobre `--surface` (escuro) | 16,56 | AAA |
 | `--text` sobre `--surface-raised` (escuro) | 12,95 | AAA |
+| `--text` sobre `--surface-sunken` (escuro) | 17,22 | AAA |
 | `--text-muted` sobre `--surface` (escuro) | 7,33 | AAA |
 | `--text-muted` sobre `--surface-raised` (escuro) | 5,73 | AA |
 | `--text-subtle` sobre `--surface` (escuro) | 4,78 | AA |
@@ -352,16 +346,21 @@ Contrastes verificados (calculados, não estimados):
 | `--success` sobre `--surface` (escuro) | 9,89 | AAA |
 | `--warning` sobre `--surface` (escuro) | 11,39 | AAA |
 | `--danger` sobre `--surface` (escuro) | 5,86 | AA |
-| `#081119` sobre `--accent` (botão primário) | 5,99 | AA |
-| `#e8f1f2` sobre `--danger-surface` | 6,79 | AA |
-| `#e8f1f2` sobre `--educational` | 14,34 | AAA |
+| `--accent-fg` sobre `--accent` (botão primário) | 5,99 | AA |
+| `--fg-on-deep` sobre `--danger-surface` (badge de erro) | 6,79 | AA |
+| `--fg-on-deep` sobre `--educational` | 14,34 | AAA |
+| `--fg-on-bright` sobre `--success` (badge de sucesso) | 9,89 | AAA |
+| `--fg-on-bright` sobre `--warning` (badge de aviso) | 11,39 | AAA |
+| `--border-interactive` sobre `--surface` (escuro) | 4,26 | ✓ 3:1 |
+| `--border-interactive` sobre `--surface-raised` (escuro) | 3,33 | ✓ 3:1 |
+| `--focus-ring` sobre `--surface` (escuro) | 5,99 | ✓ 3:1 |
+| `--focus-ring` sobre `--surface-raised` (escuro) | 4,68 | ✓ 3:1 |
 | `--text` sobre `--surface` (claro) | 16,56 | AAA |
 | `--text-muted` sobre `--surface` (claro) | 6,42 | AA |
 | `--accent` sobre `--surface` (claro) | 5,63 | AA |
 | `--success` sobre `--surface` (claro) | 4,78 | AA |
 | `--warning` sobre `--surface` (claro) | 6,18 | AA |
 | `--danger` sobre `--surface` (claro) | 6,79 | AA |
-| `--border-interactive` sobre `--surface` (escuro) | 3,31 | ✓ 3:1 |
 | `--border-interactive` sobre `--surface` (claro) | 3,22 | ✓ 3:1 |
 
 **Reprovações conhecidas — não use assim:**
@@ -373,6 +372,7 @@ Contrastes verificados (calculados, não estimados):
 | `#ffffff` sobre `#1b98e0` | 3,17 | ✗ |
 | `#1b98e0` como texto sobre `#e8f1f2` | 2,77 | ✗ |
 | `#247ba0` como texto normal sobre `#081119` | 4,00 | ✗ (só texto grande) |
+| `--border` sobre `--surface` (escuro), como fronteira de badge | 2,05 | ✗ (ok como divisória) |
 
 **Além de cor:** todo controle acessível por teclado com foco visível · alvo de toque mínimo 44×44px · `prefers-reduced-motion` respeitado · rótulo em todo campo · estado nunca comunicado só por cor.
 
@@ -380,29 +380,30 @@ Contrastes verificados (calculados, não estimados):
 
 ## 9. Implementação — Tailwind v4
 
-O `gestao_pessoas` usa Tailwind v4. Bloco pronto para `frontend/app/globals.css`:
+O `gestao_pessoas` usa Tailwind v4. Implementado em `frontend/app/globals.css`:
 
 ```css
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-/* ---- primitivas: canônicas do guia de estilos ---- */
+/* ---------- primitivas ---------- */
 :root {
+  /* do guia de estilos */
   --ibc-navy-950: #081119;
   --ibc-navy-900: #13293d;
   --ibc-teal-600: #247ba0;
   --ibc-blue-700: #006494;
   --ibc-blue-500: #1b98e0;
-  --ibc-ice-50:   #e8f1f2;
+  --ibc-ice-50: #e8f1f2;
   --ibc-magenta-600: #9f0e5d;
   --ibc-plum-900: #380f2e;
-  --ibc-gradient-start: #63b4c4;  /* aproximado — ver §1.2 */
-  --ibc-gradient-end:   #8c4ca9;  /* aproximado — ver §1.2 */
+  --ibc-gradient-start: #63b4c4; /* amostrado do PDF — ver §1.2 */
+  --ibc-gradient-end: #8c4ca9;   /* amostrado do PDF — ver §1.2 */
 
-  /* ---- primitivas: extensão ---- */
+  /* derivadas para uso em plataforma */
   --ibc-slate-400: #8fa3b8;
   --ibc-slate-500: #6b8299;
-  --ibc-slate-600: #456a85;
+  --ibc-slate-600: #537c98;
   --ibc-slate-800: #2a4a63;
   --ibc-steel-200: #c3d3d6;
   --ibc-steel-400: #6b8a92;
@@ -414,7 +415,7 @@ O `gestao_pessoas` usa Tailwind v4. Bloco pronto para `frontend/app/globals.css`
   --ibc-magenta-400: #f0559b;
 }
 
-/* ---- semântica: escuro é o padrão ---- */
+/* ---------- semântica: escuro é o padrão ---------- */
 :root {
   --surface: var(--ibc-navy-950);
   --surface-raised: var(--ibc-navy-900);
@@ -426,15 +427,20 @@ O `gestao_pessoas` usa Tailwind v4. Bloco pronto para `frontend/app/globals.css`
   --border-interactive: var(--ibc-slate-600);
   --accent: var(--ibc-blue-500);
   --accent-hover: var(--ibc-teal-600);
-  --accent-fg: var(--ibc-navy-950);      /* escuro! ver §1.5 */
+  --accent-fg: var(--ibc-navy-950); /* escuro sobre o azul — ver §1.5 */
   --focus-ring: var(--ibc-blue-500);
   --success: var(--ibc-green-400);
   --warning: var(--ibc-amber-400);
   --danger: var(--ibc-magenta-400);
   --danger-surface: var(--ibc-magenta-600);
   --educational: var(--ibc-plum-900);
+  --fg-on-bright: var(--ibc-navy-950); /* sobre success e warning */
+  --fg-on-deep: var(--ibc-ice-50);     /* sobre danger-surface e educational */
 }
 
+/* ---------- semântica: claro, escrito e inerte ----------
+   Nada liga data-theme="light" hoje. O bloco existe para que ligar o tema
+   claro no futuro seja uma mudança de atributo, não uma refatoração. */
 [data-theme="light"] {
   --surface: var(--ibc-ice-50);
   --surface-raised: #ffffff;
@@ -453,19 +459,24 @@ O `gestao_pessoas` usa Tailwind v4. Bloco pronto para `frontend/app/globals.css`
   --danger: var(--ibc-magenta-600);
 }
 
-/* ---- expõe como utilitários Tailwind ---- */
+/* ---------- expõe como utilitário Tailwind ----------
+   `inline` é obrigatório: sem ele o Tailwind congela o valor na compilação
+   e a troca de tema deixa de funcionar. */
 @theme inline {
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
   --color-surface-sunken: var(--surface-sunken);
-  --color-text: var(--text);
-  --color-text-muted: var(--text-muted);
-  --color-text-subtle: var(--text-subtle);
+  --color-fg: var(--text);
+  --color-fg-muted: var(--text-muted);
+  --color-fg-subtle: var(--text-subtle);
+  --color-fg-on-bright: var(--fg-on-bright);
+  --color-fg-on-deep: var(--fg-on-deep);
   --color-border: var(--border);
   --color-border-interactive: var(--border-interactive);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-fg: var(--accent-fg);
+  --color-focus-ring: var(--focus-ring);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
@@ -475,29 +486,25 @@ O `gestao_pessoas` usa Tailwind v4. Bloco pronto para `frontend/app/globals.css`
   --font-sans: var(--font-open-sans), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
 
-  --radius-none: 0px;
-  --radius-lg: 20px;
-  --radius-full: 9999px;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.5;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.5;
+  --text-base: 1rem;
+  --text-base--line-height: 1.6;
+  --text-lg: 1.25rem;
+  --text-lg--line-height: 1.5;
+  --text-xl: 1.5rem;
+  --text-xl--line-height: 1.35;
+  --text-2xl: 2rem;
+  --text-2xl--line-height: 1.25;
+
+  --radius-field: 12px;
+  --radius-block: 20px;
 }
 ```
 
 `@theme inline` (e não `@theme`) é obrigatório: sem o `inline`, o Tailwind congela o valor no momento da compilação e a troca de tema deixa de funcionar.
-
-### Migração dos tokens atuais
-
-O `globals.css` de hoje usa nomes descritivos de cor. Equivalência:
-
-| Token antigo | Novo |
-| --- | --- |
-| `--color-primary-bg` | `--surface` |
-| `--color-secondary-bg` | `--surface-raised` |
-| `--color-tertiary-bg` | *(sem equivalente direto — era `#006494`, use `--accent` no claro ou superfície)* |
-| `--color-text-main` | `--text` |
-| `--color-accent-blue` | `--accent` |
-| `--color-accent-magenta` | `--danger-surface` |
-| `--color-educational` | `--educational` |
-
-⚠️ Ao migrar, corrija o `text-white` do `.btn-primary` para `--accent-fg` (§1.5).
 
 ---
 
@@ -507,14 +514,28 @@ Aberto, não decidido — não resolva por conta própria:
 
 1. **Gradiente exato.** Os hex da §1.2 são amostrados do PDF. Pegar os valores reais do Canva com a Giovanna e substituir.
 2. **Arquivos de logo.** Não existe SVG versionado neste workspace — hoje o logo só está dentro do PDF e do Canva. Exportar as quatro variantes em SVG e versioná-las.
-3. **Cor das outras três áreas.** Só Educacional tem cor. Se a plataforma precisar diferenciar Projetos, Marketing e Pessoas, é decisão da Marketing.
+3. **Cor das outras três áreas.** A plataforma deixou de depender disso — `Department` não é mais badge (§7.4), é texto com ícone, e não precisa de cor própria para funcionar. Se a Marketing definir uma cor para Projetos, Marketing ou Pessoas no futuro, isso é acréscimo, não desbloqueio de nada pendente.
 4. **Tipografia de dado numérico.** Open Sans não tem numeral tabular por padrão; tabela de dados pode precisar de `font-variant-numeric: tabular-nums` ou de uma mono. Não testado ainda.
-5. **Validar a extensão com a Marketing.** Verde, âmbar, neutros e magenta clareado foram decididos aqui, por necessidade de acessibilidade. Vale confirmar que a Marketing não se opõe.
+5. **Validar a extensão com a Marketing.** Verde, âmbar e neutros foram decididos aqui, por necessidade de acessibilidade. A seção `Origem` abaixo diz o que veio do guia; ela não valida o que foi acrescentado — são coisas diferentes. Vale confirmar que a Marketing não se opõe.
 
 ---
 
 ## Origem
 
-- **Fonte canônica:** *Guia de Estilos - Blockchain 2026*, Giovanna Neves, Canva, 12 páginas. Arquivo em `design/`.
-- **Contrastes:** calculados pela fórmula de luminância relativa da WCAG 2.1.
-- **Escopo do guia original:** feito para a equipe de **marketing**, não para produto. Tudo marcado 🟨 preenche essa lacuna.
+As regras abaixo vieram do *Guia de Estilos - Blockchain 2026* (Giovanna Neves,
+Canva, 12 páginas — arquivo em `design/`). Alterá-las exige falar com a
+Marketing antes:
+
+- as 8 cores primitivas e o gradiente da marca
+- Montserrat para título, Open Sans para corpo
+- o valor 3 de borda e o valor 20 de raio
+- a sombra sólida deslocada
+- as 4 variantes de logo e o mascote
+- o padrão geométrico de fundo
+
+Todo o resto deste documento foi decidido para uso em plataforma e pode ser
+revisado livremente.
+
+O guia original foi feito para a equipe de **marketing**, não para produto.
+As razões de contraste foram calculadas pela fórmula de luminância relativa
+da WCAG 2.1, não estimadas.
