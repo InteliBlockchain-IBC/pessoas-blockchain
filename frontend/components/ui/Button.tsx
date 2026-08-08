@@ -1,21 +1,25 @@
 import { ButtonHTMLAttributes, forwardRef } from "react";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "danger";
+  variant?: "primary" | "secondary" | "ghost" | "danger";
   size?: "sm" | "md" | "lg";
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className = "", variant = "primary", size = "md", children, ...props }, ref) => {
-    const baseClass = "font-bold rounded-[20px] transition-all border-[3px] flex items-center justify-center gap-2";
-    
-    const variantClasses = {
-      primary: "bg-[var(--color-accent-blue)] text-white border-transparent hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed",
-      secondary: "bg-transparent text-[var(--color-accent-blue)] border-[var(--color-accent-blue)] hover:bg-[var(--color-secondary-bg)] disabled:opacity-50 disabled:cursor-not-allowed",
-      danger: "bg-transparent text-[var(--color-accent-magenta)] border-[var(--color-accent-magenta)] hover:bg-[var(--color-secondary-bg)] disabled:opacity-50 disabled:cursor-not-allowed",
+    const base =
+      "font-heading font-bold rounded-block transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]";
+
+    // O primário leva texto ESCURO. Branco sobre #1b98e0 dá 3,17:1 e reprova
+    // o WCAG AA — ver DESIGN_SYSTEM.md §1.5.
+    const variants = {
+      primary: "bg-accent text-accent-fg hover:bg-accent-hover",
+      secondary: "bg-transparent text-accent border border-accent hover:bg-surface-raised",
+      ghost: "bg-transparent text-fg-muted hover:bg-surface-raised hover:text-fg",
+      danger: "bg-danger-surface text-fg-on-deep hover:opacity-90",
     };
 
-    const sizeClasses = {
+    const sizes = {
       sm: "px-4 py-1 text-sm",
       md: "px-6 py-2 text-base",
       lg: "px-8 py-3 text-lg",
@@ -24,7 +28,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
-        className={`${baseClass} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+        className={`${base} ${variants[variant]} ${sizes[size]} ${className}`}
         {...props}
       >
         {children}
