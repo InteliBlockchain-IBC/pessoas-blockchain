@@ -26,8 +26,7 @@ COPY prisma ./prisma
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends openssl ca-certificates libssl-dev libssl3 \
     && rm -rf /var/lib/apt/lists/* \
-    && npm ci --omit=dev \
-    && npm i prisma@6.6.0 --no-save
+    && npm ci --omit=dev
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
