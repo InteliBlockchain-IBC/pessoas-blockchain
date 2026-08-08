@@ -7,6 +7,9 @@ ai/
 docs/superpowers/
 .claude/
 
+# Worktrees de agente
+.worktrees/
+
 # Pasta com dados privados
 data/
 backend/scripts/

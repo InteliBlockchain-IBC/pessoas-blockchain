@@ -23,6 +23,28 @@ Fluxo **superpowers**, sem exceção: `brainstorming` → spec → `writing-plan
 
 Pular o fluxo só para: typo, ajuste óbvio em 1 arquivo, exploração/audit.
 
+## Fluxo de git
+
+`develop` é a branch padrão e o alvo de **todo** PR. `main` é produção: push nela dispara o deploy para o GHCR (`.github/workflows/deploy-*.yml`, filtrados por `frontend/**` e `backend/**`).
+
+**Nunca commite direto em `main` nem em `develop`.**
+
+Trabalho de agente roda em worktree isolada, para não disputar a árvore de trabalho com o usuário:
+
+```bash
+git worktree add .worktrees/<slug> -b <tipo>/<slug> develop
+cd .worktrees/<slug>
+# implementa, commita em fases
+git push -u origin <tipo>/<slug>
+gh pr create --base develop
+```
+
+`.worktrees/` é gitignored. Ao fim: `git worktree remove .worktrees/<slug>`.
+
+`develop` → `main` é decisão de release, não de feature: acumula o que já foi aprovado e sobe num PR só — que é o que dispara o deploy.
+
+Commits em conventional commits com descrição em português: `feat: adiciona Badge`, `fix: corrige contraste do botão primário`.
+
 ## Regras técnicas críticas
 
 1. **AuthGuard valida `x-user-id` no DB e lê role do DB.** Header `x-user-role` é **ignorado** pelo backend (anti-escalada). Frontend usa role do localStorage só para UI gating. Ver `backend/src/modules/auth/auth.guard.ts`.
