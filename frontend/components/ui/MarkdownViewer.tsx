@@ -8,7 +8,7 @@ export interface MarkdownViewerProps {
 
 export function MarkdownViewer({ content, className = "" }: MarkdownViewerProps) {
   return (
-    <div className={`prose prose-invert max-w-none text-[#e8f1f2] ${className}`}>
+    <div className={`prose prose-invert max-w-none text-fg ${className}`}>
       <ReactMarkdown remarkPlugins={[remarkGfm]}>
         {content || "*Nenhum conteúdo adicionado.*"}
       </ReactMarkdown>

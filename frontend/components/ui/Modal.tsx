@@ -44,7 +44,7 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = "lg" }: Mod
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
-          style={{ backgroundColor: "rgba(8,17,25,0.85)" }}
+          style={{ backgroundColor: "color-mix(in srgb, var(--surface) 85%, transparent)" }}
           onClick={onClose}
         >
           <motion.div
@@ -54,25 +54,26 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = "lg" }: Mod
             transition={{ type: "tween", duration: 0.25 }}
             className={`
               w-full ${widthMap[maxWidth]}
-              bg-secondary-bg border-[3px] border-tertiary-bg
-              rounded-t-[20px] rounded-b-none
-              sm:rounded-[20px]
+              bg-surface-raised border border-border
+              rounded-t-block rounded-b-none
+              sm:rounded-block
               overflow-hidden
             `}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drag handle — mobile only */}
             <div className="sm:hidden flex justify-center pt-3 pb-1">
-              <div className="w-10 h-1 rounded-full bg-tertiary-bg opacity-60" />
+              <div className="w-10 h-1 rounded-full bg-border-interactive" />
             </div>
 
-            <div className="flex items-center justify-between px-5 py-4 border-b-[3px] border-tertiary-bg">
-              <h2 className="text-lg font-bold text-white">{title}</h2>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+              <h2 className="font-heading text-lg font-bold text-fg">{title}</h2>
               <button
                 onClick={onClose}
-                className="p-1 rounded-lg hover:bg-tertiary-bg transition-colors"
+                aria-label="Fechar"
+                className="p-1 rounded-field hover:bg-surface transition-colors text-fg-muted hover:text-fg"
               >
-                <X size={20} className="text-text-main" />
+                <X size={20} />
               </button>
             </div>
 
