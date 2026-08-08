@@ -26,7 +26,7 @@ export default function LoginPage() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="card w-full max-w-md text-center flex flex-col items-center gap-6 p-8"
+        className="bg-surface-raised border border-border p-6 rounded-block w-full max-w-md text-center flex flex-col items-center gap-6 p-8"
       >
         <Image
           src="/logo_texto.png"
@@ -45,7 +45,7 @@ export default function LoginPage() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleLogin}
-          className="btn-primary w-full flex items-center justify-center gap-3 py-3"
+          className="font-heading font-bold rounded-block transition-all bg-accent text-accent-fg hover:bg-accent-hover w-full flex items-center justify-center gap-3 px-6 py-3"
         >
           <LogIn size={20} />
           Entrar com o Google

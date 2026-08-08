@@ -25,9 +25,10 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
+      data-theme="dark"
       className={`${montserrat.variable} ${openSans.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans bg-[#081119] text-[#e8f1f2]">
+      <body className="min-h-full flex flex-col font-sans bg-surface text-fg">
         {children}
       </body>
     </html>

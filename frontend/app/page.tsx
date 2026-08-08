@@ -48,21 +48,21 @@ export default function LandingPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mt-8"
         >
-          <div className="card flex flex-col items-center text-center gap-3">
+          <div className="bg-surface-raised border border-border p-6 rounded-block flex flex-col items-center text-center gap-3">
             <Database size={32} className="text-[var(--color-accent-magenta)]" />
             <h3 className="text-xl font-bold">Gestão Centralizada</h3>
             <p className="text-sm opacity-80">
               Gerencie membros ativos e inativos, funções e departamentos com controle de permissões.
             </p>
           </div>
-          <div className="card flex flex-col items-center text-center gap-3">
+          <div className="bg-surface-raised border border-border p-6 rounded-block flex flex-col items-center text-center gap-3">
             <FileSpreadsheet size={32} className="text-[var(--color-accent-blue)]" />
             <h3 className="text-xl font-bold">Processo Seletivo</h3>
             <p className="text-sm opacity-80">
               Acompanhe candidaturas, avalie candidatos e importe resultados de planilhas.
             </p>
           </div>
-          <div className="card flex flex-col items-center text-center gap-3">
+          <div className="bg-surface-raised border border-border p-6 rounded-block flex flex-col items-center text-center gap-3">
             <ShieldCheck size={32} className="text-[#380f2e]" />
             <h3 className="text-xl font-bold">PDI Contínuo</h3>
             <p className="text-sm opacity-80">
@@ -79,7 +79,7 @@ export default function LandingPage() {
         >
           <Link
             href="/login"
-            className="btn-primary flex items-center gap-2 text-lg px-8 py-4"
+            className="font-heading font-bold rounded-block transition-all bg-accent text-accent-fg hover:bg-accent-hover flex items-center gap-2 text-lg px-8 py-4"
           >
             Acesso Institucional
             <ArrowRight size={20} />

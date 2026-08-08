@@ -308,7 +308,7 @@ export default function MembersPage() {
             whileTap={{ scale: 0.95 }}
             onClick={handleImportClick}
             disabled={importing}
-            className="btn-secondary flex items-center gap-2"
+            className="font-heading font-bold rounded-block transition-all bg-transparent text-accent border border-accent hover:bg-surface-raised disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 px-6 py-2"
           >
             <Upload size={18} />
             {importing ? "Importando..." : "Importar"}
@@ -318,7 +318,7 @@ export default function MembersPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleExportCSV}
-            className="btn-primary flex items-center gap-2"
+            className="font-heading font-bold rounded-block transition-all bg-accent text-accent-fg hover:bg-accent-hover flex items-center gap-2 px-6 py-2"
           >
             <Download size={18} />
             Exportar CSV
@@ -459,7 +459,7 @@ export default function MembersPage() {
 
       {/* Table */}
       {loading ? (
-        <div className="card w-full min-h-[400px] flex items-center justify-center">
+        <div className="bg-surface-raised border border-border p-6 rounded-block w-full min-h-[400px] flex items-center justify-center">
           <p className="opacity-60">Carregando membros...</p>
         </div>
       ) : (

@@ -158,7 +158,7 @@ function ProcessCard({ process }: { process: SelectionProcess }) {
   const router = useRouter();
 
   return (
-    <div className="card flex flex-col">
+    <div className="bg-surface-raised border border-border p-6 rounded-block flex flex-col">
       {/* Linha principal */}
       <div className="flex items-center gap-4">
         <div className="flex-1 min-w-0">
@@ -182,7 +182,7 @@ function ProcessCard({ process }: { process: SelectionProcess }) {
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => router.push(`/selection/${process.id}`)}
-            className="btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5"
+            className="font-heading font-bold rounded-block transition-all bg-accent text-accent-fg hover:bg-accent-hover text-xs py-1.5 px-3 flex items-center gap-1.5"
           >
             <ExternalLink size={13} />
             Candidatos
@@ -278,15 +278,15 @@ export default function SelectionPage() {
       </div>
 
       {loading ? (
-        <div className="card w-full min-h-75 flex items-center justify-center">
+        <div className="bg-surface-raised border border-border p-6 rounded-block w-full min-h-75 flex items-center justify-center">
           <p className="opacity-60">Carregando processos...</p>
         </div>
       ) : error ? (
-        <div className="card w-full min-h-50 flex items-center justify-center">
+        <div className="bg-surface-raised border border-border p-6 rounded-block w-full min-h-50 flex items-center justify-center">
           <p className="text-sm text-red-400">{error}</p>
         </div>
       ) : processes.length === 0 ? (
-        <div className="card w-full min-h-50 flex items-center justify-center">
+        <div className="bg-surface-raised border border-border p-6 rounded-block w-full min-h-50 flex items-center justify-center">
           <p className="opacity-60">Nenhum processo seletivo encontrado.</p>
         </div>
       ) : (

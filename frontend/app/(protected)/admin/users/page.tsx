@@ -183,7 +183,7 @@ export default function AdminUsersPage() {
 
       {/* Table */}
       {loading ? (
-        <div className="card w-full min-h-75 flex items-center justify-center">
+        <div className="bg-surface-raised border border-border p-6 rounded-block w-full min-h-75 flex items-center justify-center">
           <p className="opacity-60">Carregando usuários...</p>
         </div>
       ) : (
