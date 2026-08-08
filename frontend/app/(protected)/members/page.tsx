@@ -3,6 +3,7 @@
 import { Download, Upload, Users, Search, X, ChevronDown } from "lucide-react";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Table, Column } from "@/components/ui/Table";
+import { Badge } from "@/components/ui/Badge";
 import { membersService, Member, MemberFilters } from "@/services/members.service";
 import { selectionService, SelectionProcess, Application } from "@/services/selection.service";
 import { useRouter } from "next/navigation";
@@ -33,13 +34,6 @@ const POSITION_OPTIONS = [
   { value: "PRESIDENT", label: "Presidente" },
 ];
 
-const STATUS_BADGE: Record<string, string> = {
-  ACTIVE: "bg-[var(--color-accent-blue)] text-white",
-  INACTIVE: "bg-[var(--color-tertiary-bg)] text-[var(--color-text-main)]",
-  CANDIDATE: "bg-purple-700 text-white",
-  ALUMNI: "bg-yellow-700 text-white",
-};
-
 interface SelectFilter {
   label: string;
   value: string;
@@ -53,7 +47,7 @@ function SelectFilter({ label, value, options, onChange }: SelectFilter) {
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="appearance-none bg-[var(--color-secondary-bg)] border-[3px] border-[var(--color-tertiary-bg)] text-[var(--color-text-main)] text-sm rounded-[12px] px-3 py-2 pr-8 focus:outline-none focus:border-[var(--color-accent-blue)] cursor-pointer min-w-[150px]"
+        className="appearance-none bg-surface-sunken border border-border-interactive text-fg text-sm rounded-field px-3 py-2 pr-8 focus:outline-none focus:border-accent cursor-pointer min-w-[150px]"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -63,7 +57,7 @@ function SelectFilter({ label, value, options, onChange }: SelectFilter) {
       </select>
       <ChevronDown
         size={14}
-        className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--color-text-main)] pointer-events-none opacity-60"
+        className="absolute right-2 top-1/2 -translate-y-1/2 text-fg-muted pointer-events-none opacity-60"
       />
     </div>
   );
@@ -73,7 +67,7 @@ function AccessDenied() {
   return (
     <div className="p-8 flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
       <Users size={48} className="opacity-20" />
-      <h2 className="text-xl font-bold text-white">Acesso restrito</h2>
+      <h2 className="text-xl font-bold text-fg">Acesso restrito</h2>
       <p className="text-sm opacity-60 max-w-sm">
         Esta seção é exclusiva para membros da diretoria de Pessoas (ADMIN e PEOPLE).
       </p>
@@ -218,7 +212,7 @@ export default function MembersPage() {
     {
       key: "name",
       header: "Nome",
-      render: (m) => <span className="font-medium text-white">{m.name}</span>,
+      render: (m) => <span className="font-medium text-fg">{m.name}</span>,
     },
     { key: "email", header: "Email" },
     {
@@ -244,13 +238,7 @@ export default function MembersPage() {
     {
       key: "status",
       header: "Status",
-      render: (m) => (
-        <span
-          className={`px-2 py-1 rounded-[10px] text-xs font-bold ${STATUS_BADGE[m.status] ?? "bg-[var(--color-tertiary-bg)]"}`}
-        >
-          {label(MEMBER_STATUS_LABEL, m.status)}
-        </span>
-      ),
+      render: (m) => <Badge status={m.status} label={label(MEMBER_STATUS_LABEL, m.status)} />,
     },
     {
       key: "interests",
@@ -261,13 +249,13 @@ export default function MembersPage() {
             {m.interests.slice(0, 3).map((interest) => (
               <span
                 key={interest}
-                className="px-2 py-0.5 rounded-full text-xs bg-tertiary-bg text-text-main whitespace-nowrap"
+                className="px-2 py-0.5 rounded-full text-xs bg-surface-raised text-fg-muted whitespace-nowrap"
               >
                 {interest}
               </span>
             ))}
             {m.interests.length > 3 && (
-              <span className="px-2 py-0.5 rounded-full text-xs bg-tertiary-bg opacity-50 whitespace-nowrap">
+              <span className="px-2 py-0.5 rounded-full text-xs bg-surface-raised text-fg-muted opacity-50 whitespace-nowrap">
                 +{m.interests.length - 3}
               </span>
             )}
@@ -290,9 +278,9 @@ export default function MembersPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex items-center gap-3">
-          <Users size={32} className="text-[var(--color-accent-blue)]" />
+          <Users size={32} className="text-accent" />
           <div>
-            <h1 className="text-3xl text-white font-bold">Membros do Clube</h1>
+            <h1 className="font-bold text-fg">Membros do Clube</h1>
             {!loading && (
               <p className="text-sm opacity-60 mt-0.5">
                 {displayedMembers.length} membro{displayedMembers.length !== 1 ? "s" : ""}
@@ -333,14 +321,14 @@ export default function MembersPage() {
           <div className="relative flex-1">
             <Search
               size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-main)] opacity-50"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-fg-muted opacity-50"
             />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar por nome ou email..."
-              className="w-full bg-[var(--color-secondary-bg)] border-[3px] border-[var(--color-tertiary-bg)] text-[var(--color-text-main)] text-sm rounded-[12px] pl-9 pr-4 py-2 focus:outline-none focus:border-[var(--color-accent-blue)] placeholder:opacity-40"
+              className="w-full bg-surface-sunken border border-border-interactive text-fg text-sm rounded-field pl-9 pr-4 py-2 focus:outline-none focus:border-accent placeholder:text-fg-subtle"
             />
             {search && (
               <button
@@ -357,10 +345,10 @@ export default function MembersPage() {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => setShowFilters((v) => !v)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-[12px] border-[3px] text-sm font-medium transition-colors ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-field border text-sm font-medium transition-colors ${
               showFilters || activeFilterCount > 0
-                ? "border-[var(--color-accent-blue)] text-[var(--color-accent-blue)]"
-                : "border-[var(--color-tertiary-bg)] text-[var(--color-text-main)]"
+                ? "border-accent text-accent"
+                : "border-border text-fg-muted"
             }`}
           >
             <ChevronDown
@@ -369,7 +357,7 @@ export default function MembersPage() {
             />
             Filtros
             {activeFilterCount > 0 && (
-              <span className="bg-[var(--color-accent-blue)] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+              <span className="bg-accent text-accent-fg text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                 {activeFilterCount}
               </span>
             )}
@@ -380,7 +368,7 @@ export default function MembersPage() {
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               onClick={clearFilters}
-              className="flex items-center gap-1 text-sm text-[var(--color-accent-magenta)] hover:opacity-80"
+              className="flex items-center gap-1 text-sm text-danger hover:opacity-80"
             >
               <X size={14} />
               Limpar
@@ -420,7 +408,7 @@ export default function MembersPage() {
                   <select
                     value={processFilter}
                     onChange={(e) => setProcessFilter(e.target.value)}
-                    className="appearance-none bg-[var(--color-secondary-bg)] border-[3px] border-[var(--color-tertiary-bg)] text-[var(--color-text-main)] text-sm rounded-[12px] px-3 py-2 pr-8 focus:outline-none focus:border-[var(--color-accent-blue)] cursor-pointer min-w-[200px]"
+                    className="appearance-none bg-surface-sunken border border-border-interactive text-fg text-sm rounded-field px-3 py-2 pr-8 focus:outline-none focus:border-accent cursor-pointer min-w-[200px]"
                   >
                     <option value="">Todos os processos</option>
                     {processes.map((p) => (
@@ -431,7 +419,7 @@ export default function MembersPage() {
                   </select>
                   <ChevronDown
                     size={14}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--color-text-main)] pointer-events-none opacity-60"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-fg-muted pointer-events-none opacity-60"
                   />
                 </div>
                 <div className="relative">
@@ -440,7 +428,7 @@ export default function MembersPage() {
                     value={interestsFilter}
                     onChange={(e) => setInterestsFilter(e.target.value)}
                     placeholder="Filtrar por interesse..."
-                    className="bg-secondary-bg border-[3px] border-tertiary-bg text-text-main text-sm rounded-xl px-3 py-2 focus:outline-none focus:border-accent-blue min-w-45 placeholder:opacity-40"
+                    className="bg-surface-sunken border border-border-interactive text-fg text-sm rounded-field px-3 py-2 focus:outline-none focus:border-accent min-w-45 placeholder:text-fg-subtle"
                   />
                   {interestsFilter && (
                     <button

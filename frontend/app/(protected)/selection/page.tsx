@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { selectionService, SelectionProcess, Stage } from "@/services/selection.service";
+import { Badge } from "@/components/ui/Badge";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -18,7 +19,7 @@ function AccessDenied() {
   return (
     <div className="p-8 flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
       <ClipboardList size={48} className="opacity-20" />
-      <h2 className="text-xl font-bold text-white">Acesso restrito</h2>
+      <h2 className="text-xl font-bold text-fg">Acesso restrito</h2>
       <p className="text-sm opacity-60 max-w-sm">
         Esta seção é exclusiva para membros da diretoria de Pessoas (ADMIN e PEOPLE).
       </p>
@@ -85,12 +86,12 @@ function ProcessStages({ processId }: { processId: string }) {
           <div key={stage.id}>
             <button
               onClick={() => toggleStage(stage.id)}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-tertiary-bg/40 transition-colors text-left"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-field hover:bg-surface transition-colors text-left"
             >
               <span className="text-xs font-mono opacity-30 w-5 shrink-0">
                 {si + 1}.
               </span>
-              <span className="font-semibold text-white text-sm flex-1">
+              <span className="font-semibold text-fg text-sm flex-1">
                 {stage.title}
               </span>
               {questions.length > 0 && (
@@ -124,16 +125,16 @@ function ProcessStages({ processId }: { processId: string }) {
                       {questions.map((q, qi) => (
                         <div
                           key={q.id}
-                          className="flex items-start gap-2 py-1.5 border-l-2 border-tertiary-bg/30 pl-3"
+                          className="flex items-start gap-2 py-1.5 border-l-2 border-border/30 pl-3"
                         >
                           <span className="text-xs font-mono opacity-25 shrink-0 w-5 mt-0.5">
                             {qi + 1}.
                           </span>
-                          <p className="text-sm text-text-main flex-1 leading-snug">
+                          <p className="text-sm text-fg flex-1 leading-snug">
                             {q.title}
                           </p>
                           {q.maxScore > 0 && (
-                            <span className="text-xs font-semibold text-accent-blue shrink-0">
+                            <span className="text-xs font-semibold text-accent shrink-0">
                               {q.maxScore} pts
                             </span>
                           )}
@@ -163,16 +164,8 @@ function ProcessCard({ process }: { process: SelectionProcess }) {
       <div className="flex items-center gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap">
-            <span className="font-bold text-white">{process.name}</span>
-            <span
-              className={`shrink-0 px-2 py-0.5 rounded-full text-xs font-bold ${
-                process.isActive
-                  ? "bg-accent-blue text-white"
-                  : "bg-tertiary-bg text-text-main opacity-70"
-              }`}
-            >
-              {process.isActive ? "Ativo" : "Encerrado"}
-            </span>
+            <span className="font-bold text-fg">{process.name}</span>
+            <Badge status={process.isActive ? "ACTIVE" : "CLOSED"} label={process.isActive ? "Ativo" : "Encerrado"} />
           </div>
           <p className="text-xs opacity-50 mt-0.5">{process.year}</p>
         </div>
@@ -192,10 +185,10 @@ function ProcessCard({ process }: { process: SelectionProcess }) {
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => setExpanded((v) => !v)}
-            className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl border-2 transition-colors ${
+            className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-field border transition-colors ${
               expanded
-                ? "border-accent-blue text-accent-blue"
-                : "border-tertiary-bg text-text-main hover:border-accent-blue hover:text-accent-blue"
+                ? "border-accent text-accent"
+                : "border-border text-fg-muted hover:border-accent hover:text-accent"
             }`}
           >
             {expanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
@@ -214,7 +207,7 @@ function ProcessCard({ process }: { process: SelectionProcess }) {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="mt-4 pt-4 border-t-2 border-tertiary-bg">
+            <div className="mt-4 pt-4 border-t border-border">
               <ProcessStages processId={process.id} />
             </div>
           </motion.div>
@@ -266,9 +259,9 @@ export default function SelectionPage() {
       className="p-8 w-full max-w-4xl mx-auto flex flex-col gap-6"
     >
       <div className="flex items-center gap-3">
-        <ClipboardList size={32} className="text-accent-blue" />
+        <ClipboardList size={32} className="text-accent" />
         <div>
-          <h1 className="text-3xl text-white font-bold">Processos Seletivos</h1>
+          <h1 className="font-bold text-fg">Processos Seletivos</h1>
           {!loading && (
             <p className="text-sm opacity-60 mt-0.5">
               {processes.length} processo{processes.length !== 1 ? "s" : ""}
@@ -283,7 +276,7 @@ export default function SelectionPage() {
         </div>
       ) : error ? (
         <div className="bg-surface-raised border border-border p-6 rounded-block w-full min-h-50 flex items-center justify-center">
-          <p className="text-sm text-red-400">{error}</p>
+          <p className="text-sm text-danger">{error}</p>
         </div>
       ) : processes.length === 0 ? (
         <div className="bg-surface-raised border border-border p-6 rounded-block w-full min-h-50 flex items-center justify-center">

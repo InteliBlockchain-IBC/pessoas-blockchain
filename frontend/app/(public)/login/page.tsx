@@ -26,7 +26,7 @@ export default function LoginPage() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="bg-surface-raised border border-border p-6 rounded-block w-full max-w-md text-center flex flex-col items-center gap-6 p-8"
+        className="bg-surface-raised border border-border rounded-block w-full max-w-md text-center flex flex-col items-center gap-6 p-8"
       >
         <Image
           src="/logo_texto.png"
@@ -36,8 +36,8 @@ export default function LoginPage() {
           priority
           className="h-20 w-auto"
         />
-        <h1 className="text-3xl text-white font-bold">Bem-vindo(a)</h1>
-        <p className="text-[var(--color-text-main)] opacity-80 mb-4">
+        <h1 className="text-fg font-bold">Bem-vindo(a)</h1>
+        <p className="text-fg opacity-80 mb-4">
           Para acessar a plataforma, faça login com sua conta institucional <strong>@sou.inteli.edu.br</strong>.
         </p>
 

@@ -21,6 +21,7 @@ import {
   ChevronRight,
   Loader2,
 } from "lucide-react";
+import { Badge } from "@/components/ui/Badge";
 import { membersService, Member } from "@/services/members.service";
 import { selectionService, Application, StageResultItem, EvaluationItem, AnswerItem } from "@/services/selection.service";
 import Link from "next/link";
@@ -49,23 +50,6 @@ const INTEREST_SUGGESTIONS = [
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
-const APPLICATION_STATUS_COLOR: Record<string, string> = {
-  APPROVED: "bg-[var(--color-accent-blue)] text-white",
-  REJECTED: "bg-[var(--color-accent-magenta)] text-white",
-  IN_REVIEW: "bg-yellow-700 text-white",
-  SUBMITTED: "bg-purple-700 text-white",
-  DRAFT: "bg-[var(--color-tertiary-bg)] text-[var(--color-text-main)]",
-  WITHDRAWN: "bg-[var(--color-tertiary-bg)] text-[var(--color-text-main)]",
-};
-
-const MEMBER_STATUS_COLOR: Record<string, string> = {
-  ACTIVE: "bg-[var(--color-accent-blue)] text-white",
-  INACTIVE: "bg-[var(--color-tertiary-bg)] text-[var(--color-text-main)]",
-  CANDIDATE: "bg-purple-700 text-white",
-  ALUMNI: "bg-yellow-700 text-white",
-};
-
-
 const DEPT_OPTIONS = ["", "PEOPLE", "MARKETING", "PROJECTS", "EDUCATIONAL"];
 const POS_OPTIONS = ["", "MEMBER", "HEAD", "DIRECTOR", "PRESIDENT"];
 const STATUS_OPTIONS = ["ACTIVE", "INACTIVE", "CANDIDATE", "ALUMNI"];
@@ -77,18 +61,18 @@ const RACE_OPTIONS = ["", "Branco", "Pardo", "Preto", "Amarelo", "Indígena", "P
 function StageResultBadge({ result }: { result: StageResultItem }) {
   const icon =
     result.status === "PASSED" ? (
-      <CheckCircle2 size={13} className="text-green-400" />
+      <CheckCircle2 size={13} className="text-success" />
     ) : result.status === "FAILED" ? (
-      <XCircle size={13} className="text-red-400" />
+      <XCircle size={13} className="text-danger" />
     ) : (
       <Clock size={13} className="opacity-50" />
     );
 
   return (
-    <div className="flex items-center gap-1.5 bg-[var(--color-primary-bg)] border border-[var(--color-tertiary-bg)] rounded-lg px-2.5 py-1.5">
+    <div className="flex items-center gap-1.5 bg-surface border border-border rounded-block px-2.5 py-1.5">
       {icon}
       <div>
-        <p className="text-xs font-semibold text-white leading-none">
+        <p className="text-xs font-semibold text-fg leading-none">
           {result.stage.title}
         </p>
         {result.score != null && (
@@ -110,10 +94,10 @@ function Row({
 }) {
   return (
     <div className="flex items-start gap-2">
-      <span className="text-[var(--color-accent-blue)] font-semibold min-w-[120px] shrink-0 pt-0.5">
+      <span className="text-accent font-semibold min-w-[120px] shrink-0 pt-0.5">
         {label}:
       </span>
-      <span className="text-[var(--color-text-main)]">
+      <span className="text-fg">
         {value ?? <span className="opacity-40">—</span>}
       </span>
     </div>
@@ -129,7 +113,7 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-xs font-semibold text-[var(--color-accent-blue)] uppercase tracking-wide">
+      <label className="text-xs font-semibold text-accent uppercase tracking-wide">
         {label}
       </label>
       {children}
@@ -138,10 +122,10 @@ function Field({
 }
 
 const inputCls =
-  "bg-[var(--color-primary-bg)] border-[2px] border-[var(--color-tertiary-bg)] text-[var(--color-text-main)] text-sm rounded-[10px] px-3 py-2 focus:outline-none focus:border-[var(--color-accent-blue)] w-full";
+  "bg-surface-sunken border border-border-interactive text-fg text-sm rounded-field px-3 py-2 focus:outline-none focus:border-accent w-full";
 
 const selectCls =
-  "appearance-none bg-[var(--color-primary-bg)] border-[2px] border-[var(--color-tertiary-bg)] text-[var(--color-text-main)] text-sm rounded-[10px] px-3 py-2 focus:outline-none focus:border-[var(--color-accent-blue)] w-full cursor-pointer";
+  "appearance-none bg-surface-sunken border border-border-interactive text-fg text-sm rounded-field px-3 py-2 focus:outline-none focus:border-accent w-full cursor-pointer";
 
 function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return "";
@@ -195,14 +179,14 @@ function InterestsTags({
       {interests.map((tag) => (
         <span
           key={tag}
-          className="flex items-center gap-1 px-2.5 py-1 bg-[var(--color-secondary-bg)] border border-[var(--color-tertiary-bg)] rounded-full text-xs font-medium text-[var(--color-text-main)]"
+          className="flex items-center gap-1 px-2.5 py-1 bg-surface-raised border border-border rounded-full text-xs font-medium text-fg"
         >
           <Tag size={10} className="opacity-50" />
           {tag}
           {editing && (
             <button
               onClick={() => removeTag(tag)}
-              className="ml-0.5 text-[var(--color-accent-magenta)] hover:opacity-80"
+              className="ml-0.5 text-danger hover:opacity-80"
             >
               <X size={11} />
             </button>
@@ -222,11 +206,11 @@ function InterestsTags({
               }
             }}
             placeholder="+ adicionar..."
-            className="bg-[var(--color-primary-bg)] border border-[var(--color-tertiary-bg)] text-[var(--color-text-main)] text-xs rounded-full px-3 py-1 w-32 focus:outline-none focus:border-[var(--color-accent-blue)]"
+            className="bg-surface-sunken border border-border-interactive text-fg text-xs rounded-full px-3 py-1 w-32 focus:outline-none focus:border-accent"
           />
           <button
             onClick={addTag}
-            className="p-1 rounded-full bg-[var(--color-accent-blue)] text-white hover:opacity-80"
+            className="p-1 rounded-full bg-accent text-accent-fg hover:opacity-80"
           >
             <Plus size={11} />
           </button>
@@ -239,7 +223,7 @@ function InterestsTags({
             <button
               key={s}
               onClick={() => onChange?.([...interests, s])}
-              className="px-2 py-0.5 text-xs rounded-full border border-tertiary-bg text-text-main hover:border-accent-blue hover:text-accent-blue transition-colors"
+              className="px-2 py-0.5 text-xs rounded-full border border-border text-fg-muted hover:border-accent hover:text-accent transition-colors"
             >
               + {s}
             </button>
@@ -337,12 +321,12 @@ function ApplicationDetail({ appId }: { appId: string }) {
       {/* Anotações gerais por etapa (notas do StageResult) */}
       {stageNotes.length > 0 && (
         <div className="flex flex-col gap-2">
-          <p className="text-xs font-semibold text-accent-blue uppercase tracking-wide">
+          <p className="text-xs font-semibold text-accent uppercase tracking-wide">
             Anotações por etapa
           </p>
           {stageNotes.map((r) => (
             <div key={r.id} className="flex flex-col gap-0.5">
-              <span className="text-xs font-semibold text-white">
+              <span className="text-xs font-semibold text-fg">
                 {r.stage.title}
               </span>
               <p className="text-xs opacity-70 italic">{r.notes}</p>
@@ -354,12 +338,12 @@ function ApplicationDetail({ appId }: { appId: string }) {
       {/* Respostas de texto do candidato (questões sem nota) */}
       {hasAnswers && (
         <div className="flex flex-col gap-3">
-          <p className="text-xs font-semibold text-accent-blue uppercase tracking-wide">
+          <p className="text-xs font-semibold text-accent uppercase tracking-wide">
             Respostas do candidato
           </p>
           {answerGroups.map(({ stageName, answers }) => (
             <div key={stageName} className="flex flex-col gap-2">
-              <p className="text-xs font-semibold text-white opacity-70">
+              <p className="text-xs font-semibold text-fg opacity-70">
                 {stageName}
               </p>
               {answers
@@ -367,9 +351,9 @@ function ApplicationDetail({ appId }: { appId: string }) {
                 .map((ans) => (
                   <div
                     key={ans.id}
-                    className="flex flex-col gap-1 pl-3 border-l-2 border-tertiary-bg"
+                    className="flex flex-col gap-1 pl-3 border-l-2 border-border"
                   >
-                    <p className="text-xs text-text-main font-medium">
+                    <p className="text-xs text-fg font-medium">
                       {ans.question.title}
                     </p>
                     <p className="text-xs opacity-60 leading-relaxed">
@@ -385,12 +369,12 @@ function ApplicationDetail({ appId }: { appId: string }) {
       {/* Avaliações com nota por questão */}
       {hasEvals && (
         <div className="flex flex-col gap-3">
-          <p className="text-xs font-semibold text-accent-blue uppercase tracking-wide">
+          <p className="text-xs font-semibold text-accent uppercase tracking-wide">
             Avaliações por questão
           </p>
           {stageGroups.map(({ stageName, evals }) => (
             <div key={stageName} className="flex flex-col gap-2">
-              <p className="text-xs font-semibold text-white opacity-70">
+              <p className="text-xs font-semibold text-fg opacity-70">
                 {stageName}
               </p>
               {evals
@@ -398,14 +382,14 @@ function ApplicationDetail({ appId }: { appId: string }) {
                 .map((ev) => (
                   <div
                     key={ev.id}
-                    className="flex flex-col gap-0.5 pl-3 border-l-2 border-tertiary-bg"
+                    className="flex flex-col gap-0.5 pl-3 border-l-2 border-border"
                   >
-                    <p className="text-xs text-text-main font-medium">
+                    <p className="text-xs text-fg font-medium">
                       {ev.question.title}
                     </p>
                     <div className="flex items-center gap-3 flex-wrap">
                       {ev.score != null && ev.question.maxScore > 0 && (
-                        <span className="text-xs font-semibold text-accent-blue">
+                        <span className="text-xs font-semibold text-accent">
                           {ev.score}/{ev.question.maxScore} pts
                         </span>
                       )}
@@ -432,10 +416,10 @@ function ApplicationCard({ app }: { app: Application }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="flex flex-col gap-3 p-4 bg-primary-bg border border-tertiary-bg rounded-xl">
+    <div className="flex flex-col gap-3 p-4 bg-surface border border-border rounded-block">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <p className="font-semibold text-white">
+          <p className="font-semibold text-fg">
             {app.process?.name ?? "Processo desconhecido"}
             {app.process?.year && (
               <span className="text-xs font-normal opacity-60 ml-2">
@@ -448,14 +432,10 @@ function ApplicationCard({ app }: { app: Application }) {
           )}
         </div>
         <div className="flex items-center gap-2">
-          <span
-            className={`px-2 py-0.5 rounded-[10px] text-xs font-bold ${APPLICATION_STATUS_COLOR[app.status] ?? ""}`}
-          >
-            {APPLICATION_STATUS_LABEL[app.status] ?? app.status}
-          </span>
+          <Badge status={app.status} label={APPLICATION_STATUS_LABEL[app.status] ?? app.status} />
           <button
             onClick={() => router.push(`/selection/${app.processId}`)}
-            className="text-xs text-accent-blue hover:underline flex items-center gap-0.5"
+            className="text-xs text-accent hover:underline flex items-center gap-0.5"
           >
             Ver processo <ArrowRight size={12} />
           </button>
@@ -472,7 +452,7 @@ function ApplicationCard({ app }: { app: Application }) {
 
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="self-start flex items-center gap-1 text-xs font-semibold text-text-main opacity-60 hover:opacity-100 hover:text-white transition-all"
+        className="self-start flex items-center gap-1 text-xs font-semibold text-fg-muted hover:text-fg transition-all"
       >
         {expanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
         {expanded ? "Ver menos" : "Ver mais"}
@@ -590,7 +570,7 @@ export default function MemberProfilePage({
 
   if (loadingMember) {
     return (
-      <div className="p-8 text-[var(--color-text-main)] opacity-70">
+      <div className="p-8 text-fg opacity-70">
         Carregando perfil...
       </div>
     );
@@ -598,7 +578,7 @@ export default function MemberProfilePage({
 
   if (!member) {
     return (
-      <div className="p-8 text-[var(--color-accent-magenta)] font-bold">
+      <div className="p-8 text-danger font-bold">
         Membro não encontrado.
       </div>
     );
@@ -613,7 +593,7 @@ export default function MemberProfilePage({
       {/* ── Back ── */}
       <button
         onClick={() => router.push("/members")}
-        className="flex items-center gap-1.5 text-sm text-text-main opacity-60 hover:opacity-100 transition-opacity w-fit"
+        className="flex items-center gap-1.5 text-sm text-fg-muted hover:text-fg transition-colors w-fit"
       >
         <ArrowLeft size={15} />
         Membros
@@ -622,9 +602,9 @@ export default function MemberProfilePage({
       {/* ── Header ── */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex items-center gap-3">
-          <User size={32} className="text-[var(--color-accent-blue)]" />
+          <User size={32} className="text-accent" />
           <div className="flex flex-col gap-0.5">
-            <h1 className="text-3xl text-white font-bold">
+            <h1 className="font-bold text-fg">
               {editing ? (
                 <input
                   value={form.name ?? ""}
@@ -635,7 +615,7 @@ export default function MemberProfilePage({
                 member.name
               )}
             </h1>
-            <p className="text-[var(--color-text-main)] opacity-60 text-sm">
+            <p className="text-fg-muted text-sm">
               {member.email}
             </p>
           </div>
@@ -683,7 +663,7 @@ export default function MemberProfilePage({
           transition={{ delay: 0.1 }}
         >
           <Card className="flex flex-col gap-4 h-full">
-            <h2 className="text-xl font-bold border-b-[3px] border-[var(--color-tertiary-bg)] pb-2">
+            <h2 className="text-xl font-bold border-b border-border pb-2">
               Informações Básicas
             </h2>
 
@@ -778,13 +758,7 @@ export default function MemberProfilePage({
                 >
                   <Row
                     label="Status"
-                    value={
-                      <span
-                        className={`px-2 py-0.5 rounded-[10px] text-xs font-bold ${MEMBER_STATUS_COLOR[member.status] ?? ""}`}
-                      >
-                        {label(MEMBER_STATUS_LABEL, member.status)}
-                      </span>
-                    }
+                    value={<Badge status={member.status} label={label(MEMBER_STATUS_LABEL, member.status)} />}
                   />
                   <Row label="Departamento" value={label(DEPARTMENT_LABEL, member.department)} />
                   <Row label="Cargo" value={label(POSITION_LABEL, member.position)} />
@@ -805,7 +779,7 @@ export default function MemberProfilePage({
           transition={{ delay: 0.15 }}
         >
           <Card className="flex flex-col gap-4 h-full">
-            <h2 className="text-xl font-bold border-b-[3px] border-[var(--color-tertiary-bg)] pb-2">
+            <h2 className="text-xl font-bold border-b border-border pb-2">
               Dados Demográficos
             </h2>
 
@@ -903,8 +877,8 @@ export default function MemberProfilePage({
         transition={{ delay: 0.2 }}
       >
         <Card className="flex flex-col gap-4">
-          <h2 className="text-xl font-bold border-b-[3px] border-[var(--color-tertiary-bg)] pb-2 flex items-center gap-2">
-            <Tag size={18} className="text-[var(--color-accent-blue)]" />
+          <h2 className="text-xl font-bold border-b border-border pb-2 flex items-center gap-2">
+            <Tag size={18} className="text-accent" />
             Áreas de Interesse
           </h2>
           <InterestsTags
@@ -927,7 +901,7 @@ export default function MemberProfilePage({
         transition={{ delay: 0.25 }}
       >
         <Card variant="educational" className="flex flex-col gap-4">
-          <div className="flex items-center justify-between border-b-[3px] border-[var(--color-tertiary-bg)] pb-2">
+          <div className="flex items-center justify-between border-b border-border pb-2">
             <h2 className="text-xl font-bold">
               Plano de Desenvolvimento Individual (PDI)
             </h2>
@@ -952,10 +926,10 @@ export default function MemberProfilePage({
         transition={{ delay: 0.3 }}
       >
         <Card className="flex flex-col gap-4">
-          <div className="flex items-center gap-2 border-b-[3px] border-[var(--color-tertiary-bg)] pb-2">
+          <div className="flex items-center gap-2 border-b border-border pb-2">
             <ClipboardList
               size={20}
-              className="text-[var(--color-accent-blue)]"
+              className="text-accent"
             />
             <h2 className="text-xl font-bold">Processos Seletivos</h2>
           </div>
