@@ -54,14 +54,6 @@
   --educational: var(--ibc-plum-900);
   --fg-on-bright: var(--ibc-navy-950); /* sobre success e warning */
   --fg-on-deep: var(--ibc-ice-50);     /* sobre danger-surface e educational */
-
-  /* ---------- tokens antigos: removidos na Task 8 ---------- */
-  --color-primary-bg: #081119;
-  --color-secondary-bg: #13293d;
-  --color-tertiary-bg: #006494;
-  --color-text-main: #e8f1f2;
-  --color-accent-blue: #1b98e0;
-  --color-accent-magenta: #9f0e5d;
 }
 
 /* ---------- semântica: claro, escrito e inerte ----------
