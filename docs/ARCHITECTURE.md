@@ -43,8 +43,8 @@ Plataforma interna para gerenciar a jornada dos integrantes do clube Inteli Bloc
 
 | Camada | Tecnologia | Versão | Deploy |
 |--------|-----------|--------|--------|
-| Frontend | Next.js App Router, React, Tailwind CSS v4, TypeScript | Next 15+, React 19 | Vercel |
-| Backend | NestJS, TypeScript, Swagger | NestJS 11 | Docker |
+| Frontend | Next.js App Router, React, Tailwind CSS v4, TypeScript | Next 15+, React 19 | Docker (Easypanel) |
+| Backend | NestJS, TypeScript, Swagger | NestJS 11 | Docker (Easypanel) |
 | ORM | Prisma | 6.x | — |
 | Banco | PostgreSQL 15 (auto-hospedado) | — | Easypanel (VPS) |
 | Auth | Google OAuth 2.0 + DB-validated header guard | `google-auth-library` 10 | — |
@@ -422,15 +422,18 @@ Arquivos com esse padrão: `Sidebar.tsx`, `members/page.tsx`, `members/[id]/page
 
 ## 8. Deploy e Infraestrutura
 
-### Backend
+### Backend (Docker + Easypanel)
 
-Backend deploy via Docker image (built by GitHub Actions). Migrations rodam automaticamente no container start via `npx prisma migrate deploy && node dist/main` (ver Dockerfile CMD).
+Backend deploy via Docker image (built by GitHub Actions), publicado no GHCR e deployado na VPS via Easypanel. Migrations rodam automaticamente no container start via `npx prisma migrate deploy && node dist/main` (ver Dockerfile CMD).
 
-### Frontend (Vercel)
+- URL: `https://api-pessoas.inteliblockchain.org`
 
-- Root Directory: `frontend`
-- Build command: `npm run build` (auto-detectado)
-- Environment: `NEXT_PUBLIC_API_URL=https://pessoas-blockchain.fly.dev`
+### Frontend (Docker + Easypanel)
+
+Frontend deploy via Docker image (built by GitHub Actions, `frontend/Dockerfile`), publicado no GHCR e deployado na VPS via Easypanel — mesmo pipeline do backend (ver `docs/DEPLOY.md`).
+
+- URL: `https://pessoas.inteliblockchain.org`
+- Environment: `NEXT_PUBLIC_API_URL=https://api-pessoas.inteliblockchain.org` — inlined no build, não lido em runtime (trocar exige novo push/rebuild).
 
 ### Banco de Dados (Postgres auto-hospedado)
 
@@ -531,4 +534,4 @@ GET    /export/pdi/csv
 
 - `CLAUDE.md` — contexto rápido e workflow de desenvolvimento com IA
 - `backend/prisma/schema.prisma` — schema fonte da verdade
-- Swagger: `http://localhost:3001/docs` / `https://pessoas-blockchain.fly.dev/docs`
+- Swagger: `http://localhost:3001/docs` / `https://api-pessoas.inteliblockchain.org/docs`

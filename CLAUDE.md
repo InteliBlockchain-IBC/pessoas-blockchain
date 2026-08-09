@@ -8,9 +8,9 @@ Plataforma interna do clube **Inteli Blockchain** (Messias é presidente) para s
 
 ## Stack
 
-- **Frontend** — Next.js 16.x (App Router), React 19, Tailwind v4, TS — Vercel (root: `frontend`).
-- **Backend** — NestJS 11, Prisma 6, TS — Fly.io app `pessoas-blockchain`.
-- **Banco** — Postgres auto-hospedado na VPS (Docker, sem pooler).
+- **Frontend** — Next.js 16.x (App Router), React 19, Tailwind v4, TS — Docker via GHCR, deploy na VPS pelo Easypanel (root: `frontend`).
+- **Backend** — NestJS 11, Prisma 6, TS — Docker via GHCR, deploy na VPS pelo Easypanel.
+- **Banco** — Postgres auto-hospedado na mesma VPS, como serviço do Easypanel (sem pooler).
 - **Auth** — Google OAuth 2.0, domínio `@sou.inteli.edu.br`.
 
 ## Workflow obrigatório
@@ -61,7 +61,7 @@ Commits em conventional commits com descrição em português: `feat: adiciona B
 | `docs/ARCHITECTURE.md` | Fonte de verdade versionada: 16 modelos Prisma, 9 enums, RBAC, 44+ endpoints, regras do seed |
 | `backend/prisma/schema.prisma` | Schema fonte da verdade |
 | `backend/README.md` / `frontend/README.md` | Detalhes de cada camada |
-| Swagger | `http://localhost:3001/docs` ou `https://pessoas-blockchain.fly.dev/docs` |
+| Swagger | `http://localhost:3001/docs` ou `https://api-pessoas.inteliblockchain.org/docs` |
 
 ## Setup rápido
 
