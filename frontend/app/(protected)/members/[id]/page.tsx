@@ -32,7 +32,6 @@ import {
   MEMBER_STATUS_LABEL,
   DEPARTMENT_LABEL,
   POSITION_LABEL,
-  STAGE_RESULT_STATUS_LABEL,
   label,
 } from "@/lib/labels";
 
@@ -498,7 +497,9 @@ export default function MemberProfilePage({
   const [form, setForm] = useState<Partial<Member>>({});
 
   useEffect(() => {
+    // localStorage só existe no cliente — SSR-safe (CLAUDE.md, regra técnica 2).
     const role = localStorage.getItem("x-user-role") ?? "";
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCanEdit(["ADMIN", "PEOPLE"].includes(role));
   }, []);
 
@@ -692,7 +693,7 @@ export default function MemberProfilePage({
                   <Field label="Departamento">
                     <select
                       value={form.department ?? ""}
-                      onChange={(e) => set("department", e.target.value || null as any)}
+                      onChange={(e) => set("department", e.target.value || null)}
                       className={selectCls}
                     >
                       {DEPT_OPTIONS.map((d) => (
@@ -705,7 +706,7 @@ export default function MemberProfilePage({
                   <Field label="Cargo">
                     <select
                       value={form.position ?? ""}
-                      onChange={(e) => set("position", e.target.value || null as any)}
+                      onChange={(e) => set("position", e.target.value || null)}
                       className={selectCls}
                     >
                       {POS_OPTIONS.map((p) => (
@@ -735,7 +736,7 @@ export default function MemberProfilePage({
                     <input
                       type="date"
                       value={toInputDate(form.joinedAt)}
-                      onChange={(e) => set("joinedAt", e.target.value || null as any)}
+                      onChange={(e) => set("joinedAt", e.target.value || null)}
                       className={inputCls}
                     />
                   </Field>
@@ -743,7 +744,7 @@ export default function MemberProfilePage({
                     <input
                       type="date"
                       value={toInputDate(form.leftAt)}
-                      onChange={(e) => set("leftAt", e.target.value || null as any)}
+                      onChange={(e) => set("leftAt", e.target.value || null)}
                       className={inputCls}
                     />
                   </Field>
@@ -795,7 +796,7 @@ export default function MemberProfilePage({
                   <Field label="Gênero">
                     <select
                       value={form.gender ?? ""}
-                      onChange={(e) => set("gender", e.target.value || null as any)}
+                      onChange={(e) => set("gender", e.target.value || null)}
                       className={selectCls}
                     >
                       {GENDER_OPTIONS.map((g) => (
@@ -808,7 +809,7 @@ export default function MemberProfilePage({
                   <Field label="Raça/Cor">
                     <select
                       value={form.race ?? ""}
-                      onChange={(e) => set("race", e.target.value || null as any)}
+                      onChange={(e) => set("race", e.target.value || null)}
                       className={selectCls}
                     >
                       {RACE_OPTIONS.map((r) => (
@@ -831,7 +832,7 @@ export default function MemberProfilePage({
                         set(
                           "isLgbtqia",
                           e.target.value === ""
-                            ? null as any
+                            ? null
                             : e.target.value === "true",
                         )
                       }

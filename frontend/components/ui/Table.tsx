@@ -42,7 +42,7 @@ export function Table<T>({ columns, data, emptyMessage = "Nenhum dado disponíve
               >
                 {columns.map((col) => (
                   <td key={col.key} className="p-4 text-fg whitespace-nowrap">
-                    {col.render ? col.render(item) : (item as any)[col.key]}
+                    {col.render ? col.render(item) : (item as Record<string, unknown>)[col.key] as React.ReactNode}
                   </td>
                 ))}
               </tr>

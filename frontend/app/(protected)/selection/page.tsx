@@ -45,7 +45,8 @@ function ProcessStages({ processId }: { processId: string }) {
   const toggleStage = (id: string) =>
     setOpenStages((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
 
@@ -226,7 +227,9 @@ export default function SelectionPage() {
   const [canAccess, setCanAccess] = useState<boolean | null>(null);
 
   useEffect(() => {
+    // localStorage só existe no cliente — SSR-safe (CLAUDE.md, regra técnica 2).
     const role = localStorage.getItem("x-user-role") ?? "";
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCanAccess(role === "ADMIN" || role === "PEOPLE");
   }, []);
 
@@ -234,8 +237,8 @@ export default function SelectionPage() {
     try {
       const data = await selectionService.getProcesses();
       setProcesses(data);
-    } catch (err: any) {
-      const status = err?.response?.status;
+    } catch (err) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
       if (status === 403) setError("Sem permissão para acessar processos seletivos.");
       else setError("Erro ao carregar processos. Verifique se o backend está rodando.");
     } finally {
@@ -245,6 +248,7 @@ export default function SelectionPage() {
 
   useEffect(() => {
     if (canAccess === null) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- dispara a busca inicial assim que canAccess resolve
     if (canAccess) fetchProcesses();
     else setLoading(false);
   }, [canAccess, fetchProcesses]);

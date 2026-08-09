@@ -17,7 +17,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [isPeople, setIsPeople] = useState(false);
 
   useEffect(() => {
+    // localStorage só existe no cliente — SSR-safe (CLAUDE.md, regra técnica 2).
     const role = localStorage.getItem("x-user-role") ?? "";
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsPeople(role === "ADMIN" || role === "PEOPLE");
   }, []);
 

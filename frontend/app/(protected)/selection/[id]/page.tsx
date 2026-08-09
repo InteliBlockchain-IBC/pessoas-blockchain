@@ -505,7 +505,9 @@ export default function SelectionProcessPage({
 
   const [canAccess, setCanAccess] = useState<boolean | null>(null);
   useEffect(() => {
+    // localStorage só existe no cliente — SSR-safe (CLAUDE.md, regra técnica 2).
     const role = localStorage.getItem("x-user-role") ?? "";
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCanAccess(role === "ADMIN" || role === "PEOPLE");
   }, []);
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { Download, Upload, Users, Search, X, ChevronDown } from "lucide-react";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Table, Column } from "@/components/ui/Table";
 import { Badge } from "@/components/ui/Badge";
 import { membersService, Member, MemberFilters } from "@/services/members.service";
@@ -47,6 +47,7 @@ function SelectFilter({ label, value, options, onChange }: SelectFilter) {
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        aria-label={label}
         className="appearance-none bg-surface-sunken border border-border-interactive text-fg text-sm rounded-field px-3 py-2 pr-8 focus:outline-none focus:border-accent cursor-pointer min-w-[150px]"
       >
         {options.map((o) => (
@@ -77,7 +78,6 @@ function AccessDenied() {
 
 export default function MembersPage() {
   const [allMembers, setAllMembers] = useState<Member[]>([]);
-  const [displayedMembers, setDisplayedMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [importing, setImporting] = useState(false);
   const router = useRouter();
@@ -85,7 +85,10 @@ export default function MembersPage() {
   const [canAccess, setCanAccess] = useState<boolean | null>(null);
 
   useEffect(() => {
+    // localStorage só existe no cliente — não dá para ler no lazy initializer
+    // do useState sem quebrar SSR (CLAUDE.md, regra técnica 2).
     const role = localStorage.getItem("x-user-role") ?? "";
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCanAccess(role === "ADMIN" || role === "PEOPLE");
   }, []);
 
@@ -113,6 +116,7 @@ export default function MembersPage() {
   // When process filter changes, load applicants
   useEffect(() => {
     if (!processFilter) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- limpa o estado quando o filtro esvazia, parte do mesmo efeito que busca os dados abaixo
       setProcessApplicants(new Set());
       return;
     }
@@ -137,6 +141,7 @@ export default function MembersPage() {
   // Initial load
   useEffect(() => {
     if (canAccess === null) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- dispara a busca inicial assim que canAccess resolve
     if (canAccess) fetchMembers({ limit: 200 });
     else setLoading(false);
   }, [fetchMembers, canAccess]);
@@ -158,13 +163,11 @@ export default function MembersPage() {
     };
   }, [search, statusFilter, deptFilter, positionFilter, interestsFilter, fetchMembers]);
 
-  // Client-side filter for process (cross-reference)
-  useEffect(() => {
-    if (!processFilter || processApplicants.size === 0) {
-      setDisplayedMembers(allMembers);
-    } else {
-      setDisplayedMembers(allMembers.filter((m) => processApplicants.has(m.id)));
-    }
+  // Client-side filter for process (cross-reference) — puramente derivado, sem
+  // efeito colateral, então useMemo em vez de useState+useEffect.
+  const displayedMembers = useMemo(() => {
+    if (!processFilter || processApplicants.size === 0) return allMembers;
+    return allMembers.filter((m) => processApplicants.has(m.id));
   }, [allMembers, processFilter, processApplicants]);
 
   const activeFilterCount = [search, statusFilter, deptFilter, positionFilter, processFilter, interestsFilter].filter(Boolean).length;

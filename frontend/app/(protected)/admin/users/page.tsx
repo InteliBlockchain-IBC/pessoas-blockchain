@@ -50,6 +50,8 @@ export default function AdminUsersPage() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    // localStorage só existe no cliente — SSR-safe (CLAUDE.md, regra técnica 2).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsAdmin(localStorage.getItem("x-user-role") === "ADMIN");
   }, []);
 
@@ -69,6 +71,7 @@ export default function AdminUsersPage() {
   );
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- busca inicial ao montar
     fetchUsers({});
   }, [fetchUsers]);
 
