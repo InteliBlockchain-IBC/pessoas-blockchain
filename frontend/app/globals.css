@@ -1,45 +1,145 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-@theme {
-  --color-primary-bg: #081119;
-  --color-secondary-bg: #13293d;
-  --color-tertiary-bg: #006494;
-  --color-text-main: #e8f1f2;
-  --color-accent-blue: #1b98e0;
-  --color-accent-magenta: #9f0e5d;
-  --color-educational: #380f2e;
+/* ---------- primitivas ---------- */
+:root {
+  /* do guia de estilos */
+  --ibc-navy-950: #081119;
+  --ibc-navy-900: #13293d;
+  --ibc-teal-600: #247ba0;
+  --ibc-blue-700: #006494;
+  --ibc-blue-500: #1b98e0;
+  --ibc-ice-50: #e8f1f2;
+  --ibc-magenta-600: #9f0e5d;
+  --ibc-plum-900: #380f2e;
+  --ibc-gradient-start: #63b4c4; /* amostrado do PDF — ver DESIGN_SYSTEM.md §1.2 */
+  --ibc-gradient-end: #8c4ca9;   /* amostrado do PDF — ver DESIGN_SYSTEM.md §1.2 */
 
-  --font-sans: var(--font-open-sans), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-heading: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  /* derivadas para uso em plataforma */
+  --ibc-slate-400: #8fa3b8;
+  --ibc-slate-500: #6b8299;
+  /* #537c98, não #456a85: o valor original dava 2,59:1 contra --surface-raised,
+     abaixo do mínimo de 3:1 para --border-interactive como borda de campo em
+     card. Ajustado à mão, conferido pelo check-contrast (Task 1). */
+  --ibc-slate-600: #537c98;
+  --ibc-slate-800: #2a4a63;
+  --ibc-steel-200: #c3d3d6;
+  --ibc-steel-400: #6b8a92;
+  --ibc-steel-700: #42586d;
+  --ibc-green-400: #34d399;
+  --ibc-green-700: #047857;
+  --ibc-amber-400: #fbbf24;
+  --ibc-amber-800: #92400e;
+  --ibc-magenta-400: #f0559b;
 }
 
-/* 
-  Estilos base exigidos pelo style-guide:
-  - Borda: 3px
-  - Raio de Borda: 0 ou 20px
-*/
+/* ---------- semântica: escuro é o padrão ---------- */
+:root {
+  --surface: var(--ibc-navy-950);
+  --surface-raised: var(--ibc-navy-900);
+  --surface-sunken: #050b11;
+  --text: var(--ibc-ice-50);
+  --text-muted: var(--ibc-slate-400);
+  --text-subtle: var(--ibc-slate-500);
+  --border: var(--ibc-slate-800);
+  --border-interactive: var(--ibc-slate-600);
+  --accent: var(--ibc-blue-500);
+  --accent-hover: var(--ibc-teal-600);
+  --accent-fg: var(--ibc-navy-950); /* escuro sobre o azul — ver DESIGN_SYSTEM.md §1.5 */
+  --focus-ring: var(--ibc-blue-500);
+  --success: var(--ibc-green-400);
+  --warning: var(--ibc-amber-400);
+  --danger: var(--ibc-magenta-400);
+  --danger-surface: var(--ibc-magenta-600);
+  --educational: var(--ibc-plum-900);
+  --fg-on-bright: var(--ibc-navy-950); /* sobre success e warning */
+  --fg-on-deep: var(--ibc-ice-50);     /* sobre danger-surface e educational */
+}
+
+/* ---------- semântica: claro, escrito e inerte ----------
+   Nada liga data-theme="light" hoje. O bloco existe para que ligar o tema
+   claro no futuro seja uma mudança de atributo, não uma refatoração. */
+[data-theme="light"] {
+  --surface: var(--ibc-ice-50);
+  --surface-raised: #ffffff;
+  --surface-sunken: #dbe7e9;
+  --text: var(--ibc-navy-950);
+  --text-muted: var(--ibc-steel-700);
+  --text-subtle: #5c7d86;
+  --border: var(--ibc-steel-200);
+  --border-interactive: var(--ibc-steel-400);
+  --accent: var(--ibc-blue-700);
+  --accent-hover: var(--ibc-navy-900);
+  --accent-fg: #ffffff;
+  --focus-ring: var(--ibc-blue-700);
+  --success: var(--ibc-green-700);
+  --warning: var(--ibc-amber-800);
+  --danger: var(--ibc-magenta-600);
+}
+
+/* ---------- expõe como utilitário Tailwind ----------
+   `inline` é obrigatório: sem ele o Tailwind congela o valor na compilação
+   e a troca de tema deixa de funcionar. */
+@theme inline {
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-fg: var(--text);
+  --color-fg-muted: var(--text-muted);
+  --color-fg-subtle: var(--text-subtle);
+  --color-fg-on-bright: var(--fg-on-bright);
+  --color-fg-on-deep: var(--fg-on-deep);
+  --color-border: var(--border);
+  --color-border-interactive: var(--border-interactive);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-fg: var(--accent-fg);
+  --color-focus-ring: var(--focus-ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-danger-surface: var(--danger-surface);
+  --color-educational: var(--educational);
+
+  --font-sans: var(--font-open-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.5;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.5;
+  --text-base: 1rem;
+  --text-base--line-height: 1.6;
+  --text-lg: 1.25rem;
+  --text-lg--line-height: 1.5;
+  --text-xl: 1.5rem;
+  --text-xl--line-height: 1.35;
+  --text-2xl: 2rem;
+  --text-2xl--line-height: 1.25;
+
+  --radius-field: 12px;
+  --radius-block: 20px;
+}
+
 @layer base {
+  /* O Tailwind v4 usa currentColor como cor de borda padrão. Sem isto,
+     um `border` sem cor explícita herdaria a cor do texto. */
   * {
-    border-color: var(--color-secondary-bg);
+    border-color: var(--border);
   }
-  
+
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
     font-weight: 700;
   }
-}
+  h1 { font-size: var(--text-2xl); line-height: 1.25; }
+  h2 { font-size: var(--text-xl); line-height: 1.35; }
+  h3 { font-size: var(--text-lg); line-height: 1.5; }
 
-@layer components {
-  .btn-primary {
-    @apply bg-[var(--color-accent-blue)] text-white px-6 py-2 rounded-[20px] font-bold hover:opacity-90 transition-all border-[3px] border-transparent;
-  }
-  
-  .btn-secondary {
-    @apply bg-transparent text-[var(--color-accent-blue)] px-6 py-2 rounded-[20px] font-bold hover:bg-[var(--color-secondary-bg)] transition-all border-[3px] border-[var(--color-accent-blue)];
-  }
-
-  .card {
-    @apply bg-[var(--color-secondary-bg)] p-6 rounded-[20px] border-[3px] border-[var(--color-tertiary-bg)];
+  /* Restrição de acessibilidade: o anel de foco nunca é removido.
+     `outline: none` sem substituto torna a plataforma inoperável por teclado. */
+  :focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
   }
 }

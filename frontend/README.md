@@ -10,7 +10,7 @@ Interface web construída com Next.js 15+ App Router, React 19, Tailwind CSS v4 
 - **HTTP:** Axios 1.x
 - **Ícones:** Lucide React
 - **Markdown:** react-markdown + remark-gfm
-- **Deploy:** Vercel — Root Directory: `frontend`
+- **Deploy:** Docker via GHCR, deploy na VPS pelo Easypanel — `https://pessoas.inteliblockchain.org`
 
 ## Setup
 
@@ -183,11 +183,11 @@ Todos os serviços leem `response.data?.data` (envelope da API).
 | `users.service.ts` | `getUsers(filters)`, `approveUser(id)`, `rejectUser(id)`, `updateRole(id, role)` |
 | `dashboard.service.ts` | `getMetrics()` |
 
-## Deploy (Vercel)
+## Deploy (Docker + Easypanel)
 
-Configuração no dashboard da Vercel:
-- **Root Directory:** `frontend`
-- **Framework Preset:** Next.js (auto-detectado)
-- **Environment Variable:** `NEXT_PUBLIC_API_URL=https://pessoas-blockchain.fly.dev`
+Buildado como imagem Docker pelo GitHub Actions (`frontend/Dockerfile`), publicado no GHCR e deployado na VPS via Easypanel. Guia completo: `docs/DEPLOY.md`.
 
-Não há `vercel.json` — configuração via dashboard.
+- **URL:** `https://pessoas.inteliblockchain.org`
+- **Environment Variable:** `NEXT_PUBLIC_API_URL=https://api-pessoas.inteliblockchain.org` — inlined no build args do Docker (trocar exige novo push/rebuild, não é lido em runtime).
+
+Não há `vercel.json` — build e deploy via GitHub Actions.

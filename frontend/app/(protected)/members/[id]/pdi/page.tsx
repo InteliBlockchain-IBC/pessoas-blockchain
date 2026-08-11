@@ -105,7 +105,7 @@ export default function PDIPage({ params }: { params: Promise<{ id: string }> })
       {/* Back */}
       <button
         onClick={() => router.push(`/members/${memberId}`)}
-        className="flex items-center gap-1.5 text-sm text-text-main opacity-60 hover:opacity-100 transition-opacity w-fit"
+        className="flex items-center gap-1.5 text-sm text-fg-muted hover:text-fg transition-colors w-fit"
       >
         <ArrowLeft size={15} />
         Perfil do Membro
@@ -114,10 +114,10 @@ export default function PDIPage({ params }: { params: Promise<{ id: string }> })
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl text-white font-bold">
+          <h1 className="font-bold text-fg">
             Plano de Desenvolvimento Individual
           </h1>
-          <p className="text-[var(--color-text-main)] opacity-60 text-sm">
+          <p className="text-fg-muted text-sm">
             ID do Membro: {memberId}
             {currentPdi && (
               <span className="ml-2 opacity-50">
@@ -157,7 +157,7 @@ export default function PDIPage({ params }: { params: Promise<{ id: string }> })
         <motion.div
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 text-xs text-yellow-400 bg-yellow-900/20 border border-yellow-700/40 rounded-lg px-3 py-2"
+          className="flex items-center gap-2 text-xs text-warning bg-warning/20 border border-warning/40 rounded-block px-3 py-2"
         >
           <AlertTriangle size={14} />
           Alterações não salvas — clique em &quot;Salvar PDI&quot; para persistir.
@@ -194,14 +194,14 @@ export default function PDIPage({ params }: { params: Promise<{ id: string }> })
         maxWidth="2xl"
       >
         <div className="flex flex-col gap-5">
-          <div className="text-xs opacity-60 border border-[var(--color-tertiary-bg)] rounded-lg px-3 py-2">
+          <div className="text-xs opacity-60 border border-border rounded-block px-3 py-2">
             O PDF exportado conterá informações demográficas do membro, este PDI
             e o histórico do processo seletivo. Abaixo, a pré-visualização do
             conteúdo do PDI:
           </div>
 
           {/* Rendered preview */}
-          <div className="bg-[var(--color-primary-bg)] border border-[var(--color-tertiary-bg)] rounded-[12px] p-5 max-h-[50vh] overflow-y-auto">
+          <div className="bg-surface border border-border rounded-field p-5 max-h-[50vh] overflow-y-auto">
             <MarkdownViewer content={content} />
           </div>
 
@@ -229,13 +229,13 @@ export default function PDIPage({ params }: { params: Promise<{ id: string }> })
         maxWidth="md"
       >
         <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-3 text-sm text-[var(--color-text-main)]">
+          <div className="flex flex-col gap-3 text-sm text-fg">
             <p className="opacity-70">
               O arquivo CSV conterá o histórico completo de revisões do PDI deste membro,
               incluindo data, editor e conteúdo de cada versão.
             </p>
-            <div className="bg-[var(--color-primary-bg)] border border-[var(--color-tertiary-bg)] rounded-lg px-4 py-3 font-mono text-xs opacity-80">
-              <p className="font-semibold text-white mb-1">Colunas do CSV:</p>
+            <div className="bg-surface border border-border rounded-block px-4 py-3 font-mono text-xs opacity-80">
+              <p className="font-semibold text-fg mb-1">Colunas do CSV:</p>
               <p>id, memberId, title, content, editor, createdAt</p>
             </div>
           </div>

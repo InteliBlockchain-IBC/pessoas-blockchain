@@ -17,7 +17,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [isPeople, setIsPeople] = useState(false);
 
   useEffect(() => {
+    // localStorage só existe no cliente — SSR-safe (CLAUDE.md, regra técnica 2).
     const role = localStorage.getItem("x-user-role") ?? "";
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsPeople(role === "ADMIN" || role === "PEOPLE");
   }, []);
 
@@ -33,8 +35,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   ];
 
   const sidebarContent = (
-    <div className="w-64 bg-secondary-bg border-r-[3px] border-tertiary-bg h-full flex flex-col">
-      <div className="p-6 flex items-center justify-between border-b-[3px] border-tertiary-bg">
+    <div className="w-64 bg-surface-raised border-r border-border h-full flex flex-col">
+      <div className="p-6 flex items-center justify-between border-b border-border">
         <Link href="/dashboard" onClick={onClose} className="flex items-center gap-3">
           <Image
             src="/logo.png"
@@ -44,15 +46,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             priority
             className="h-10 w-auto"
           />
-          <h2 className="text-xl font-bold text-white leading-tight">
+          <h2 className="font-heading text-xl font-bold text-fg leading-tight">
             Inteli<br />
-            <span className="text-accent-blue">Blockchain</span>
+            <span className="text-accent">Blockchain</span>
           </h2>
         </Link>
         {/* Close button — only visible on mobile */}
         <button
           onClick={onClose}
-          className="md:hidden p-1.5 rounded-xl hover:bg-tertiary-bg transition-colors text-text-main"
+          className="md:hidden p-1.5 rounded-field hover:bg-surface transition-colors text-fg-muted hover:text-fg"
         >
           <X size={20} />
         </button>
@@ -68,10 +70,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               key={link.href}
               href={link.href}
               onClick={onClose}
-              className={`flex items-center gap-3 p-3 rounded-[20px] transition-colors border-[3px] font-bold ${
+              className={`flex items-center gap-3 p-3 rounded-block transition-colors font-heading font-bold ${
                 isActive
-                  ? "bg-tertiary-bg border-accent-blue text-white"
-                  : "border-transparent text-text-main hover:bg-tertiary-bg opacity-80 hover:opacity-100"
+                  ? "bg-surface text-accent"
+                  : "text-fg-muted hover:bg-surface hover:text-fg"
               }`}
             >
               <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
@@ -83,14 +85,14 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         })}
       </nav>
 
-      <div className="p-4 border-t-[3px] border-tertiary-bg">
+      <div className="p-4 border-t border-border">
         <button
           onClick={() => {
             localStorage.removeItem("x-user-id");
             localStorage.removeItem("x-user-role");
             window.location.href = "/";
           }}
-          className="flex items-center w-full gap-3 p-3 rounded-[20px] border-[3px] border-transparent text-accent-magenta hover:bg-tertiary-bg font-bold transition-colors cursor-pointer"
+          className="flex items-center w-full gap-3 p-3 rounded-block text-danger hover:bg-surface font-heading font-bold transition-colors cursor-pointer"
         >
           <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
             <LogOut size={20} />
@@ -119,7 +121,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40 bg-black/60 md:hidden"
+              className="fixed inset-0 z-40 md:hidden"
+              style={{ backgroundColor: "color-mix(in srgb, var(--surface) 70%, transparent)" }}
               onClick={onClose}
             />
             {/* Drawer */}
