@@ -7,7 +7,6 @@ import { join, extname } from "node:path";
 const ROOTS = ["app", "components"];
 // Arquivos ainda não migrados. A cada fase, itens saem daqui — nunca entram.
 const ALLOWLIST = new Set([
-  "app/(protected)/members/page.tsx",
   "app/(protected)/members/[id]/page.tsx",
   "app/(protected)/members/[id]/pdi/page.tsx",
   "app/(protected)/selection/page.tsx",
