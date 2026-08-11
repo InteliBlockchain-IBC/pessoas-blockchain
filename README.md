@@ -6,8 +6,8 @@ Plataforma interna para gerenciar a jornada dos integrantes do clube Inteli Bloc
 
 | Camada | Tecnologia | Deploy |
 |--------|-----------|--------|
-| Frontend | Next.js 15+ (App Router), React 19, Tailwind CSS v4, TypeScript | Vercel — Root Directory: `frontend` |
-| Backend | NestJS 11, TypeScript, Swagger, Prisma 6.x | Fly.io via Docker — app `pessoas-blockchain` |
+| Frontend | Next.js 15+ (App Router), React 19, Tailwind CSS v4, TypeScript | Docker via GHCR — Easypanel (VPS) |
+| Backend | NestJS 11, TypeScript, Swagger, Prisma 6.x | Docker via GHCR — Easypanel (VPS) |
 | Banco de Dados | PostgreSQL 15 (auto-hospedado) | Easypanel (VPS) |
 | Auth | Google OAuth 2.0 + DB-validated header guard | `google-auth-library` |
 
@@ -113,22 +113,10 @@ Isso inicializa a sessão no localStorage sem precisar de OAuth.
 
 ## Deploy
 
-### Backend (Fly.io)
+Backend e frontend são buildados como imagens Docker pelo GitHub Actions, publicados no GHCR e deployados na VPS via Easypanel. Push em `main` que toque `backend/**` ou `frontend/**` builda, publica e dispara o deploy automaticamente. Guia completo (secrets, domínios, variáveis de ambiente): `docs/DEPLOY.md`.
 
-```bash
-cd backend
-fly deploy
-```
-
-- Release command automático: `npx prisma migrate deploy`
-- Região: `iad` (US East)
-- Recursos: 1 vCPU compartilhado, 1 GB RAM
-
-### Frontend (Vercel)
-
-Configurar no dashboard da Vercel:
-- **Root Directory:** `frontend`
-- **Environment Variable:** `NEXT_PUBLIC_API_URL=https://pessoas-blockchain.fly.dev`
+- **Backend:** `https://api-pessoas.inteliblockchain.org` — migrations aplicadas automaticamente no start do container (`npx prisma migrate deploy && node dist/main`).
+- **Frontend:** `https://pessoas.inteliblockchain.org` — `NEXT_PUBLIC_API_URL` é inlined no build (trocar exige novo push/rebuild).
 
 ## Comandos Úteis
 
@@ -151,6 +139,6 @@ npx tsc --noEmit           # verificar tipos TypeScript
 ## Documentação
 
 - **Arquitetura completa:** `docs/ARCHITECTURE.md`
-- **API Swagger:** `http://localhost:3001/docs` (local) ou `https://pessoas-blockchain.fly.dev/docs`
+- **API Swagger:** `http://localhost:3001/docs` (local) ou `https://api-pessoas.inteliblockchain.org/docs`
 - **Backend detalhado:** `backend/README.md`
 - **Frontend detalhado:** `frontend/README.md`
