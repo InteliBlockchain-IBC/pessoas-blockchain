@@ -12,20 +12,11 @@ import { selectionService, SelectionProcess, Stage } from "@/services/selection.
 import { Badge } from "@/components/ui/Badge";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-
-// ─── Role guard ───────────────────────────────────────────────────────────────
-
-function AccessDenied() {
-  return (
-    <div className="p-8 flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
-      <ClipboardList size={48} className="opacity-20" />
-      <h2 className="text-xl font-bold text-fg">Acesso restrito</h2>
-      <p className="text-sm opacity-60 max-w-sm">
-        Esta seção é exclusiva para membros da diretoria de Pessoas (ADMIN e PEOPLE).
-      </p>
-    </div>
-  );
-}
+import { PageHeader } from "@/components/ds/PageHeader";
+import { SectionCard } from "@/components/ds/SectionCard";
+import { EmptyState } from "@/components/ds/EmptyState";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 
 // ─── Stages content (rendered inside card) ────────────────────────────────────
 
@@ -160,61 +151,49 @@ function ProcessCard({ process }: { process: SelectionProcess }) {
   const router = useRouter();
 
   return (
-    <div className="bg-surface-raised border border-border p-6 rounded-block flex flex-col">
-      {/* Linha principal */}
-      <div className="flex items-center gap-4">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="font-bold text-fg">{process.name}</span>
-            <Badge status={process.isActive ? "ACTIVE" : "CLOSED"} label={process.isActive ? "Ativo" : "Encerrado"} />
-          </div>
-          <p className="text-xs opacity-50 mt-0.5">{process.year}</p>
-        </div>
-
-        <div className="flex items-center gap-2 shrink-0">
-          <motion.button
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => router.push(`/selection/${process.id}`)}
-            className="font-heading font-bold rounded-block transition-all bg-accent text-accent-fg hover:bg-accent-hover text-xs py-1.5 px-3 flex items-center gap-1.5"
-          >
-            <ExternalLink size={13} />
-            Candidatos
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => setExpanded((v) => !v)}
-            className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-field border transition-colors ${
-              expanded
-                ? "border-accent text-accent"
-                : "border-border text-fg-muted hover:border-accent hover:text-accent"
-            }`}
-          >
-            {expanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-            Ver mais
-          </motion.button>
-        </div>
-      </div>
-
-      {/* Expansão inline dentro do mesmo card */}
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="mt-4 pt-4 border-t border-border">
-              <ProcessStages processId={process.id} />
+    <SectionCard label="PROCESSO" values={{}}>
+      {() => (
+        <div className="flex flex-col gap-4">
+          {/* Linha principal */}
+          <div className="flex items-center gap-4">
+            <div className="flex-1 min-w-0 flex items-center gap-3 flex-wrap">
+              <span className="font-bold text-fg">{process.name}</span>
+              <Badge status={process.isActive ? "ACTIVE" : "CLOSED"} label={process.isActive ? "Ativo" : "Encerrado"} />
+              <span className="text-xs text-fg-muted">{process.year}</span>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <Button size="sm" onClick={() => router.push(`/selection/${process.id}`)}>
+                <ExternalLink size={13} />
+                Candidatos
+              </Button>
+
+              <Button variant="outline" size="sm" onClick={() => setExpanded((v) => !v)}>
+                {expanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+                Ver mais
+              </Button>
+            </div>
+          </div>
+
+          {/* Expansão inline dentro do mesmo card */}
+          <AnimatePresence>
+            {expanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="pt-4 border-t border-border">
+                  <ProcessStages processId={process.id} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+    </SectionCard>
   );
 }
 
@@ -254,38 +233,42 @@ export default function SelectionPage() {
   }, [canAccess, fetchProcesses]);
 
   if (canAccess === null) return null;
-  if (!canAccess) return <AccessDenied />;
+  if (!canAccess) {
+    return (
+      <EmptyState
+        tone="denied"
+        title="Acesso restrito"
+        description="Esta seção é exclusiva para membros da diretoria de Pessoas (ADMIN e PEOPLE)."
+      />
+    );
+  }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="p-8 w-full max-w-4xl mx-auto flex flex-col gap-6"
-    >
-      <div className="flex items-center gap-3">
-        <ClipboardList size={32} className="text-accent" />
-        <div>
-          <h1 className="font-bold text-fg">Processos Seletivos</h1>
-          {!loading && (
-            <p className="text-sm opacity-60 mt-0.5">
-              {processes.length} processo{processes.length !== 1 ? "s" : ""}
-            </p>
-          )}
-        </div>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        label="SELEÇÃO"
+        title="Processos Seletivos"
+        subtitle={
+          !loading
+            ? `${processes.length} processo${processes.length !== 1 ? "s" : ""}`
+            : undefined
+        }
+        icon={ClipboardList}
+      />
 
       {loading ? (
-        <div className="bg-surface-raised border border-border p-6 rounded-block w-full min-h-75 flex items-center justify-center">
-          <p className="opacity-60">Carregando processos...</p>
+        <div className="flex flex-col gap-4">
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
         </div>
       ) : error ? (
-        <div className="bg-surface-raised border border-border p-6 rounded-block w-full min-h-50 flex items-center justify-center">
-          <p className="text-sm text-danger">{error}</p>
-        </div>
+        <EmptyState tone="error" title="Erro ao carregar processos" description={error} />
       ) : processes.length === 0 ? (
-        <div className="bg-surface-raised border border-border p-6 rounded-block w-full min-h-50 flex items-center justify-center">
-          <p className="opacity-60">Nenhum processo seletivo encontrado.</p>
-        </div>
+        <EmptyState
+          title="Nenhum processo seletivo encontrado"
+          description="Quando um processo seletivo for criado, ele aparece aqui."
+        />
       ) : (
         <div className="flex flex-col gap-4">
           {processes.map((p) => (
@@ -293,6 +276,6 @@ export default function SelectionPage() {
           ))}
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }
