@@ -1,15 +1,22 @@
 "use client";
 
-import { use, useState, useEffect } from "react";
-import { MarkdownEditor } from "@/components/ui/MarkdownEditor";
-import { MarkdownViewer } from "@/components/ui/MarkdownViewer";
-import { Button } from "@/components/ui/LegacyButton";
-import { Card } from "@/components/ui/Card";
-import { Modal } from "@/components/ui/Modal";
-import { ArrowLeft, Download, Save, FileText, Eye, AlertTriangle } from "lucide-react";
-import { pdiService, PdiEntry } from "@/services/pdi.service";
-import { motion } from "framer-motion";
+import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Download, Save, FileText, Eye, AlertTriangle, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { PageHeader } from "@/components/ds/PageHeader";
+import { MarkdownEditor } from "@/components/ds/MarkdownEditor";
+import { MarkdownViewer } from "@/components/ds/MarkdownViewer";
+import { notificar } from "@/components/ds/toast-helpers";
+import { useDirtySections } from "@/components/ds/DirtyGuard";
+import { pdiService, PdiEntry } from "@/services/pdi.service";
 
 const DEFAULT_CONTENT =
   "# Meu Plano de Desenvolvimento Individual\n\n## Metas do Semestre\n- \n\n## Pontos Fortes\n- \n\n## Áreas de Desenvolvimento\n- \n";
@@ -28,6 +35,12 @@ export default function PDIPage({ params }: { params: Promise<{ id: string }> })
   // Preview modal
   const [previewModal, setPreviewModal] = useState<"pdf" | "csv" | null>(null);
   const [exporting, setExporting] = useState(false);
+
+  const { registrar } = useDirtySections();
+  useEffect(() => {
+    registrar("pdi", hasUnsaved);
+    return () => registrar("pdi", false);
+  }, [hasUnsaved, registrar]);
 
   // Load existing PDI
   useEffect(() => {
@@ -64,9 +77,9 @@ export default function PDIPage({ params }: { params: Promise<{ id: string }> })
         setCurrentPdi(result ?? null);
       }
       setHasUnsaved(false);
-      alert("PDI salvo com sucesso!");
+      notificar.sucesso("PDI salvo");
     } catch {
-      alert("Erro ao salvar PDI. Verifique as permissões.");
+      notificar.erro("Não foi possível salvar o PDI", "Verifique suas permissões.");
     } finally {
       setSaving(false);
     }
@@ -77,7 +90,7 @@ export default function PDIPage({ params }: { params: Promise<{ id: string }> })
     try {
       await pdiService.exportPDF(memberId);
     } catch {
-      alert("Erro ao exportar PDF.");
+      notificar.erro("Não foi possível exportar o PDF");
     } finally {
       setExporting(false);
       setPreviewModal(null);
@@ -89,172 +102,128 @@ export default function PDIPage({ params }: { params: Promise<{ id: string }> })
     try {
       await pdiService.exportCSV(memberId);
     } catch {
-      alert("Erro ao exportar histórico.");
+      notificar.erro("Não foi possível exportar o histórico");
     } finally {
       setExporting(false);
       setPreviewModal(null);
     }
   };
 
+  const subtitle = currentPdi
+    ? `Última edição: ${new Date(currentPdi.updatedAt).toLocaleDateString("pt-BR")}`
+    : "Nenhum PDI salvo ainda.";
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="p-8 w-full max-w-5xl mx-auto flex flex-col gap-8"
-    >
-      {/* Back */}
-      <button
-        onClick={() => router.push(`/members/${memberId}`)}
-        className="flex items-center gap-1.5 text-sm text-fg-muted hover:text-fg transition-colors w-fit"
-      >
-        <ArrowLeft size={15} />
-        Perfil do Membro
-      </button>
-
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="font-bold text-fg">
-            Plano de Desenvolvimento Individual
-          </h1>
-          <p className="text-fg-muted text-sm">
-            ID do Membro: {memberId}
-            {currentPdi && (
-              <span className="ml-2 opacity-50">
-                · Última edição:{" "}
-                {new Date(currentPdi.updatedAt).toLocaleDateString("pt-BR")}
-              </span>
-            )}
-          </p>
-        </div>
-
-        <div className="flex gap-3 flex-wrap">
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button onClick={() => setPreviewModal("csv")} variant="secondary">
-              <Eye size={18} />
+    <div className="space-y-8">
+      <PageHeader
+        label="PDI"
+        title="Plano de Desenvolvimento Individual"
+        subtitle={subtitle}
+        onBack={() => router.push(`/members/${memberId}`)}
+        actions={
+          <>
+            <Button variant="outline" onClick={() => setPreviewModal("csv")}>
+              <Eye size={18} aria-hidden="true" />
               Exportar Histórico
             </Button>
-          </motion.div>
-
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button onClick={() => setPreviewModal("pdf")} variant="secondary">
-              <Eye size={18} />
+            <Button variant="outline" onClick={() => setPreviewModal("pdf")}>
+              <Eye size={18} aria-hidden="true" />
               Exportar Ficha (PDF)
             </Button>
-          </motion.div>
-
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button onClick={handleSave} variant="primary" disabled={saving}>
-              <Save size={18} />
-              {saving ? "Salvando..." : "Salvar PDI"}
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? (
+                <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+              ) : (
+                <Save size={18} aria-hidden="true" />
+              )}
+              Salvar PDI
             </Button>
-          </motion.div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* Unsaved indicator */}
       {hasUnsaved && (
-        <motion.div
-          initial={{ opacity: 0, y: -4 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 text-xs text-warning bg-warning/20 border border-warning/40 rounded-block px-3 py-2"
-        >
-          <AlertTriangle size={14} />
+        <div className="flex items-center gap-2 rounded-block border border-warning/40 bg-warning/20 px-3 py-2 text-xs text-warning">
+          <AlertTriangle size={14} aria-hidden="true" />
           Alterações não salvas — clique em &quot;Salvar PDI&quot; para persistir.
-        </motion.div>
+        </div>
       )}
 
       {/* Editor */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.15 }}
-      >
-        <Card>
-          <h2 className="text-xl font-bold mb-4">Editar PDI (Suporta Markdown)</h2>
-          {loadingPdi ? (
-            <div className="h-48 flex items-center justify-center opacity-50 text-sm">
-              Carregando PDI...
+      <div className="flex flex-col gap-4">
+        <h2 className="text-xl font-bold">Editar PDI (Suporta Markdown)</h2>
+        {loadingPdi ? (
+          <div className="flex h-48 items-center justify-center text-sm opacity-50">
+            Carregando PDI...
+          </div>
+        ) : (
+          <MarkdownEditor
+            value={content}
+            onChange={handleContentChange}
+            placeholder="Suporta Markdown (ex. **negrito**, - lista)"
+          />
+        )}
+      </div>
+
+      {/* ── PDF Preview Dialog ─────────────────────────────────────────── */}
+      <Dialog open={previewModal === "pdf"} onOpenChange={(open) => !open && setPreviewModal(null)}>
+        <DialogContent className="sm:max-w-2xl"> {/* check-visual: ok — largura do dialog, não da página */}
+          <DialogHeader>
+            <DialogTitle>Pré-visualização — Ficha PDF</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-5">
+            <div className="rounded-block border border-border px-3 py-2 text-xs opacity-60">
+              O PDF exportado conterá informações demográficas do membro, este PDI
+              e o histórico do processo seletivo. Abaixo, a pré-visualização do
+              conteúdo do PDI:
             </div>
-          ) : (
-            <MarkdownEditor
-              value={content}
-              onChange={handleContentChange}
-              placeholder="Suporta Markdown (ex. **negrito**, - lista)"
-            />
-          )}
-        </Card>
-      </motion.div>
 
-      {/* ── PDF Preview Modal ──────────────────────────────────────────── */}
-      <Modal
-        isOpen={previewModal === "pdf"}
-        onClose={() => setPreviewModal(null)}
-        title="Pré-visualização — Ficha PDF"
-        maxWidth="2xl"
-      >
-        <div className="flex flex-col gap-5">
-          <div className="text-xs opacity-60 border border-border rounded-block px-3 py-2">
-            O PDF exportado conterá informações demográficas do membro, este PDI
-            e o histórico do processo seletivo. Abaixo, a pré-visualização do
-            conteúdo do PDI:
+            <div className="max-h-[50vh] overflow-y-auto rounded-field border border-border bg-surface p-5">
+              <MarkdownViewer content={content} />
+            </div>
           </div>
-
-          {/* Rendered preview */}
-          <div className="bg-surface border border-border rounded-field p-5 max-h-[50vh] overflow-y-auto">
-            <MarkdownViewer content={content} />
-          </div>
-
-          <div className="flex gap-3 justify-end">
-            <Button variant="secondary" onClick={() => setPreviewModal(null)}>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setPreviewModal(null)}>
               Cancelar
             </Button>
-            <Button
-              variant="primary"
-              onClick={handleExportPDF}
-              disabled={exporting}
-            >
-              <FileText size={16} />
+            <Button onClick={handleExportPDF} disabled={exporting}>
+              <FileText size={16} aria-hidden="true" />
               {exporting ? "Exportando..." : "Confirmar e baixar PDF"}
             </Button>
-          </div>
-        </div>
-      </Modal>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-      {/* ── CSV Preview Modal ──────────────────────────────────────────── */}
-      <Modal
-        isOpen={previewModal === "csv"}
-        onClose={() => setPreviewModal(null)}
-        title="Pré-visualização — Exportar Histórico CSV"
-        maxWidth="md"
-      >
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-3 text-sm text-fg">
-            <p className="opacity-70">
-              O arquivo CSV conterá o histórico completo de revisões do PDI deste membro,
-              incluindo data, editor e conteúdo de cada versão.
-            </p>
-            <div className="bg-surface border border-border rounded-block px-4 py-3 font-mono text-xs opacity-80">
-              <p className="font-semibold text-fg mb-1">Colunas do CSV:</p>
-              <p>id, memberId, title, content, editor, createdAt</p>
+      {/* ── CSV Preview Dialog ─────────────────────────────────────────── */}
+      <Dialog open={previewModal === "csv"} onOpenChange={(open) => !open && setPreviewModal(null)}>
+        <DialogContent className="sm:max-w-md"> {/* check-visual: ok — largura do dialog, não da página */}
+          <DialogHeader>
+            <DialogTitle>Pré-visualização — Exportar Histórico CSV</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-3 text-sm text-fg">
+              <p className="opacity-70">
+                O arquivo CSV conterá o histórico completo de revisões do PDI deste membro,
+                incluindo data, editor e conteúdo de cada versão.
+              </p>
+              <div className="rounded-block border border-border bg-surface px-4 py-3 font-mono text-xs opacity-80">
+                <p className="mb-1 font-semibold text-fg">Colunas do CSV:</p>
+                <p>id, memberId, title, content, editor, createdAt</p>
+              </div>
             </div>
           </div>
-
-          <div className="flex gap-3 justify-end">
-            <Button variant="secondary" onClick={() => setPreviewModal(null)}>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setPreviewModal(null)}>
               Cancelar
             </Button>
-            <Button
-              variant="primary"
-              onClick={handleExportCSV}
-              disabled={exporting}
-            >
-              <Download size={16} />
+            <Button onClick={handleExportCSV} disabled={exporting}>
+              <Download size={16} aria-hidden="true" />
               {exporting ? "Exportando..." : "Confirmar e baixar CSV"}
             </Button>
-          </div>
-        </div>
-      </Modal>
-    </motion.div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
