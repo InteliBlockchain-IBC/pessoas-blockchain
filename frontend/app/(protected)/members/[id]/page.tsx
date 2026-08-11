@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useState, useEffect } from "react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import { Card } from "@/components/ui/Card";
 import {
   FileText,

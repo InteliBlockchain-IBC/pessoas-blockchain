@@ -10,7 +10,7 @@ import {
 import { motion } from "framer-motion";
 import { Search, X, UserCog, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 
 const ROLE_OPTIONS: { value: string; label: string }[] = [
   { value: "", label: "Todos os papéis" },

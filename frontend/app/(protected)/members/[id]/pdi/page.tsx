@@ -3,7 +3,7 @@
 import { use, useState, useEffect } from "react";
 import { MarkdownEditor } from "@/components/ui/MarkdownEditor";
 import { MarkdownViewer } from "@/components/ui/MarkdownViewer";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import { Card } from "@/components/ui/Card";
 import { Modal } from "@/components/ui/Modal";
 import { ArrowLeft, Download, Save, FileText, Eye, AlertTriangle } from "lucide-react";

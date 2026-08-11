@@ -2,7 +2,7 @@
 
 import { Download, Upload, Users, Search, X, ChevronDown } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { Table, Column } from "@/components/ui/Table";
+import { Table, Column } from "@/components/ui/LegacyTable";
 import { Badge } from "@/components/ui/Badge";
 import { membersService, Member, MemberFilters } from "@/services/members.service";
 import { selectionService, SelectionProcess, Application } from "@/services/selection.service";
