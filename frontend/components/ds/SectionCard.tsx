@@ -8,6 +8,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { notificar } from "./toast-helpers";
 import { montarPayload } from "./section-payload";
 import { useDirtySections } from "./DirtyGuard";
 import { Moldura } from "./Moldura";
@@ -124,9 +125,14 @@ export function SectionCard<T extends object>({
       setConfirmado(novo);
       setRascunho(novo);
       setEditing(false);
+      notificar.sucesso("Alterações salvas");
     } catch (err) {
       // NÃO fecha, NÃO limpa o rascunho. O toast é disparado pelo call site,
       // que sabe o que estava salvando.
+      notificar.erro(
+        "Não foi possível salvar",
+        "Verifique suas permissões e tente de novo. O que você digitou continua aqui."
+      );
       const campos = (err as { fields?: Partial<Record<keyof T, string>> })?.fields;
       if (campos) setErrors(campos);
     } finally {

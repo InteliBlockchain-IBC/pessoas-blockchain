@@ -3,7 +3,7 @@
 import * as React from "react"
 import * as ToastPrimitives from "@radix-ui/react-toast"
 import { cva, type VariantProps } from "class-variance-authority"
-import { X } from "lucide-react"
+import { X, Info, CheckCircle2, TriangleAlert, XCircle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -24,15 +24,19 @@ const ToastViewport = React.forwardRef<
 ))
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName
 
-// Barra lateral de 3px na cor da semântica — success/warning ainda não têm
-// variant aqui (chegam na Task 13); destructive já usa border-l-danger.
+// Barra lateral de 3px na cor da semântica — ícone e texto sempre juntos,
+// nunca só a cor. Ver DESIGN_SYSTEM.md §7.7.
 const toastVariants = cva(
-  "group pointer-events-auto relative flex w-full items-center justify-between space-x-2 overflow-hidden rounded-block border border-border bg-surface-raised p-4 pr-6 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full",
+  "group pointer-events-auto relative flex w-full items-start justify-between gap-3 overflow-hidden rounded-block border border-border border-l-[3px] bg-surface-raised p-4 pr-6 shadow-none transition-all data-[state=open]:animate-in data-[state=closed]:animate-out",
   {
     variants: {
       variant: {
-        default: "text-fg",
-        destructive: "destructive group border-l-[3px] border-l-danger text-fg",
+        default: "border-l-border-interactive",
+        success: "border-l-success",
+        warning: "border-l-warning",
+        // O magenta como barra de erro é --danger-surface, coerente com o
+        // StatusBadge de rejeitado.
+        error: "border-l-danger-surface",
       },
     },
     defaultVariants: {
@@ -41,17 +45,24 @@ const toastVariants = cva(
   }
 )
 
+const ICONE = { default: Info, success: CheckCircle2, warning: TriangleAlert, error: XCircle }
+
 const Toast = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
     VariantProps<typeof toastVariants>
->(({ className, variant, ...props }, ref) => {
+>(({ className, variant, children, ...props }, ref) => {
+  // Ícone e texto, sempre os dois — nunca só a cor da barra lateral.
+  const Icone = ICONE[variant || "default"]
   return (
     <ToastPrimitives.Root
       ref={ref}
       className={cn(toastVariants({ variant }), className)}
       {...props}
-    />
+    >
+      <Icone className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+      {children}
+    </ToastPrimitives.Root>
   )
 })
 Toast.displayName = ToastPrimitives.Root.displayName
