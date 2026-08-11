@@ -14,25 +14,25 @@ export function MarkdownEditor({ value, onChange, placeholder, className = "" }:
   const [isPreview, setIsPreview] = useState(false);
 
   return (
-    <div className={`flex flex-col border-[3px] border-[var(--color-tertiary-bg)] rounded-[20px] overflow-hidden ${className}`}>
-      <div className="flex bg-[var(--color-secondary-bg)] border-b-[3px] border-[var(--color-tertiary-bg)]">
+    <div className={`flex flex-col border border-border rounded-block overflow-hidden ${className}`}>
+      <div className="flex bg-surface-raised border-b border-border">
         <button
           type="button"
           onClick={() => setIsPreview(false)}
-          className={`px-4 py-2 font-bold text-sm ${!isPreview ? "bg-[var(--color-primary-bg)] text-[var(--color-accent-blue)]" : "text-[var(--color-text-main)] opacity-70 hover:opacity-100"}`}
+          className={`px-4 py-2 font-heading font-bold text-sm ${!isPreview ? "bg-surface text-accent" : "text-fg-muted hover:text-fg"}`}
         >
           Editar
         </button>
         <button
           type="button"
           onClick={() => setIsPreview(true)}
-          className={`px-4 py-2 font-bold text-sm border-l-[3px] border-[var(--color-tertiary-bg)] ${isPreview ? "bg-[var(--color-primary-bg)] text-[var(--color-accent-blue)]" : "text-[var(--color-text-main)] opacity-70 hover:opacity-100"}`}
+          className={`px-4 py-2 font-heading font-bold text-sm border-l border-border ${isPreview ? "bg-surface text-accent" : "text-fg-muted hover:text-fg"}`}
         >
           Visualizar
         </button>
       </div>
-      
-      <div className="bg-[var(--color-primary-bg)] p-4 min-h-[200px]">
+
+      <div className="bg-surface-sunken p-4 min-h-[200px]">
         {isPreview ? (
           <MarkdownViewer content={value} />
         ) : (
@@ -40,7 +40,7 @@ export function MarkdownEditor({ value, onChange, placeholder, className = "" }:
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder || "Suporta Markdown (ex: **negrito**, - lista)"}
-            className="w-full h-full min-h-[180px] bg-transparent text-[var(--color-text-main)] focus:outline-none resize-y"
+            className="w-full h-full min-h-[180px] bg-transparent text-fg placeholder:text-fg-subtle focus:outline-none resize-y"
           />
         )}
       </div>

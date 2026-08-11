@@ -9,6 +9,8 @@ import {
 } from "@/services/users.service";
 import { motion } from "framer-motion";
 import { Search, X, UserCog, ChevronDown } from "lucide-react";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 
 const ROLE_OPTIONS: { value: string; label: string }[] = [
   { value: "", label: "Todos os papéis" },
@@ -30,22 +32,10 @@ const ROLE_LABELS: Record<string, string> = {
   INTERVIEWER: "Entrevistador",
 };
 
-const STATUS_BADGE: Record<string, string> = {
-  APPROVED: "bg-green-900/50 text-green-300",
-  PENDING: "bg-yellow-900/50 text-yellow-300",
-  REJECTED: "bg-red-900/50 text-red-300",
-};
-
 const STATUS_LABEL: Record<string, string> = {
   APPROVED: "Aprovado",
   PENDING: "Pendente",
   REJECTED: "Rejeitado",
-};
-
-const ROLE_BADGE: Record<string, string> = {
-  ADMIN: "bg-accent-blue/20 text-accent-blue border border-accent-blue/30",
-  PEOPLE: "bg-purple-900/30 text-purple-300 border border-purple-700/30",
-  INTERVIEWER: "bg-tertiary-bg text-text-main border border-transparent",
 };
 
 export default function AdminUsersPage() {
@@ -60,6 +50,8 @@ export default function AdminUsersPage() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    // localStorage só existe no cliente — SSR-safe (CLAUDE.md, regra técnica 2).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsAdmin(localStorage.getItem("x-user-role") === "ADMIN");
   }, []);
 
@@ -79,6 +71,7 @@ export default function AdminUsersPage() {
   );
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- busca inicial ao montar
     fetchUsers({});
   }, [fetchUsers]);
 
@@ -122,9 +115,9 @@ export default function AdminUsersPage() {
     >
       {/* Header */}
       <div className="flex items-center gap-3">
-        <UserCog size={32} className="text-accent-blue" />
+        <UserCog size={32} className="text-accent" />
         <div>
-          <h1 className="text-3xl text-white font-bold">Usuários da Plataforma</h1>
+          <h1 className="font-bold text-fg">Usuários da Plataforma</h1>
           {!loading && (
             <p className="text-sm opacity-60 mt-0.5">
               {users.length} usuário{users.length !== 1 ? "s" : ""}
@@ -145,7 +138,7 @@ export default function AdminUsersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nome ou email..."
-            className="w-full bg-secondary-bg border-[3px] border-tertiary-bg text-text-main text-sm rounded-xl pl-9 pr-4 py-2 focus:outline-none focus:border-accent-blue placeholder:opacity-40"
+            className="w-full bg-surface-sunken border border-border-interactive text-fg text-sm rounded-field pl-9 pr-4 py-2 focus:outline-none focus:border-accent placeholder:text-fg-subtle"
           />
           {search && (
             <button
@@ -165,7 +158,7 @@ export default function AdminUsersPage() {
             <select
               value={sel.value}
               onChange={(e) => sel.onChange(e.target.value)}
-              className="appearance-none bg-secondary-bg border-[3px] border-tertiary-bg text-text-main text-sm rounded-xl px-3 py-2 pr-8 focus:outline-none focus:border-accent-blue cursor-pointer min-w-40"
+              className="appearance-none bg-surface-sunken border border-border-interactive text-fg text-sm rounded-field px-3 py-2 pr-8 focus:outline-none focus:border-accent cursor-pointer min-w-40"
             >
               {sel.options.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -183,26 +176,26 @@ export default function AdminUsersPage() {
 
       {/* Table */}
       {loading ? (
-        <div className="card w-full min-h-75 flex items-center justify-center">
+        <div className="bg-surface-raised border border-border p-6 rounded-block w-full min-h-75 flex items-center justify-center">
           <p className="opacity-60">Carregando usuários...</p>
         </div>
       ) : (
-        <div className="w-full overflow-x-auto rounded-[20px] border-[3px] border-tertiary-bg">
+        <div className="w-full overflow-x-auto rounded-block border border-border">
           <table className="w-full text-left border-collapse text-sm">
             <thead>
-              <tr className="bg-secondary-bg border-b-[3px] border-tertiary-bg">
-                <th className="p-3 font-bold text-white">Usuário</th>
-                <th className="p-3 font-bold text-white">Papel</th>
-                <th className="p-3 font-bold text-white">Status</th>
-                <th className="p-3 font-bold text-white">Ações</th>
+              <tr className="bg-surface-raised border-b border-border">
+                <th className="p-3 font-bold text-fg">Usuário</th>
+                <th className="p-3 font-bold text-fg">Papel</th>
+                <th className="p-3 font-bold text-fg">Status</th>
+                <th className="p-3 font-bold text-fg">Ações</th>
               </tr>
             </thead>
-            <tbody className="bg-primary-bg">
+            <tbody className="bg-surface">
               {users.length === 0 ? (
                 <tr>
                   <td
                     colSpan={4}
-                    className="p-8 text-center text-text-main opacity-60"
+                    className="p-8 text-center text-fg-muted"
                   >
                     Nenhum usuário encontrado.
                   </td>
@@ -211,10 +204,10 @@ export default function AdminUsersPage() {
                 users.map((user) => (
                   <tr
                     key={user.id}
-                    className="border-b-[3px] border-tertiary-bg last:border-b-0 hover:bg-secondary-bg transition-colors"
+                    className="border-b border-border last:border-b-0 hover:bg-surface-raised transition-colors"
                   >
                     <td className="p-3">
-                      <p className="font-semibold text-white">
+                      <p className="font-semibold text-fg">
                         {user.name ?? (
                           <span className="opacity-40 font-normal">Sem nome</span>
                         )}
@@ -223,6 +216,8 @@ export default function AdminUsersPage() {
                     </td>
 
                     <td className="p-3">
+                      {/* Papel não é badge — é identidade, não estado (mesma
+                          lógica de Department, DESIGN_SYSTEM.md §7.4). */}
                       {isAdmin ? (
                         <div className="relative inline-block">
                           <select
@@ -230,7 +225,7 @@ export default function AdminUsersPage() {
                             onChange={(e) =>
                               handleRoleChange(user.id, e.target.value as UserRole)
                             }
-                            className={`appearance-none text-xs font-bold px-2.5 py-1 pr-6 rounded-lg cursor-pointer focus:outline-none ${ROLE_BADGE[user.role] ?? ""}`}
+                            className="appearance-none bg-surface-sunken border border-border-interactive text-fg text-xs font-bold px-2.5 py-1 pr-6 rounded-field cursor-pointer focus:outline-none focus:border-accent"
                           >
                             <option value="ADMIN">Admin</option>
                             <option value="PEOPLE">People</option>
@@ -242,39 +237,35 @@ export default function AdminUsersPage() {
                           />
                         </div>
                       ) : (
-                        <span
-                          className={`text-xs font-bold px-2.5 py-1 rounded-lg ${ROLE_BADGE[user.role] ?? ""}`}
-                        >
+                        <span className="text-xs font-bold text-fg-muted">
                           {ROLE_LABELS[user.role] ?? user.role}
                         </span>
                       )}
                     </td>
 
                     <td className="p-3">
-                      <span
-                        className={`text-xs font-bold px-2.5 py-1 rounded-lg ${STATUS_BADGE[user.status] ?? ""}`}
-                      >
-                        {STATUS_LABEL[user.status] ?? user.status}
-                      </span>
+                      <Badge status={user.status} label={STATUS_LABEL[user.status] ?? user.status} />
                     </td>
 
                     <td className="p-3">
                       <div className="flex gap-2">
                         {user.status !== "APPROVED" && (
-                          <button
+                          <Button
+                            size="sm"
+                            variant="secondary"
                             onClick={() => handleApprove(user.id, "APPROVED")}
-                            className="text-xs px-2.5 py-1 rounded-lg bg-green-900/40 text-green-300 hover:bg-green-900/70 transition-colors font-semibold"
                           >
                             Aprovar
-                          </button>
+                          </Button>
                         )}
                         {user.status !== "REJECTED" && (
-                          <button
+                          <Button
+                            size="sm"
+                            variant="danger"
                             onClick={() => handleApprove(user.id, "REJECTED")}
-                            className="text-xs px-2.5 py-1 rounded-lg bg-red-900/40 text-red-300 hover:bg-red-900/70 transition-colors font-semibold"
                           >
                             Rejeitar
-                          </button>
+                          </Button>
                         )}
                       </div>
                     </td>

@@ -19,8 +19,8 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col justify-center items-center p-8 relative overflow-hidden">
       {/* Background Decorators */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[var(--color-tertiary-bg)] rounded-full blur-[120px] opacity-30 z-0"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-[var(--color-accent-magenta)] rounded-full blur-[100px] opacity-20 z-0"></div>
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent rounded-full blur-[120px] opacity-30 z-0"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-danger-surface rounded-full blur-[100px] opacity-20 z-0"></div>
 
       <main className="z-10 max-w-4xl w-full flex flex-col items-center text-center gap-8">
         <motion.div
@@ -37,7 +37,7 @@ export default function LandingPage() {
             priority
             className="h-56 md:h-80 w-auto mb-2 drop-shadow-md "
           />
-          <p className="text-xl md:text-2xl text-[var(--color-text-main)] max-w-2xl font-light">
+          <p className="text-xl md:text-2xl text-fg max-w-2xl font-light">
             Plataforma centralizada para Gestão de Pessoas, Processos Seletivos e Planos de Desenvolvimento Individual.
           </p>
         </motion.div>
@@ -48,22 +48,22 @@ export default function LandingPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mt-8"
         >
-          <div className="card flex flex-col items-center text-center gap-3">
-            <Database size={32} className="text-[var(--color-accent-magenta)]" />
+          <div className="bg-surface-raised border border-border p-6 rounded-block flex flex-col items-center text-center gap-3">
+            <Database size={32} className="text-danger" />
             <h3 className="text-xl font-bold">Gestão Centralizada</h3>
             <p className="text-sm opacity-80">
               Gerencie membros ativos e inativos, funções e departamentos com controle de permissões.
             </p>
           </div>
-          <div className="card flex flex-col items-center text-center gap-3">
-            <FileSpreadsheet size={32} className="text-[var(--color-accent-blue)]" />
+          <div className="bg-surface-raised border border-border p-6 rounded-block flex flex-col items-center text-center gap-3">
+            <FileSpreadsheet size={32} className="text-accent" />
             <h3 className="text-xl font-bold">Processo Seletivo</h3>
             <p className="text-sm opacity-80">
               Acompanhe candidaturas, avalie candidatos e importe resultados de planilhas.
             </p>
           </div>
-          <div className="card flex flex-col items-center text-center gap-3">
-            <ShieldCheck size={32} className="text-[#380f2e]" />
+          <div className="bg-surface-raised border border-border p-6 rounded-block flex flex-col items-center text-center gap-3">
+            <ShieldCheck size={32} className="text-accent-hover" />
             <h3 className="text-xl font-bold">PDI Contínuo</h3>
             <p className="text-sm opacity-80">
               Crie históricos de desenvolvimento versionados para todos os membros do clube.
@@ -79,7 +79,7 @@ export default function LandingPage() {
         >
           <Link
             href="/login"
-            className="btn-primary flex items-center gap-2 text-lg px-8 py-4"
+            className="font-heading font-bold rounded-block transition-all bg-accent text-accent-fg hover:bg-accent-hover flex items-center gap-2 text-lg px-8 py-4"
           >
             Acesso Institucional
             <ArrowRight size={20} />

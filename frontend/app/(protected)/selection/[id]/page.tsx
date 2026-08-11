@@ -23,6 +23,7 @@ import {
   StageResultItem,
 } from "@/services/selection.service";
 import { Modal } from "@/components/ui/Modal";
+import { Badge } from "@/components/ui/Badge";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 
@@ -30,15 +31,6 @@ import { useRouter } from "next/navigation";
 
 type SortKey = "name" | "status" | "total" | string;
 type SortDir = "asc" | "desc";
-
-const APP_STATUS_COLOR: Record<string, string> = {
-  APPROVED: "bg-[var(--color-accent-blue)] text-white",
-  REJECTED: "bg-[var(--color-accent-magenta)] text-white",
-  IN_REVIEW: "bg-yellow-700 text-white",
-  SUBMITTED: "bg-purple-700 text-white",
-  DRAFT: "bg-[var(--color-tertiary-bg)] text-[var(--color-text-main)]",
-  WITHDRAWN: "bg-[var(--color-tertiary-bg)] text-[var(--color-text-main)]",
-};
 
 const APP_STATUS_LABEL: Record<string, string> = {
   APPROVED: "Aprovado",
@@ -53,9 +45,9 @@ const APP_STATUS_LABEL: Record<string, string> = {
 
 function stageIcon(status: string) {
   if (status === "PASSED")
-    return <CheckCircle2 size={14} className="text-green-400 shrink-0" />;
+    return <CheckCircle2 size={14} className="text-success shrink-0" />;
   if (status === "FAILED")
-    return <XCircle size={14} className="text-red-400 shrink-0" />;
+    return <XCircle size={14} className="text-danger shrink-0" />;
   return <Clock size={14} className="opacity-40 shrink-0" />;
 }
 
@@ -144,16 +136,12 @@ function CandidateDetailModal({
         <div className="flex flex-col gap-6">
           {/* Summary bar */}
           <div className="flex flex-wrap gap-3 items-center">
-            <span
-              className={`px-2.5 py-1 rounded-[10px] text-xs font-bold ${APP_STATUS_COLOR[app.status] ?? ""}`}
-            >
-              {APP_STATUS_LABEL[app.status] ?? app.status}
-            </span>
+            <Badge status={app.status} label={APP_STATUS_LABEL[app.status] ?? app.status} />
             {app.member?.email && (
               <span className="text-xs opacity-50">{app.member.email}</span>
             )}
             {totalScore != null && (
-              <span className="ml-auto text-sm font-bold text-[var(--color-accent-blue)]">
+              <span className="ml-auto text-sm font-bold text-accent">
                 Total: {totalScore.toFixed(2)} pts
               </span>
             )}
@@ -163,23 +151,23 @@ function CandidateDetailModal({
           {(app.member?.gender ||
             app.member?.race ||
             app.member?.isLgbtqia != null) && (
-            <div className="flex flex-wrap gap-4 text-xs bg-[var(--color-primary-bg)] border border-[var(--color-tertiary-bg)] rounded-lg px-4 py-2.5">
+            <div className="flex flex-wrap gap-4 text-xs bg-surface border border-border rounded-block px-4 py-2.5">
               {app.member?.gender && (
                 <span>
                   Gênero:{" "}
-                  <strong className="text-white">{app.member.gender}</strong>
+                  <strong className="text-fg">{app.member.gender}</strong>
                 </span>
               )}
               {app.member?.race && (
                 <span>
                   Raça/Cor:{" "}
-                  <strong className="text-white">{app.member.race}</strong>
+                  <strong className="text-fg">{app.member.race}</strong>
                 </span>
               )}
               {app.member?.isLgbtqia != null && (
                 <span>
                   LGBTQIA+:{" "}
-                  <strong className="text-white">
+                  <strong className="text-fg">
                     {app.member.isLgbtqia ? "Sim" : "Não"}
                   </strong>
                 </span>
@@ -209,7 +197,7 @@ function CandidateDetailModal({
 
           {/* General notes */}
           {app.notes && (
-            <div className="bg-[var(--color-primary-bg)] border border-[var(--color-tertiary-bg)] rounded-lg p-3 text-xs text-[var(--color-text-main)] opacity-80 whitespace-pre-wrap">
+            <div className="bg-surface border border-border rounded-block p-3 text-xs text-fg opacity-80 whitespace-pre-wrap">
               <strong className="block mb-1 opacity-60">
                 Observações gerais:
               </strong>
@@ -223,7 +211,7 @@ function CandidateDetailModal({
               onClose();
               router.push(`/members/${app.memberId}`);
             }}
-            className="self-start text-xs text-[var(--color-accent-blue)] hover:underline"
+            className="self-start text-xs text-accent hover:underline"
           >
             Ver perfil completo do membro →
           </button>
@@ -249,16 +237,16 @@ function StageSection({
   const [open, setOpen] = useState(true);
 
   return (
-    <div className="flex flex-col gap-3 border border-[var(--color-tertiary-bg)] rounded-[12px] overflow-hidden">
+    <div className="flex flex-col gap-3 border border-border rounded-field overflow-hidden">
       {/* Stage header */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-3 px-4 py-3 bg-[var(--color-secondary-bg)] hover:bg-[var(--color-tertiary-bg)] transition-colors text-left"
+        className="flex items-center gap-3 px-4 py-3 bg-surface-raised hover:bg-surface transition-colors text-left"
       >
         {result ? stageIcon(result.status) : <Clock size={14} className="opacity-30" />}
-        <span className="font-bold text-white text-sm flex-1">{stage.title}</span>
+        <span className="font-bold text-fg text-sm flex-1">{stage.title}</span>
         {result?.score != null && (
-          <span className="text-sm font-semibold text-[var(--color-accent-blue)]">
+          <span className="text-sm font-semibold text-accent">
             {result.score} pts
           </span>
         )}
@@ -273,7 +261,7 @@ function StageSection({
         <div className="flex flex-col gap-4 px-4 pb-4">
           {/* Stage notes */}
           {result?.notes && (
-            <div className="text-xs bg-[var(--color-primary-bg)] border border-[var(--color-tertiary-bg)] rounded-lg px-3 py-2.5 text-[var(--color-text-main)] whitespace-pre-wrap">
+            <div className="text-xs bg-surface border border-border rounded-block px-3 py-2.5 text-fg whitespace-pre-wrap">
               <span className="font-semibold opacity-50 block mb-1">
                 Observação da etapa:
               </span>
@@ -289,10 +277,10 @@ function StageSection({
               </p>
               {answers.map((a) => (
                 <div key={a.id} className="flex flex-col gap-1">
-                  <p className="text-xs font-semibold text-[var(--color-accent-blue)]">
+                  <p className="text-xs font-semibold text-accent">
                     {a.question.order}. {a.question.title}
                   </p>
-                  <p className="text-sm text-[var(--color-text-main)] bg-[var(--color-primary-bg)] border border-[var(--color-tertiary-bg)] rounded-lg px-3 py-2 whitespace-pre-wrap leading-relaxed">
+                  <p className="text-sm text-fg bg-surface border border-border rounded-block px-3 py-2 whitespace-pre-wrap leading-relaxed">
                     {a.answerText}
                   </p>
                 </div>
@@ -309,11 +297,11 @@ function StageSection({
               {evals.map((e) => (
                 <div key={e.id} className="flex flex-col gap-1">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs font-semibold text-[var(--color-accent-blue)]">
+                    <p className="text-xs font-semibold text-accent">
                       {e.question.order}. {e.question.title}
                     </p>
                     {e.score != null && (
-                      <span className="text-xs font-mono font-bold text-white bg-[var(--color-secondary-bg)] border border-[var(--color-tertiary-bg)] px-2 py-0.5 rounded">
+                      <span className="text-xs font-mono font-bold text-fg bg-surface-raised border border-border px-2 py-0.5 rounded">
                         {e.score}
                         {e.question.maxScore > 0 && (
                           <span className="opacity-50">
@@ -324,7 +312,7 @@ function StageSection({
                     )}
                   </div>
                   {e.notes && (
-                    <p className="text-sm text-[var(--color-text-main)] bg-[var(--color-primary-bg)] border border-[var(--color-tertiary-bg)] rounded-lg px-3 py-2 whitespace-pre-wrap leading-relaxed">
+                    <p className="text-sm text-fg bg-surface border border-border rounded-block px-3 py-2 whitespace-pre-wrap leading-relaxed">
                       {e.notes}
                     </p>
                   )}
@@ -365,7 +353,7 @@ function SortHeader({
   return (
     <th
       onClick={() => onSort(colKey)}
-      className={`p-3 text-left font-bold text-white whitespace-nowrap cursor-pointer select-none hover:bg-[var(--color-tertiary-bg)] transition-colors ${className}`}
+      className={`p-3 text-left font-bold text-fg whitespace-nowrap cursor-pointer select-none hover:bg-surface transition-colors ${className}`}
     >
       <div className="flex items-center gap-1">
         {label}
@@ -517,7 +505,9 @@ export default function SelectionProcessPage({
 
   const [canAccess, setCanAccess] = useState<boolean | null>(null);
   useEffect(() => {
+    // localStorage só existe no cliente — SSR-safe (CLAUDE.md, regra técnica 2).
     const role = localStorage.getItem("x-user-role") ?? "";
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCanAccess(role === "ADMIN" || role === "PEOPLE");
   }, []);
 
@@ -533,7 +523,7 @@ export default function SelectionProcessPage({
     return (
       <div className="p-8 flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
         <ClipboardList size={48} className="opacity-20" />
-        <h2 className="text-xl font-bold text-white">Acesso restrito</h2>
+        <h2 className="text-xl font-bold text-fg">Acesso restrito</h2>
         <p className="text-sm opacity-60 max-w-sm">
           Esta seção é exclusiva para membros da diretoria de Pessoas.
         </p>
@@ -550,7 +540,7 @@ export default function SelectionProcessPage({
       {/* Back */}
       <button
         onClick={() => router.push("/selection")}
-        className="flex items-center gap-1.5 text-sm text-text-main opacity-60 hover:opacity-100 transition-opacity w-fit"
+        className="flex items-center gap-1.5 text-sm text-fg-muted hover:text-fg transition-colors w-fit"
       >
         <ArrowLeft size={15} />
         Processos Seletivos
@@ -561,24 +551,24 @@ export default function SelectionProcessPage({
         <div className="flex items-center gap-3">
           <ClipboardList
             size={32}
-            className="text-[var(--color-accent-blue)]"
+            className="text-accent"
           />
           <div>
-            <h1 className="text-3xl text-white font-bold">
+            <h1 className="font-bold text-fg">
               {process?.name ?? "Processo Seletivo"}
             </h1>
             {process && (
               <p className="text-sm opacity-60 mt-0.5">
                 {process.year} · {applications.length} candidato
                 {applications.length !== 1 ? "s" : ""} ·{" "}
-                <span className="text-green-400">
+                <span className="text-success">
                   {approvedCount} aprovado{approvedCount !== 1 ? "s" : ""}
                 </span>
                 {rejectedCount > 0 && (
                   <>
                     {" "}
                     ·{" "}
-                    <span className="text-red-400">
+                    <span className="text-danger">
                       {rejectedCount} reprovado{rejectedCount !== 1 ? "s" : ""}
                     </span>
                   </>
@@ -594,7 +584,7 @@ export default function SelectionProcessPage({
             whileTap={{ scale: 0.95 }}
             onClick={handleImportClick}
             disabled={importing}
-            className="btn-secondary flex items-center gap-2"
+            className="font-heading font-bold rounded-block transition-all bg-transparent text-accent border border-accent hover:bg-surface-raised disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 px-6 py-2"
           >
             <Upload size={18} />
             {importing ? "Importando..." : "Importar"}
@@ -604,7 +594,7 @@ export default function SelectionProcessPage({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleExportCSV}
-            className="btn-primary flex items-center gap-2"
+            className="font-heading font-bold rounded-block transition-all bg-accent text-accent-fg hover:bg-accent-hover flex items-center gap-2 px-6 py-2"
           >
             <Download size={18} />
             Exportar CSV
@@ -627,10 +617,10 @@ export default function SelectionProcessPage({
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1 rounded-[10px] text-xs font-bold border-2 transition-colors ${
+              className={`px-3 py-1 rounded-field text-xs font-bold border transition-colors ${
                 statusFilter === s
-                  ? "border-[var(--color-accent-blue)] text-[var(--color-accent-blue)]"
-                  : "border-[var(--color-tertiary-bg)] text-[var(--color-text-main)] opacity-60 hover:opacity-100"
+                  ? "border-accent text-accent"
+                  : "border-border text-fg-muted hover:text-fg"
               }`}
             >
               {s === "" ? "Todos" : (APP_STATUS_LABEL[s] ?? s)} ({count})
@@ -641,15 +631,15 @@ export default function SelectionProcessPage({
 
       {/* Spreadsheet */}
       {loading ? (
-        <div className="card w-full min-h-[400px] flex items-center justify-center">
+        <div className="bg-surface-raised border border-border p-6 rounded-block w-full min-h-[400px] flex items-center justify-center">
           <p className="opacity-60">Carregando candidatos...</p>
         </div>
       ) : (
-        <div className="w-full overflow-x-auto rounded-[20px] border-[3px] border-[var(--color-tertiary-bg)]">
+        <div className="w-full overflow-x-auto rounded-block border border-border">
           <table className="w-full text-left border-collapse text-sm">
             <thead>
-              <tr className="bg-[var(--color-secondary-bg)] border-b-[3px] border-[var(--color-tertiary-bg)]">
-                <th className="p-3 font-bold text-white w-10 opacity-50">#</th>
+              <tr className="bg-surface-raised border-b border-border">
+                <th className="p-3 font-bold text-fg w-10 opacity-50">#</th>
                 <SortHeader
                   label="Nome"
                   colKey="name"
@@ -684,12 +674,12 @@ export default function SelectionProcessPage({
                 />
               </tr>
             </thead>
-            <tbody className="bg-[var(--color-primary-bg)]">
+            <tbody className="bg-surface">
               {sortedApps.length === 0 ? (
                 <tr>
                   <td
                     colSpan={4 + scorableStages.length + 1}
-                    className="p-8 text-center text-[var(--color-text-main)] opacity-60"
+                    className="p-8 text-center text-fg opacity-60"
                   >
                     Nenhum candidato encontrado.
                   </td>
@@ -701,14 +691,14 @@ export default function SelectionProcessPage({
                     <tr
                       key={app.id}
                       onClick={() => setSelectedAppId(app.id)}
-                      className="border-b-[3px] border-[var(--color-tertiary-bg)] last:border-b-0 hover:bg-[var(--color-secondary-bg)] transition-colors cursor-pointer"
+                      className="border-b border-border last:border-b-0 hover:bg-surface-raised transition-colors cursor-pointer"
                     >
-                      <td className="p-3 text-[var(--color-text-main)] opacity-40 font-mono text-xs">
+                      <td className="p-3 text-fg opacity-40 font-mono text-xs">
                         {idx + 1}
                       </td>
 
                       <td className="p-3">
-                        <p className="font-semibold text-white whitespace-nowrap">
+                        <p className="font-semibold text-fg whitespace-nowrap">
                           {app.member?.name ??
                             `ID: ${app.memberId.slice(0, 8)}`}
                         </p>
@@ -720,11 +710,7 @@ export default function SelectionProcessPage({
                       </td>
 
                       <td className="p-3">
-                        <span
-                          className={`px-2 py-0.5 rounded-[10px] text-xs font-bold whitespace-nowrap ${APP_STATUS_COLOR[app.status] ?? ""}`}
-                        >
-                          {APP_STATUS_LABEL[app.status] ?? app.status}
-                        </span>
+                        <Badge status={app.status} label={APP_STATUS_LABEL[app.status] ?? app.status} />
                       </td>
 
                       {scorableStages.map((stage) => {
@@ -737,7 +723,7 @@ export default function SelectionProcessPage({
                               <span
                                 className={
                                   score != null
-                                    ? "font-mono font-semibold text-white"
+                                    ? "font-mono font-semibold text-fg"
                                     : "opacity-25 text-xs"
                                 }
                               >
@@ -752,7 +738,7 @@ export default function SelectionProcessPage({
                         <span
                           className={
                             total != null
-                              ? "font-mono font-bold text-[var(--color-accent-blue)]"
+                              ? "font-mono font-bold text-accent"
                               : "opacity-25 text-xs"
                           }
                         >
