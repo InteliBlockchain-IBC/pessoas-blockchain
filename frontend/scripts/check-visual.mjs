@@ -16,8 +16,6 @@ const ALLOWLIST = new Set([
   "app/(protected)/admin/users/page.tsx",
   "app/(public)/login/page.tsx",
   "app/page.tsx",
-  "app/(protected)/layout.tsx",
-  "components/layout/Sidebar.tsx",
   "components/ui/LegacyButton.tsx",
   "components/ui/Card.tsx",
   "components/ui/LegacyInput.tsx",

@@ -3,112 +3,165 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Users, ClipboardList, LogOut, LayoutDashboard, UserCog, X } from "lucide-react";
+import { LogOut, PanelLeftClose, PanelLeftOpen, UserRound, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
+import { itensVisiveis, type Papel } from "./nav-config";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+const ROTULO_PAPEL: Record<string, string> = {
+  ADMIN: "Administrador",
+  PEOPLE: "Pessoas",
+  INTERVIEWER: "Entrevistador",
+};
 
 interface SidebarProps {
+  /** Vem do AppShell, lido do localStorage uma única vez (spec §13). */
+  papel: Papel | null;
+  /** Idem — hoje sempre null, ninguém grava "x-user-email" ainda. */
+  email: string | null;
   isOpen: boolean;
   onClose: () => void;
+  colapsada: boolean;
+  onColapsarChange: (colapsada: boolean) => void;
 }
 
-export function Sidebar({ isOpen, onClose }: SidebarProps) {
+export function Sidebar({ papel, email, isOpen, onClose, colapsada, onColapsarChange }: SidebarProps) {
   const pathname = usePathname();
-  const [isPeople, setIsPeople] = useState(false);
+  const grupos = itensVisiveis(papel ?? "");
+  const rotuloUsuario = email ?? (papel ? (ROTULO_PAPEL[papel] ?? papel) : "Usuário");
 
-  useEffect(() => {
-    // localStorage só existe no cliente — SSR-safe (CLAUDE.md, regra técnica 2).
-    const role = localStorage.getItem("x-user-role") ?? "";
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsPeople(role === "ADMIN" || role === "PEOPLE");
-  }, []);
+  function alternarColapsada() {
+    const novoValor = !colapsada;
+    onColapsarChange(novoValor);
+    document.cookie = `sidebar-colapsada=${novoValor}; path=/; max-age=31536000; SameSite=Lax`;
+  }
 
-  const links = [
-    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    ...(isPeople
-      ? [
-          { name: "Membros", href: "/members", icon: Users },
-          { name: "Processo Seletivo", href: "/selection", icon: ClipboardList },
-          { name: "Usuários", href: "/admin/users", icon: UserCog },
-        ]
-      : []),
-  ];
+  function sair() {
+    localStorage.removeItem("x-user-id");
+    localStorage.removeItem("x-user-role");
+    localStorage.removeItem("x-user-email");
+    window.location.href = "/";
+  }
 
-  const sidebarContent = (
-    <div className="w-64 bg-surface-raised border-r border-border h-full flex flex-col">
-      <div className="p-6 flex items-center justify-between border-b border-border">
-        <Link href="/dashboard" onClick={onClose} className="flex items-center gap-3">
-          <Image
-            src="/logo.png"
-            alt="Inteli Blockchain"
-            width={914}
-            height={1062}
-            priority
-            className="h-10 w-auto"
-          />
-          <h2 className="font-heading text-xl font-bold text-fg leading-tight">
-            Inteli<br />
-            <span className="text-accent">Blockchain</span>
-          </h2>
-        </Link>
-        {/* Close button — only visible on mobile */}
-        <button
-          onClick={onClose}
-          className="md:hidden p-1.5 rounded-field hover:bg-surface transition-colors text-fg-muted hover:text-fg"
-        >
-          <X size={20} />
-        </button>
+  // O drawer mobile é um overlay com fechar próprio, não uma barra
+  // persistente — sempre abre cheio/rotulado, independente do cookie de
+  // colapso do desktop (o botão de expandir só existe em md:, spec exige
+  // "colapsável no desktop"). Por isso o conteúdo é uma função: a barra
+  // desktop respeita `colapsada`, o drawer sempre passa `forcarExpandido`.
+  function renderConteudo(forcarExpandido: boolean) {
+    const efetivamenteColapsada = colapsada && !forcarExpandido;
+
+    return (
+      <div
+        className={cn(
+          "flex h-full flex-col border-r border-border bg-surface-raised transition-[width] duration-200",
+          efetivamenteColapsada ? "w-16" : "w-64"
+        )}
+      >
+        <div className="flex items-center justify-between gap-1 border-b border-border p-4">
+          <Link href="/dashboard" onClick={onClose} className="flex min-w-0 items-center gap-3">
+            <Image src="/logo.png" alt="Inteli Blockchain" width={914} height={1062} priority className="h-9 w-auto shrink-0" />
+            {!efetivamenteColapsada && (
+              <h2 className="truncate font-heading text-lg font-bold leading-tight text-fg">
+                Inteli <span className="text-accent">Blockchain</span>
+              </h2>
+            )}
+          </Link>
+
+          {/* Fechar — só no drawer mobile */}
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Fechar menu"
+            className="shrink-0 rounded-field p-1.5 text-fg-muted transition-colors hover:bg-surface hover:text-fg md:hidden"
+          >
+            <X size={20} aria-hidden="true" />
+          </button>
+
+          {/* Colapsar — só no desktop */}
+          <button
+            type="button"
+            onClick={alternarColapsada}
+            aria-label={colapsada ? "Expandir menu" : "Recolher menu"}
+            className="hidden shrink-0 rounded-field p-1.5 text-fg-muted transition-colors hover:bg-surface hover:text-fg md:flex"
+          >
+            {colapsada ? <PanelLeftOpen size={18} aria-hidden="true" /> : <PanelLeftClose size={18} aria-hidden="true" />}
+          </button>
+        </div>
+
+        <nav aria-label="Navegação principal" className="flex flex-1 flex-col gap-4 overflow-y-auto py-4">
+          {grupos.map((grupo) => (
+            <div key={grupo.grupo} className="flex flex-col gap-1">
+              {!efetivamenteColapsada && (
+                <p className="px-4 pb-1 font-heading text-xs font-bold uppercase tracking-wide text-fg-muted">
+                  {grupo.grupo}
+                </p>
+              )}
+              {grupo.itens.map((item) => {
+                const ativo = pathname.startsWith(item.href);
+                const Icon = item.icon;
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={onClose}
+                    aria-current={ativo ? "page" : undefined}
+                    aria-label={efetivamenteColapsada ? item.label : undefined}
+                    title={efetivamenteColapsada ? item.label : undefined}
+                    className={cn(
+                      "flex items-center gap-3 border-l-2 py-2.5 pl-4 pr-3 font-heading text-sm font-bold transition-colors",
+                      ativo
+                        ? "border-l-accent text-fg"
+                        : "border-l-transparent text-fg-muted hover:border-l-border-interactive hover:text-fg"
+                    )}
+                  >
+                    <Icon size={20} aria-hidden="true" className="shrink-0" />
+                    {!efetivamenteColapsada && item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
+        </nav>
+
+        <div className="border-t border-border p-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label={efetivamenteColapsada ? rotuloUsuario : undefined}
+                title={efetivamenteColapsada ? rotuloUsuario : undefined}
+                className="flex w-full items-center gap-3 rounded-field px-2 py-2 text-left font-heading text-sm font-bold text-fg-muted transition-colors hover:bg-surface hover:text-fg"
+              >
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface">
+                  <UserRound size={16} aria-hidden="true" />
+                </span>
+                {!efetivamenteColapsada && <span className="min-w-0 flex-1 truncate">{rotuloUsuario}</span>}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" side="top" className="w-56">
+              <DropdownMenuItem variant="destructive" onSelect={sair}>
+                <LogOut size={16} aria-hidden="true" />
+                Sair
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
-
-      <nav className="flex-1 p-4 flex flex-col gap-2 mt-4">
-        {links.map((link) => {
-          const isActive = pathname.startsWith(link.href);
-          const Icon = link.icon;
-
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={onClose}
-              className={`flex items-center gap-3 p-3 rounded-block transition-colors font-heading font-bold ${
-                isActive
-                  ? "bg-surface text-accent"
-                  : "text-fg-muted hover:bg-surface hover:text-fg"
-              }`}
-            >
-              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                <Icon size={20} />
-              </motion.div>
-              {link.name}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div className="p-4 border-t border-border">
-        <button
-          onClick={() => {
-            localStorage.removeItem("x-user-id");
-            localStorage.removeItem("x-user-role");
-            window.location.href = "/";
-          }}
-          className="flex items-center w-full gap-3 p-3 rounded-block text-danger hover:bg-surface font-heading font-bold transition-colors cursor-pointer"
-        >
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-            <LogOut size={20} />
-          </motion.div>
-          Sair
-        </button>
-      </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <>
-      {/* Desktop — always visible */}
-      <div className="hidden md:flex h-screen sticky top-0 shrink-0">
-        {sidebarContent}
-      </div>
+      {/* Desktop — always visible, respeita o colapso */}
+      <div className="hidden h-screen shrink-0 md:sticky md:top-0 md:flex">{renderConteudo(false)}</div>
 
       {/* Mobile — overlay drawer */}
       <AnimatePresence>
@@ -132,9 +185,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "tween", duration: 0.25 }}
-              className="fixed inset-y-0 left-0 z-50 md:hidden h-full"
+              className="fixed inset-y-0 left-0 z-50 h-full md:hidden"
             >
-              {sidebarContent}
+              {/* Sempre expandido — o cookie de colapso é preferência de desktop */}
+              {renderConteudo(true)}
             </motion.div>
           </>
         )}
