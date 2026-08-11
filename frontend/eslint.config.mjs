@@ -13,6 +13,25 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      "no-restricted-globals": [
+        "error",
+        { name: "alert", message: "Use o toast (components/ui/toaster)." },
+        { name: "confirm", message: "Use ui/alert-dialog." },
+        { name: "prompt", message: "Use um dialog com campo." },
+      ],
+    },
+  },
+  // TEMPORÁRIO — remover na Task 26 do plano de redesign
+  {
+    files: [
+      "app/(protected)/members/**/*.tsx",
+      "app/(protected)/selection/**/*.tsx",
+      "app/(protected)/admin/**/*.tsx",
+    ],
+    rules: { "no-restricted-globals": "warn" },
+  },
 ]);
 
 export default eslintConfig;
