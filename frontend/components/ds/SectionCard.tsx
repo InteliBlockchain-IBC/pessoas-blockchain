@@ -48,7 +48,7 @@ export function SectionCard<T extends object>({
   className?: string;
 }) {
   const id = useId();
-  const { registrar } = useDirtySections();
+  const { registrar, registrarFechar, existeOutraSuja, descartarOutras } = useDirtySections();
   const corpo = useRef<HTMLDivElement>(null);
 
   const [confirmado, setConfirmado] = useState<T>(values);
@@ -57,6 +57,7 @@ export function SectionCard<T extends object>({
   const [salvando, setSalvando] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({});
   const [perguntando, setPerguntando] = useState(false);
+  const [perguntandoTroca, setPerguntandoTroca] = useState(false);
 
   // Sincroniza quando o pai recarrega os dados (ex.: refetch depois de um
   // import). Não sobrescreve um rascunho em andamento.
@@ -89,10 +90,21 @@ export function SectionCard<T extends object>({
     setErrors((e) => ({ ...e, [k]: undefined }));
   }, []);
 
-  const abrir = () => {
+  const abrirAgora = () => {
     setRascunho(confirmado);
     setErrors({});
     setEditing(true);
+  };
+
+  // Uma seção em edição por vez (spec §7.2): se outra seção já está suja,
+  // pergunta antes de abrir — abrir direto descartaria o rascunho alheio em
+  // silêncio.
+  const abrir = () => (existeOutraSuja(id) ? setPerguntandoTroca(true) : abrirAgora());
+
+  const confirmarTroca = () => {
+    descartarOutras(id);
+    setPerguntandoTroca(false);
+    abrirAgora();
   };
 
   // Foco no primeiro campo ao entrar em edição — sem isso quem navega por
@@ -110,6 +122,12 @@ export function SectionCard<T extends object>({
     setEditing(false);
     setPerguntando(false);
   };
+
+  // Registrado a cada render: `fechar` fecha sobre `confirmado` atual, e
+  // outra seção pode chamá-lo (via descartarOutras) bem depois de montado.
+  useEffect(() => {
+    registrarFechar(id, fechar);
+  });
 
   const cancelar = () => (sujo ? setPerguntando(true) : fechar());
 
@@ -195,6 +213,22 @@ export function SectionCard<T extends object>({
           <AlertDialogFooter>
             <AlertDialogCancel>Continuar editando</AlertDialogCancel>
             <AlertDialogAction onClick={fechar}>Descartar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={perguntandoTroca} onOpenChange={setPerguntandoTroca}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Outra seção está em edição</AlertDialogTitle>
+            <AlertDialogDescription>
+              Há alterações não salvas em outra seção. Editar esta seção vai
+              descartá-las.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmarTroca}>Descartar e editar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
