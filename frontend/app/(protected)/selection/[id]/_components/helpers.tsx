@@ -1,18 +1,9 @@
 import { CheckCircle2, XCircle, Clock } from "lucide-react";
 import { Application } from "@/services/selection.service";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-export const APP_STATUS_LABEL: Record<string, string> = {
-  APPROVED: "Aprovado",
-  REJECTED: "Reprovado",
-  IN_REVIEW: "Em revisão",
-  SUBMITTED: "Submetido",
-  DRAFT: "Rascunho",
-  WITHDRAWN: "Retirado",
-};
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+// APP_STATUS_LABEL saiu daqui na Task 23: StatusBadge (ds/StatusBadge) já
+// cobre os 6 status de candidatura com seu próprio STATUS_LABELS.
 
 export function stageIcon(status: string) {
   if (status === "PASSED")

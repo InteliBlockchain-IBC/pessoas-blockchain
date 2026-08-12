@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Menu } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { Toaster } from "@/components/ui/toaster";
 import { DirtyGuard } from "@/components/ds/DirtyGuard";
@@ -17,15 +18,15 @@ import type { Papel } from "./nav-config";
  * o conteúdo mudava de largura a cada navegação.
  *
  * TODA PÁGINA CONFIA INTEIRAMENTE NESTE CONTAINER. Nenhuma escreve p-8,
- * max-w-*, mx-auto ou min-h-screen. Se uma página precisar de outra largura, a
- * resposta é a prop `wide` aqui, nunca um wrapper por cima.
+ * max-w-*, mx-auto ou min-h-screen. A largura é decisão do shell, nunca da
+ * página: o próprio AppShell detecta por `usePathname()` a única tela larga
+ * da plataforma — a tabela de candidatos do processo seletivo, que tem uma
+ * coluna por etapa (`/selection/[id]`). Nenhuma página passa prop de largura.
  */
 export function AppShell({
-  wide = false,
   colapsadaInicial = false,
   children,
 }: {
-  wide?: boolean;
   /**
    * Lida do cookie `sidebar-colapsada` por `app/(protected)/layout.tsx`
    * (Server Component) e passada aqui pronta — é o que evita o flash que
@@ -35,6 +36,10 @@ export function AppShell({
   colapsadaInicial?: boolean;
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  // A tabela de candidatos tem uma coluna por etapa — é a ÚNICA tela larga.
+  const wide = /^\/selection\/[^/]+$/.test(pathname);
+
   const [menuAberto, setMenuAberto] = useState(false);
   const [colapsada, setColapsada] = useState(colapsadaInicial);
   // SSR-safe: null enquanto o localStorage não foi lido (CLAUDE.md, regra 2).

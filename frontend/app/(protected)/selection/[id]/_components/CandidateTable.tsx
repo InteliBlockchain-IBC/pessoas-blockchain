@@ -1,56 +1,64 @@
 import { useState, useMemo } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { Application, Stage } from "@/services/selection.service";
-import { Badge } from "@/components/ui/Badge";
-import {
-  APP_STATUS_LABEL,
-  stageIcon,
-  getScore,
-  getStageStatus,
-  getTotalScore,
-} from "./helpers";
+import { DataTable, Column } from "@/components/ds/DataTable";
+import { StatusBadge } from "@/components/ds/StatusBadge";
+import { EmptyState } from "@/components/ds/EmptyState";
+import { cn } from "@/lib/utils";
+import { stageIcon, getScore, getStageStatus, getTotalScore } from "./helpers";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 type SortKey = "name" | "status" | "total" | string;
 type SortDir = "asc" | "desc";
 
-// ─── Sort Header ──────────────────────────────────────────────────────────────
+// Linha decorada com a posição pós-ordenação — DataTable.Column.render só
+// recebe o item, não o índice (Task 10), então o índice vem pré-computado.
+type Row = { app: Application; idx: number };
 
-function SortHeader({
+// ─── Sort Chip ────────────────────────────────────────────────────────────────
+// DataTable.Column.header é `string` por contrato (Task 10) — não aceita um
+// cabeçalho clicável com ícone. O controle de ordenação por coluna, que antes
+// vivia no <th>, migra para esta fileira de chips acima da tabela (mesmo
+// padrão visual dos pills de "Filtrar:" já usados nesta página). A lógica de
+// ordenação (sortKey/sortDir/handleSort/sortedApps) não muda uma linha —
+// só o lugar onde o clique acontece.
+function SortChip({
   label,
   colKey,
   sortKey,
   sortDir,
   onSort,
-  className = "",
 }: {
   label: string;
   colKey: SortKey;
   sortKey: SortKey;
   sortDir: SortDir;
   onSort: (k: SortKey) => void;
-  className?: string;
 }) {
   const active = sortKey === colKey;
   return (
-    <th
+    <button
+      type="button"
       onClick={() => onSort(colKey)}
-      className={`p-3 text-left font-bold text-fg whitespace-nowrap cursor-pointer select-none hover:bg-surface transition-colors ${className}`}
+      className={cn(
+        "flex items-center gap-1 rounded-field border px-3 py-1 text-xs font-bold whitespace-nowrap transition-colors",
+        active
+          ? "border-accent text-accent"
+          : "border-border text-fg-muted hover:text-fg",
+      )}
     >
-      <div className="flex items-center gap-1">
-        {label}
-        {active ? (
-          sortDir === "asc" ? (
-            <ChevronUp size={13} />
-          ) : (
-            <ChevronDown size={13} />
-          )
+      {label}
+      {active ? (
+        sortDir === "asc" ? (
+          <ChevronUp size={13} />
         ) : (
-          <ChevronDown size={13} className="opacity-20" />
-        )}
-      </div>
-    </th>
+          <ChevronDown size={13} />
+        )
+      ) : (
+        <ChevronDown size={13} className="opacity-20" />
+      )}
+    </button>
   );
 }
 
@@ -119,128 +127,135 @@ export function CandidateTable({
     });
   }, [filteredApps, sortKey, sortDir]);
 
-  return loading ? (
-    <div className="bg-surface-raised border border-border p-6 rounded-block w-full min-h-[400px] flex items-center justify-center">
-      <p className="opacity-60">Carregando candidatos...</p>
-    </div>
-  ) : (
-    <div className="w-full overflow-x-auto rounded-block border border-border">
-      <table className="w-full text-left border-collapse text-sm">
-        <thead>
-          <tr className="bg-surface-raised border-b border-border">
-            <th className="p-3 font-bold text-fg w-10 opacity-50">#</th>
-            <SortHeader
-              label="Nome"
-              colKey="name"
-              sortKey={sortKey}
-              sortDir={sortDir}
-              onSort={handleSort}
-            />
-            <SortHeader
-              label="Status"
-              colKey="status"
-              sortKey={sortKey}
-              sortDir={sortDir}
-              onSort={handleSort}
-            />
-            {scorableStages.map((stage) => (
-              <SortHeader
-                key={stage.id}
-                label={stage.title}
-                colKey={`stage:${stage.id}`}
-                sortKey={sortKey}
-                sortDir={sortDir}
-                onSort={handleSort}
-                className="min-w-[150px]"
-              />
-            ))}
-            <SortHeader
-              label="Total"
-              colKey="total"
-              sortKey={sortKey}
-              sortDir={sortDir}
-              onSort={handleSort}
-            />
-          </tr>
-        </thead>
-        <tbody className="bg-surface">
-          {sortedApps.length === 0 ? (
-            <tr>
-              <td
-                colSpan={4 + scorableStages.length + 1}
-                className="p-8 text-center text-fg opacity-60"
-              >
-                Nenhum candidato encontrado.
-              </td>
-            </tr>
-          ) : (
-            sortedApps.map((app, idx) => {
-              const total = getTotalScore(app);
-              return (
-                <tr
-                  key={app.id}
-                  onClick={() => onSelectApp(app.id)}
-                  className="border-b border-border last:border-b-0 hover:bg-surface-raised transition-colors cursor-pointer"
-                >
-                  <td className="p-3 text-fg opacity-40 font-mono text-xs">
-                    {idx + 1}
-                  </td>
+  const rows: Row[] = sortedApps.map((app, idx) => ({ app, idx }));
 
-                  <td className="p-3">
-                    <p className="font-semibold text-fg whitespace-nowrap">
-                      {app.member?.name ??
-                        `ID: ${app.memberId.slice(0, 8)}`}
-                    </p>
-                    {app.member?.email && (
-                      <p className="text-xs opacity-40 whitespace-nowrap">
-                        {app.member.email}
-                      </p>
-                    )}
-                  </td>
-
-                  <td className="p-3">
-                    <Badge status={app.status} label={APP_STATUS_LABEL[app.status] ?? app.status} />
-                  </td>
-
-                  {scorableStages.map((stage) => {
-                    const score = getScore(app, stage.id);
-                    const st = getStageStatus(app, stage.id);
-                    return (
-                      <td key={stage.id} className="p-3">
-                        <div className="flex items-center gap-1.5">
-                          {st !== "PENDING" && stageIcon(st)}
-                          <span
-                            className={
-                              score != null
-                                ? "font-mono font-semibold text-fg"
-                                : "opacity-25 text-xs"
-                            }
-                          >
-                            {score != null ? score.toFixed(2) : "—"}
-                          </span>
-                        </div>
-                      </td>
-                    );
-                  })}
-
-                  <td className="p-3">
-                    <span
-                      className={
-                        total != null
-                          ? "font-mono font-bold text-accent"
-                          : "opacity-25 text-xs"
-                      }
-                    >
-                      {total != null ? total.toFixed(2) : "—"}
-                    </span>
-                  </td>
-
-                </tr>
-              );
-            })
+  const columns: Column<Row>[] = [
+    {
+      key: "idx",
+      header: "#",
+      width: "2.5rem",
+      render: ({ idx }) => (
+        <span className="font-mono text-xs opacity-40">{idx + 1}</span>
+      ),
+    },
+    {
+      key: "name",
+      header: "Nome",
+      render: ({ app }) => (
+        <>
+          <p className="font-semibold text-fg whitespace-nowrap">
+            {app.member?.name ?? `ID: ${app.memberId.slice(0, 8)}`}
+          </p>
+          {app.member?.email && (
+            <p className="text-xs opacity-40 whitespace-nowrap">
+              {app.member.email}
+            </p>
           )}
-        </tbody>
-      </table>
+        </>
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      render: ({ app }) => <StatusBadge status={app.status} />,
+    },
+    ...scorableStages.map(
+      (stage): Column<Row> => ({
+        key: `stage:${stage.id}`,
+        header: stage.title,
+        width: "150px",
+        render: ({ app }) => {
+          const score = getScore(app, stage.id);
+          const st = getStageStatus(app, stage.id);
+          return (
+            <div className="flex items-center gap-1.5">
+              {st !== "PENDING" && stageIcon(st)}
+              <span
+                className={
+                  score != null
+                    ? "font-mono font-semibold text-fg"
+                    : "opacity-25 text-xs"
+                }
+              >
+                {score != null ? score.toFixed(2) : "—"}
+              </span>
+            </div>
+          );
+        },
+      }),
+    ),
+    {
+      key: "total",
+      header: "Total",
+      render: ({ app }) => {
+        const total = getTotalScore(app);
+        return (
+          <span
+            className={
+              total != null
+                ? "font-mono font-bold text-accent"
+                : "opacity-25 text-xs"
+            }
+          >
+            {total != null ? total.toFixed(2) : "—"}
+          </span>
+        );
+      },
+    },
+  ];
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap gap-2 items-center">
+        <span className="text-xs opacity-50 font-semibold uppercase tracking-wide">
+          Ordenar:
+        </span>
+        <SortChip
+          label="Nome"
+          colKey="name"
+          sortKey={sortKey}
+          sortDir={sortDir}
+          onSort={handleSort}
+        />
+        <SortChip
+          label="Status"
+          colKey="status"
+          sortKey={sortKey}
+          sortDir={sortDir}
+          onSort={handleSort}
+        />
+        {scorableStages.map((stage) => (
+          <SortChip
+            key={stage.id}
+            label={stage.title}
+            colKey={`stage:${stage.id}`}
+            sortKey={sortKey}
+            sortDir={sortDir}
+            onSort={handleSort}
+          />
+        ))}
+        <SortChip
+          label="Total"
+          colKey="total"
+          sortKey={sortKey}
+          sortDir={sortDir}
+          onSort={handleSort}
+        />
+      </div>
+
+      <DataTable
+        columns={columns}
+        data={rows}
+        loading={loading}
+        rowKey={(r) => r.app.id}
+        onRowClick={(r) => onSelectApp(r.app.id)}
+        empty={
+          <EmptyState
+            title="Nenhum candidato encontrado"
+            description="Ajuste os filtros ou importe uma planilha de candidatos para este processo."
+          />
+        }
+      />
     </div>
   );
 }

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Download, Upload } from "lucide-react";
-import { motion } from "framer-motion";
 import { selectionService, Application } from "@/services/selection.service";
+import { Button } from "@/components/ui/button";
+import { notificar } from "@/components/ds/toast-helpers";
 
 // ─── Selection Toolbar ────────────────────────────────────────────────────────
 
@@ -18,7 +19,7 @@ export function SelectionToolbar({
     try {
       await selectionService.exportCSV(processId);
     } catch {
-      alert("Erro ao exportar resultados.");
+      notificar.erro("Erro ao exportar resultados.");
     }
   };
 
@@ -36,9 +37,9 @@ export function SelectionToolbar({
             file,
           );
           onImported(apps);
-          alert("Candidatos importados com sucesso!");
+          notificar.sucesso("Candidatos importados com sucesso!");
         } catch {
-          alert("Erro ao importar candidatos.");
+          notificar.erro("Erro ao importar candidatos.");
         } finally {
           setImporting(false);
         }
@@ -48,27 +49,16 @@ export function SelectionToolbar({
   };
 
   return (
-    <div className="flex gap-3">
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={handleImportClick}
-        disabled={importing}
-        className="font-heading font-bold rounded-block transition-all bg-transparent text-accent border border-accent hover:bg-surface-raised disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 px-6 py-2"
-      >
+    <>
+      <Button variant="outline" onClick={handleImportClick} disabled={importing}>
         <Upload size={18} />
         {importing ? "Importando..." : "Importar"}
-      </motion.button>
+      </Button>
 
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={handleExportCSV}
-        className="font-heading font-bold rounded-block transition-all bg-accent text-accent-fg hover:bg-accent-hover flex items-center gap-2 px-6 py-2"
-      >
+      <Button onClick={handleExportCSV}>
         <Download size={18} />
         Exportar CSV
-      </motion.button>
-    </div>
+      </Button>
+    </>
   );
 }
