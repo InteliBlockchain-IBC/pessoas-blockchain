@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ArrowRight, ChevronDown, ChevronRight } from "lucide-react";
-import { Badge } from "@/components/ui/Badge";
+import { StatusBadge } from "@/components/ds/StatusBadge";
 import { Application } from "@/services/selection.service";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,7 +31,7 @@ export function ApplicationCard({ app }: { app: Application }) {
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Badge status={app.status} label={APPLICATION_STATUS_LABEL[app.status] ?? app.status} />
+          <StatusBadge status={app.status} label={APPLICATION_STATUS_LABEL[app.status] ?? app.status} />
           <button
             onClick={() => router.push(`/selection/${app.processId}`)}
             className="text-xs text-accent hover:underline flex items-center gap-0.5"

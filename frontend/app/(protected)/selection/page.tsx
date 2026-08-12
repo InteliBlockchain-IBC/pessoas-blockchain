@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { selectionService, SelectionProcess, Stage } from "@/services/selection.service";
-import { Badge } from "@/components/ui/Badge";
+import { StatusBadge } from "@/components/ds/StatusBadge";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageHeader } from "@/components/ds/PageHeader";
@@ -158,7 +158,7 @@ function ProcessCard({ process }: { process: SelectionProcess }) {
           <div className="flex items-center gap-4">
             <div className="flex-1 min-w-0 flex items-center gap-3 flex-wrap">
               <span className="font-bold text-fg">{process.name}</span>
-              <Badge status={process.isActive ? "ACTIVE" : "CLOSED"} label={process.isActive ? "Ativo" : "Encerrado"} />
+              <StatusBadge status={process.isActive ? "ACTIVE" : "CLOSED"} label={process.isActive ? "Ativo" : "Encerrado"} />
               <span className="text-xs text-fg-muted">{process.year}</span>
             </div>
 
