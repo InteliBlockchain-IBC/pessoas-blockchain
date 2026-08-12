@@ -79,6 +79,15 @@ const PAIRS = [
   ["--border-interactive", "--surface-raised", UI, "borda de campo em card"],
   ["--focus-ring", "--surface", UI, "anel de foco na página"],
   ["--focus-ring", "--surface-raised", UI, "anel de foco em card"],
+  // Rótulo de calha — 0.6875rem é TEXTO PEQUENO, logo o mínimo é 4,5 e não 3.
+  // Medido em 11/08/2026: --text-subtle sobre --surface-raised dá 3,74 e
+  // reprova. Por isso existem duas classes, .rotulo e .rotulo-em-card.
+  ["--text-subtle", "--surface", TEXT, "rótulo de calha solto na página"],
+  ["--text-muted", "--surface-raised", TEXT, "rótulo de calha dentro de card"],
+  // Moldura (spec §3.5)
+  ["--text", "--surface-raised", UI, "borda 3px da moldura sobre o preenchimento"],
+  ["--accent", "--surface", UI, "sombra ciano da moldura sobre a página"],
+  ["--danger", "--surface", UI, "sombra magenta da moldura no login"],
 ];
 
 let failures = 0;

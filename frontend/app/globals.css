@@ -117,8 +117,16 @@
   --text-2xl: 2rem;
   --text-2xl--line-height: 1.25;
 
-  --radius-field: 12px;
+  /* Raio: o guia de estilos permite 0 ou 20, e nenhum valor intermediário.
+     --radius-field era 12px, um terceiro valor que o guia proíbe e que o
+     DESIGN_SYSTEM.md §4.1 nunca autorizou. Corrigido em 11/08/2026. */
+  --radius-field: 0px;
   --radius-block: 20px;
+  --radius-pill: 9999px;
+
+  /* Deslocamento da moldura. Um valor só, nos três usos — é o que faz o
+     gesto de encaixe ler como uma regra e não como três animações parecidas. */
+  --moldura-desloc: 8px;
 }
 
 @layer base {
@@ -141,5 +149,43 @@
   :focus-visible {
     outline: 3px solid var(--focus-ring);
     outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Rótulo de calha — Montserrat 700, tracking largo, caixa alta.
+     Duas classes e não uma com override: --text-subtle dentro de card dá
+     3,74:1 e reprova o AA para texto pequeno. Ver DESIGN_SYSTEM.md §8. */
+  .rotulo {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.6875rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+  .rotulo-em-card {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.6875rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* Título de página — Montserrat 300 caixa alta.
+     O piso de 1.5rem (24px) do clamp é OBRIGATÓRIO: o DESIGN_SYSTEM.md §2
+     proíbe Montserrat 300 abaixo disso, porque no tema escuro o peso Light
+     fica fino demais. Não baixe o piso. */
+  .titulo-pagina {
+    font-family: var(--font-heading);
+    font-weight: 300;
+    font-size: clamp(1.5rem, 3.4vw, 2.5rem);
+    line-height: 1.2;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
+  }
+  .titulo-pagina b {
+    font-weight: 700;
   }
 }

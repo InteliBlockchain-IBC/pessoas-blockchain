@@ -62,7 +62,7 @@ const TONE_CLASSES: Record<BadgeTone, string> = {
   neutral: "bg-transparent text-fg-muted border border-border-interactive",
 };
 
-export interface BadgeProps {
+export interface StatusBadgeProps {
   status: string;
   /** Sobrescreve o rótulo padrão. Ignorado se houver `children`. */
   label?: string;
@@ -71,13 +71,13 @@ export interface BadgeProps {
   className?: string;
 }
 
-export function Badge({ status, label, children, className = "" }: BadgeProps) {
+export function StatusBadge({ status, label, children, className = "" }: StatusBadgeProps) {
   const tone = TONE_BY_STATUS[status] ?? "neutral";
   const content = children ?? label ?? STATUS_LABELS[status] ?? status;
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-3 py-1 font-heading text-xs font-bold whitespace-nowrap ${TONE_CLASSES[tone]} ${className}`}
+      className={`inline-flex items-center gap-1 rounded-pill px-3 py-1 font-heading text-xs font-bold whitespace-nowrap ${TONE_CLASSES[tone]} ${className}`}
     >
       {content}
     </span>
