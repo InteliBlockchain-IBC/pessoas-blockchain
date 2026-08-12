@@ -6,14 +6,7 @@ import { join, extname } from "node:path";
 
 const ROOTS = ["app", "components"];
 // Arquivos ainda não migrados. A cada fase, itens saem daqui — nunca entram.
-const ALLOWLIST = new Set([
-  // Nunca vão ser migrados — só deletados, na Task 25 (junto com esta
-  // entrada). Ninguém mais importa nenhum dos dois (grep confirmado, Task
-  // 24): ficam aqui só porque o conteúdo deles falha o check-visual por
-  // conta própria, e editá-los está fora do escopo de páginas desta task.
-  "components/ui/LegacyButton.tsx",
-  "components/ui/LegacyTable.tsx",
-]);
+const ALLOWLIST = new Set([]);
 
 const RULES = [
   [/\balert\s*\(/, "alert() do browser — use o toast (spec §5.11)"],
