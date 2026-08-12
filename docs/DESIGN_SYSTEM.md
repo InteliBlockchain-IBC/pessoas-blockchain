@@ -153,6 +153,8 @@ O guia é explícito: *"brinque com cores e negritos que ajudem a entender o obj
 - Destaque de palavra dentro de frase: `--accent`, como no guia. Um destaque por frase, no máximo.
 - Restrição: caixa alta só em rótulo curto (badge, botão). Nunca em frase, e não em cabeçalho de tabela (ver §7.5) — o guia usa caixa alta em títulos de slide, o que não transporta para leitura de tela em tabela de 40 linhas.
 
+> **Rótulo de calha:** Montserrat 700, `0.6875rem`, tracking `.28em`, caixa alta. Por ser texto pequeno, o mínimo é 4,5:1 e não 3:1. Medido em 11/08/2026: `--text-subtle` sobre `--surface` dá 4,78:1 e passa; sobre `--surface-raised` dá **3,74:1 e reprova**. Por isso existem duas classes: `.rotulo` na página e `.rotulo-em-card` (que usa `--text-muted`, 5,73:1) dentro de card.
+
 ---
 
 ## 3. Espaçamento e layout
@@ -174,11 +176,13 @@ O guia diz, na página de Molduras: **"Arredondamento 0 ou 20"** — mas essa é
 | Raio | Onde | Origem |
 | --- | --- | --- |
 | `20px` | Card, botão, modal, moldura — bloco de conteúdo | guia de estilos |
-| `12px` | Input, select, textarea — controle de formulário | decisão de plataforma |
+| `0` | Input, select, textarea — controle de formulário | decisão de plataforma |
 | `0` | Célula de tabela, divisória | decisão de plataforma |
 | `9999px` | Badge, avatar | decisão de plataforma |
 
-Critério: **20px em bloco, 0 em divisória, 12px em campo editável, total em pill.** Um input de 40px de altura com raio 20 vira cápsula e deixa de parecer um campo editável.
+> `--radius-field` era `12px` até 11/08/2026, um terceiro valor que o guia proíbe e que este documento nunca autorizou. Corrigido para `0`.
+
+Critério: **20px em bloco, 0 em divisória, 0 em campo editável, total em pill.** Um input de 40px de altura com raio 20 vira cápsula e deixa de parecer um campo editável.
 
 Só `12px` e `20px` viram token (`--radius-field`, `--radius-block`) — `0` e `9999px` usam os utilitários nativos do Tailwind (`rounded-none`, `rounded-full`), que já fazem exatamente isso sem precisar de um nome novo.
 
@@ -203,9 +207,13 @@ O detalhe mais característico da marca, direto da página de Molduras: um retâ
 .moldura {
   border: 3px solid var(--text);
   border-radius: 20px;
-  box-shadow: 8px 8px 0 0 var(--ibc-gradient-start); /* ou #9f0e5d */
+  box-shadow: var(--moldura-desloc) var(--moldura-desloc) 0 0 var(--accent); /* ou var(--danger) */
 }
 ```
+
+> A sombra usa `--accent` (ciano) ou `--danger` (magenta), nunca `--ibc-gradient-start` — aquele valor é amostrado por pixel do PDF e vale só para o logo (§1.2). Deslocamento: `--moldura-desloc`, `8px`, o mesmo nos três usos.
+>
+> **Os três usos permitidos:** card de login (magenta) · `EmptyState` com mascote (ciano) · card do PDI no perfil (ciano, interativo). Máximo um por tela, nunca em elemento repetido. Um quarto uso exige decisão de design.
 
 Sem blur — é sombra sólida, deslocada. O deslocamento de 8px é interpretação; o guia mostra o efeito sem cotar. Restrita a: hero de página, estado vazio, e no máximo um card de destaque por tela. Nunca em card de listagem.
 

@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils";
 import { notificar } from "./toast-helpers";
 import { montarPayload } from "./section-payload";
 import { useDirtySections } from "./DirtyGuard";
-import { Moldura } from "./Moldura";
 
 /**
  * Seção com edição própria. Substitui o booleano `editing` de página inteira
@@ -31,7 +30,6 @@ export function SectionCard<T extends object>({
   editable = false,
   onSave,
   children,
-  variant = "painel",
   className,
 }: {
   label: string;
@@ -44,7 +42,6 @@ export function SectionCard<T extends object>({
     set: <K extends keyof T>(k: K, v: T[K]) => void;
     errors: Partial<Record<keyof T, string>>;
   }) => React.ReactNode;
-  variant?: "painel" | "moldura";
   className?: string;
 }) {
   const id = useId();
@@ -158,13 +155,9 @@ export function SectionCard<T extends object>({
     }
   };
 
-  const conteudo = (
+  return (
     <section
-      className={cn(
-        "rounded-none border border-border bg-surface-raised p-6",
-        variant === "moldura" && "border-0 p-0",
-        className
-      )}
+      className={cn("rounded-none border border-border bg-surface-raised p-6", className)}
     >
       <div className="mb-4 flex items-center justify-between gap-4 border-b border-border pb-3">
         <h2 className="rotulo-em-card">{label}</h2>
@@ -234,6 +227,4 @@ export function SectionCard<T extends object>({
       </AlertDialog>
     </section>
   );
-
-  return variant === "moldura" ? <Moldura shadow="ciano">{conteudo}</Moldura> : conteudo;
 }

@@ -23,15 +23,6 @@ const eslintConfig = defineConfig([
       ],
     },
   },
-  // TEMPORÁRIO — remover na Task 26 do plano de redesign
-  {
-    files: [
-      "app/(protected)/members/**/*.tsx",
-      "app/(protected)/selection/**/*.tsx",
-      "app/(protected)/admin/**/*.tsx",
-    ],
-    rules: { "no-restricted-globals": "warn" },
-  },
 ]);
 
 export default eslintConfig;
