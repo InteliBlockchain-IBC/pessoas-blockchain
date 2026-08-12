@@ -5,6 +5,7 @@ import {
   Query,
   Req,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
@@ -15,6 +16,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from './auth.guard';
+import { AuthRepository } from './auth.repository';
 import { GoogleOAuthService } from './google-oauth.service';
 
 /**
@@ -27,7 +29,10 @@ import { GoogleOAuthService } from './google-oauth.service';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly googleOAuthService: GoogleOAuthService) {}
+  constructor(
+    private readonly googleOAuthService: GoogleOAuthService,
+    private readonly authRepository: AuthRepository,
+  ) {}
 
   private getFrontendBaseUrl(): string {
     const frontendUrl = process.env.FRONTEND_URL;
@@ -59,15 +64,34 @@ export class AuthController {
   /**
    * Return the authenticated user based on request headers.
    *
+   * O AuthGuard só injeta { id, role } em req.user — o rodapé da sidebar
+   * precisa de name/email/image, então buscamos o usuário aqui em vez de
+   * alargar o select do guard, que roda em toda requisição autenticada.
+   *
    * @param req - Request with user data injected by the AuthGuard.
-   * @returns The current user or an empty object when missing.
+   * @returns The current user.
    */
   @Get('me')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Return the authenticated user' })
   @ApiOkResponse({ description: 'Authenticated user payload.' })
-  getMe(@Req() req: Request) {
-    return req.user ?? {};
+  async getMe(@Req() req: Request) {
+    const userId = req.user?.id;
+    const user = userId ? await this.authRepository.findUserById(userId) : null;
+
+    if (!user) {
+      throw new UnauthorizedException('Usuario nao encontrado.');
+    }
+
+    // Mapeamento explícito: findUserById traz `accounts` junto, e o cliente
+    // não tem nada que ver com dado de conta OAuth.
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      image: user.image,
+      role: user.role,
+    };
   }
 
   /**
