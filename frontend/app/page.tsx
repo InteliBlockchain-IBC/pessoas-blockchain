@@ -6,23 +6,20 @@ import { ArrowRight, ShieldCheck, Database, FileSpreadsheet } from "lucide-react
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function LandingPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (typeof window !== "undefined" && localStorage.getItem("x-user-id")) {
+    if (localStorage.getItem("x-user-id")) {
       router.push("/dashboard");
     }
   }, [router]);
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center p-8 relative overflow-hidden">
-      {/* Background Decorators */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent rounded-full blur-[120px] opacity-30 z-0"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-danger-surface rounded-full blur-[100px] opacity-20 z-0"></div>
-
-      <main className="z-10 max-w-4xl w-full flex flex-col items-center text-center gap-8">
+    <div className="min-h-screen flex flex-col justify-center items-center p-8 relative overflow-hidden"> {/* check-visual: ok — a página de entrada está fora do AppShell */}
+      <main className="z-10 max-w-4xl w-full flex flex-col items-center text-center gap-8"> {/* check-visual: ok — a página de entrada está fora do AppShell */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -37,33 +34,33 @@ export default function LandingPage() {
             priority
             className="h-56 md:h-80 w-auto mb-2 drop-shadow-md "
           />
-          <p className="text-xl md:text-2xl text-fg max-w-2xl font-light">
+          <p className="text-xl md:text-2xl text-fg max-w-2xl font-light"> {/* check-visual: ok — legibilidade do parágrafo, não largura de página */}
             Plataforma centralizada para Gestão de Pessoas, Processos Seletivos e Planos de Desenvolvimento Individual.
           </p>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mt-8"
         >
-          <div className="bg-surface-raised border border-border p-6 rounded-block flex flex-col items-center text-center gap-3">
-            <Database size={32} className="text-danger" />
+          <div className="bg-surface-raised border border-border p-6 rounded-none flex flex-col items-center text-center gap-3">
+            <Database size={32} className="text-fg-muted" />
             <h3 className="text-xl font-bold">Gestão Centralizada</h3>
             <p className="text-sm opacity-80">
               Gerencie membros ativos e inativos, funções e departamentos com controle de permissões.
             </p>
           </div>
-          <div className="bg-surface-raised border border-border p-6 rounded-block flex flex-col items-center text-center gap-3">
-            <FileSpreadsheet size={32} className="text-accent" />
+          <div className="bg-surface-raised border border-border p-6 rounded-none flex flex-col items-center text-center gap-3">
+            <FileSpreadsheet size={32} className="text-fg-muted" />
             <h3 className="text-xl font-bold">Processo Seletivo</h3>
             <p className="text-sm opacity-80">
               Acompanhe candidaturas, avalie candidatos e importe resultados de planilhas.
             </p>
           </div>
-          <div className="bg-surface-raised border border-border p-6 rounded-block flex flex-col items-center text-center gap-3">
-            <ShieldCheck size={32} className="text-accent-hover" />
+          <div className="bg-surface-raised border border-border p-6 rounded-none flex flex-col items-center text-center gap-3">
+            <ShieldCheck size={32} className="text-fg-muted" />
             <h3 className="text-xl font-bold">PDI Contínuo</h3>
             <p className="text-sm opacity-80">
               Crie históricos de desenvolvimento versionados para todos os membros do clube.
@@ -71,19 +68,18 @@ export default function LandingPage() {
           </div>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4, delay: 0.4 }}
           className="mt-12 flex flex-col sm:flex-row gap-4 items-center"
         >
-          <Link
-            href="/login"
-            className="font-heading font-bold rounded-block transition-all bg-accent text-accent-fg hover:bg-accent-hover flex items-center gap-2 text-lg px-8 py-4"
-          >
-            Acesso Institucional
-            <ArrowRight size={20} />
-          </Link>
+          <Button asChild size="lg">
+            <Link href="/login">
+              Acesso Institucional
+              <ArrowRight size={20} />
+            </Link>
+          </Button>
         </motion.div>
       </main>
 

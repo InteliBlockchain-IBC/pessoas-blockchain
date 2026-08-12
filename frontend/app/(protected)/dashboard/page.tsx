@@ -1,13 +1,15 @@
 "use client";
 
-import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
-import { Users, FileText, ClipboardList } from "lucide-react";
+import { LayoutDashboard, Users, UserCheck, FileText, ClipboardList } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import { setupApiClient } from "@/services/api";
 import { dashboardService, type DashboardMetrics } from "@/services/dashboard.service";
-import { motion } from "framer-motion";
 import { useSearchParams, useRouter } from "next/navigation";
+import { PageHeader } from "@/components/ds/PageHeader";
+import { KpiRow } from "@/components/ds/KpiRow";
+import { KpiCard } from "@/components/ds/KpiCard";
+import { SectionCard } from "@/components/ds/SectionCard";
+import { StatusBadge } from "@/components/ds/StatusBadge";
 
 function DashboardContent() {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
@@ -42,94 +44,43 @@ function DashboardContent() {
   }, [searchParams, router]);
 
   return (
-    <div className="p-8 w-full max-w-7xl mx-auto flex flex-col gap-8">
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="flex flex-col gap-2"
-      >
-        <h1 className="font-bold text-fg">Dashboard</h1>
-        <p className="text-fg opacity-80">
-          Visão geral da plataforma de Gestão de Pessoas.
-        </p>
-      </motion.div>
+    <div className="space-y-8">
+      <PageHeader
+        label="VISÃO GERAL"
+        title="Dashboard"
+        subtitle="Gestão de pessoas do Inteli Blockchain"
+        icon={LayoutDashboard}
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Members card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <Card className="flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <Users size={24} className="text-accent" />
-              <h2 className="text-lg font-bold">Membros</h2>
-            </div>
-            <p className="text-2xl font-bold text-fg">
-              {loading ? "-" : metrics?.totalMembers ?? 0}
-            </p>
-            {!loading && metrics && (
-              <div className="flex flex-wrap gap-1.5">
-                <Badge status="ACTIVE">Ativos: <strong>{metrics.activeMembers}</strong></Badge>
-                <Badge status="INACTIVE">Inativos: <strong>{metrics.inactiveMembers}</strong></Badge>
-                <Badge status="CANDIDATE">Candidatos: <strong>{metrics.candidateMembers}</strong></Badge>
-                <Badge status="ALUMNI">Alumni: <strong>{metrics.alumniMembers}</strong></Badge>
-              </div>
-            )}
-            {loading && (
-              <span className="text-xs opacity-60">Carregando distribuição...</span>
-            )}
-          </Card>
-        </motion.div>
+      <KpiRow>
+        <KpiCard hero icon={Users} label="Membros" value={metrics?.totalMembers ?? 0} loading={loading} />
+        <KpiCard icon={UserCheck} label="Ativos" value={metrics?.activeMembers ?? 0} tone="success" loading={loading} />
+        <KpiCard icon={ClipboardList} label="Processos" value={metrics?.totalProcesses ?? 0} loading={loading} />
+        <KpiCard icon={FileText} label="PDIs" value={metrics?.totalPdis ?? 0} loading={loading} />
+      </KpiRow>
 
-        {/* Processes card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Card className="flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <ClipboardList
-                size={24}
-                className="text-danger"
-              />
-              <h2 className="text-lg font-bold">Processos Seletivos</h2>
-            </div>
-            <p className="text-2xl font-bold text-fg">
-              {loading ? "-" : metrics?.totalProcesses ?? 0}
-            </p>
-            {!loading && metrics && (
-              <div className="flex flex-wrap gap-1.5">
-                <Badge status="ACTIVE">Ativos: <strong>{metrics.activeProcesses}</strong></Badge>
-                <Badge status="CLOSED">Encerrados: <strong>{metrics.totalProcesses - metrics.activeProcesses}</strong></Badge>
-              </div>
-            )}
-            {loading && (
-              <span className="text-xs opacity-60">Carregando processos...</span>
-            )}
-          </Card>
-        </motion.div>
+      <SectionCard label="DISTRIBUIÇÃO DE MEMBROS" values={{}}>
+        {() => (
+          <div className="flex flex-wrap gap-2">
+            <StatusBadge status="ACTIVE" label={`Ativos: ${metrics?.activeMembers ?? 0}`} />
+            <StatusBadge status="INACTIVE" label={`Inativos: ${metrics?.inactiveMembers ?? 0}`} />
+            <StatusBadge status="CANDIDATE" label={`Candidatos: ${metrics?.candidateMembers ?? 0}`} />
+            <StatusBadge status="ALUMNI" label={`Alumni: ${metrics?.alumniMembers ?? 0}`} />
+          </div>
+        )}
+      </SectionCard>
 
-        {/* PDI card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <Card variant="educational" className="flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <FileText size={24} className="text-fg-on-deep" />
-              <h2 className="text-lg font-bold">Planos de Desenvolvimento</h2>
-            </div>
-            <p className="text-2xl font-bold text-fg-on-deep">
-              {loading ? "-" : metrics?.totalPdis ?? 0}
-            </p>
-            <span className="text-xs opacity-60">Total de PDIs cadastrados</span>
-          </Card>
-        </motion.div>
-      </div>
+      <SectionCard label="PROCESSOS SELETIVOS" values={{}}>
+        {() => (
+          <div className="flex flex-wrap gap-2">
+            <StatusBadge status="ACTIVE" label={`Ativos: ${metrics?.activeProcesses ?? 0}`} />
+            <StatusBadge
+              status="INACTIVE"
+              label={`Encerrados: ${(metrics?.totalProcesses ?? 0) - (metrics?.activeProcesses ?? 0)}`}
+            />
+          </div>
+        )}
+      </SectionCard>
     </div>
   );
 }

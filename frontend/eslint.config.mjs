@@ -13,6 +13,16 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      "no-restricted-globals": [
+        "error",
+        { name: "alert", message: "Use o toast (components/ui/toaster)." },
+        { name: "confirm", message: "Use ui/alert-dialog." },
+        { name: "prompt", message: "Use um dialog com campo." },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;
