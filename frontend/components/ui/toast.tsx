@@ -34,9 +34,10 @@ const toastVariants = cva(
         default: "border-l-border-interactive",
         success: "border-l-success",
         warning: "border-l-warning",
-        // O magenta como barra de erro é --danger-surface, coerente com o
-        // StatusBadge de rejeitado.
-        error: "border-l-danger-surface",
+        // --danger-surface mede 1,91:1 sobre --surface-raised (DESIGN_SYSTEM.md
+        // §1.5) — reprova até o piso de 3:1 para elemento de UI. --danger
+        // (~5,86:1) é a mesma correção já aplicada na sombra da Moldura (Task 2).
+        error: "border-l-danger",
       },
     },
     defaultVariants: {

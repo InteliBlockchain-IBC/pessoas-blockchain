@@ -33,7 +33,7 @@ export function MarkdownEditor({ value, onChange, placeholder, className = "" }:
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder || "Suporta Markdown (ex: **negrito**, - lista)"}
-          className="min-h-[180px] w-full resize-y bg-transparent p-4 text-fg placeholder:text-fg-subtle focus:outline-none"
+          className="min-h-[180px] w-full resize-y bg-transparent p-4 text-fg placeholder:text-fg-subtle"
         />
         <div className="border-t border-border px-4 py-1.5 text-right text-xs text-fg-muted">
           {value.length} caractere{value.length === 1 ? "" : "s"}

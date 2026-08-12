@@ -47,12 +47,18 @@ export function Moldura({
         "mr-[var(--moldura-desloc)] mb-[var(--moldura-desloc)]",
         shadowClass,
         interactive && [
+          // O wrapper nunca recebe foco (não tem tabIndex) — quem foca de
+          // verdade é o filho interativo (ex.: <Link>). `group` + `has-[]`
+          // deixa o gesto reagir ao foco de teclado do filho, não do wrapper.
+          "group",
           "transition-[transform,box-shadow] duration-200",
           // O gesto: encaixa na própria sombra.
           "hover:translate-x-[var(--moldura-desloc)] hover:translate-y-[var(--moldura-desloc)] hover:shadow-none",
-          "focus-visible:translate-x-[var(--moldura-desloc)] focus-visible:translate-y-[var(--moldura-desloc)] focus-visible:shadow-none",
-          // Anel por FORA da sombra — ambos são ciano.
-          "focus-visible:outline-offset-[10px]",
+          "has-[:focus-visible]:translate-x-[var(--moldura-desloc)] has-[:focus-visible]:translate-y-[var(--moldura-desloc)] has-[:focus-visible]:shadow-none",
+          // O anel em si (deslocado 10px, por FORA da sombra) precisa ser
+          // desenhado no próprio filho focado — outline não herda do
+          // ancestral. O filho interativo deve usar
+          // `focus-visible:outline-offset-[10px]` (ver members/[id]/page.tsx).
           // Sem ponteiro, o repouso mantém a sombra: colapsá-la esconderia
           // justamente o que define o componente (spec §3.5).
           "[@media(hover:none)]:hover:translate-x-0 [@media(hover:none)]:hover:translate-y-0",

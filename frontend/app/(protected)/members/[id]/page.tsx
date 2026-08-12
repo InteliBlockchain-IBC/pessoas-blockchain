@@ -163,7 +163,7 @@ export default function MemberProfilePage({
               </Field>
               <Field label="Status">
                 <Select value={values.status ?? ""} onValueChange={(v) => set("status", v)}>
-                  <SelectTrigger className={CAMPO}><SelectValue /></SelectTrigger>
+                  <SelectTrigger className={CAMPO} aria-label="Status"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {STATUS_OPTIONS.map((s) => (
                       <SelectItem key={s} value={s}>{label(MEMBER_STATUS_LABEL, s)}</SelectItem>
@@ -173,7 +173,7 @@ export default function MemberProfilePage({
               </Field>
               <Field label="Departamento">
                 <Select value={values.department ?? "nenhum"} onValueChange={(v) => set("department", v === "nenhum" ? "" : v)}>
-                  <SelectTrigger className={CAMPO}><SelectValue /></SelectTrigger>
+                  <SelectTrigger className={CAMPO} aria-label="Departamento"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="nenhum">— Nenhum —</SelectItem>
                     {DEPARTMENT_OPTIONS.map((d) => (
@@ -184,7 +184,7 @@ export default function MemberProfilePage({
               </Field>
               <Field label="Cargo">
                 <Select value={values.position ?? "nenhum"} onValueChange={(v) => set("position", v === "nenhum" ? "" : v)}>
-                  <SelectTrigger className={CAMPO}><SelectValue /></SelectTrigger>
+                  <SelectTrigger className={CAMPO} aria-label="Cargo"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="nenhum">— Nenhum —</SelectItem>
                     {POSITION_OPTIONS.map((p) => (
@@ -221,7 +221,7 @@ export default function MemberProfilePage({
             <>
               <Field label="Gênero">
                 <Select value={values.gender ?? "vazio"} onValueChange={(v) => set("gender", v === "vazio" ? "" : v)}>
-                  <SelectTrigger className={CAMPO}><SelectValue /></SelectTrigger>
+                  <SelectTrigger className={CAMPO} aria-label="Gênero"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="vazio">— Não informado —</SelectItem>
                     {GENDER_OPTIONS.map((g) => (
@@ -232,7 +232,7 @@ export default function MemberProfilePage({
               </Field>
               <Field label="Raça/Cor">
                 <Select value={values.race ?? "vazio"} onValueChange={(v) => set("race", v === "vazio" ? "" : v)}>
-                  <SelectTrigger className={CAMPO}><SelectValue /></SelectTrigger>
+                  <SelectTrigger className={CAMPO} aria-label="Raça/Cor"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="vazio">— Não informado —</SelectItem>
                     {RACE_OPTIONS.map((r) => (
@@ -246,7 +246,7 @@ export default function MemberProfilePage({
                   value={values.isLgbtqia == null ? "vazio" : values.isLgbtqia ? "sim" : "nao"}
                   onValueChange={(v) => set("isLgbtqia", v === "vazio" ? null : v === "sim")}
                 >
-                  <SelectTrigger className={CAMPO}><SelectValue /></SelectTrigger>
+                  <SelectTrigger className={CAMPO} aria-label="LGBTQIA+"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="vazio">— Não informado —</SelectItem>
                     <SelectItem value="sim">Sim</SelectItem>
@@ -288,7 +288,7 @@ export default function MemberProfilePage({
       <Moldura shadow="ciano" interactive fill="educational">
         <Link
           href={`/members/${memberId}/pdi`}
-          className="flex items-center justify-between gap-4 p-6 focus:outline-none"
+          className="flex items-center justify-between gap-4 p-6 focus-visible:outline-offset-[10px]"
         >
           <div>
             <h2 className="font-heading text-lg font-bold">Plano de Desenvolvimento Individual</h2>

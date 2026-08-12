@@ -30,11 +30,15 @@ describe("Moldura", () => {
     expect(vivo.firstElementChild!.className).toContain("hover:translate-x");
   });
 
-  it("interativa afasta o anel de foco para além da sombra", () => {
+  it("interativa reage ao foco de teclado do filho, não do próprio wrapper", () => {
     const { container } = render(<Moldura interactive>x</Moldura>);
-    // O anel é ciano e a sombra também. Sem offset maior que o deslocamento,
-    // focar por teclado desenha ciano sobre ciano e o foco fica ilegível.
-    expect(container.firstElementChild!.className).toContain("focus-visible:outline-offset-[10px]");
+    // O wrapper não tem tabIndex — quem recebe foco é o filho (ex.: <Link>).
+    // `group` + `has-[:focus-visible]` é o que liga o gesto de encaixe ao
+    // foco real, em vez de um `focus-visible:` que nunca casaria no wrapper.
+    const cls = container.firstElementChild!.className;
+    expect(cls).toContain("group");
+    expect(cls).toContain("has-[:focus-visible]:translate-x-[var(--moldura-desloc)]");
+    expect(cls).toContain("has-[:focus-visible]:shadow-none");
   });
 
   it("renderiza o conteúdo", () => {
