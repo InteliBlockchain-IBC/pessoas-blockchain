@@ -31,6 +31,9 @@ const TONE_BY_STATUS: Record<string, BadgeTone> = {
   SCHEDULED: "success",
   COMPLETED: "success",
   CANCELED: "danger",
+  // PDI (lista /pdi)
+  HAS_PDI: "success",
+  NO_PDI: "neutral",
 };
 
 export const STATUS_LABELS: Record<string, string> = {
@@ -51,6 +54,8 @@ export const STATUS_LABELS: Record<string, string> = {
   SCHEDULED: "Agendado",
   COMPLETED: "Concluído",
   CANCELED: "Cancelado",
+  HAS_PDI: "Tem PDI",
+  NO_PDI: "Sem PDI",
 };
 
 const TONE_CLASSES: Record<BadgeTone, string> = {
