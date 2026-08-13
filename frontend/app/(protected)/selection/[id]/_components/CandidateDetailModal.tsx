@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useMemo } from "react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -14,19 +16,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { StatusBadge } from "@/components/ds/StatusBadge";
-import { getTotalScore } from "./helpers";
-import { StageSection } from "./StageSection";
+import { ApplicationSummary } from "@/components/selection/ApplicationSummary";
+import { StageBlock } from "@/components/selection/StageBlock";
 
 // ─── Candidate Detail Modal ───────────────────────────────────────────────────
 
 export function CandidateDetailModal({
   appId,
   stages,
+  canEdit,
   onClose,
 }: {
   appId: string;
   stages: Stage[];
+  canEdit: boolean;
   onClose: () => void;
 }) {
   const router = useRouter();
@@ -63,11 +66,9 @@ export function CandidateDetailModal({
     return m;
   }, [app]);
 
-  const totalScore = app ? getTotalScore(app) : null;
-
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-2xl"> {/* check-visual: ok — largura do dialog, não da página */}
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>
             {loading
@@ -87,18 +88,15 @@ export function CandidateDetailModal({
             </p>
           ) : (
             <div className="flex flex-col gap-6">
-              {/* Summary bar */}
-              <div className="flex flex-wrap gap-3 items-center">
-                <StatusBadge status={app.status} />
-                {app.member?.email && (
-                  <span className="text-xs opacity-50">{app.member.email}</span>
-                )}
-                {totalScore != null && (
-                  <span className="ml-auto text-sm font-bold text-accent">
-                    Total: {totalScore.toFixed(2)} pts
-                  </span>
-                )}
-              </div>
+              {app.member?.email && (
+                <span className="text-xs opacity-50">{app.member.email}</span>
+              )}
+
+              <ApplicationSummary
+                application={app}
+                canEdit={canEdit}
+                onSaved={setApp}
+              />
 
               {/* Demographics */}
               {(app.member?.gender ||
@@ -129,34 +127,38 @@ export function CandidateDetailModal({
               )}
 
               {/* Per-stage breakdown */}
-              {stages.map((stage) => {
-                const result = app.results?.find((r) => r.stageId === stage.id);
-                const answers = answersByStage[stage.id] ?? [];
-                const evals = evalsByStage[stage.id] ?? [];
+              <div className="flex flex-col">
+                {stages.map((stage) => {
+                  const result = app.results?.find((r) => r.stageId === stage.id);
+                  const answers = answersByStage[stage.id] ?? [];
+                  const evals = evalsByStage[stage.id] ?? [];
 
-                if (answers.length === 0 && evals.length === 0 && !result)
-                  return null;
+                  // Sem canEdit, esconde etapas sem nenhum dado (comportamento
+                  // já existente). Com canEdit, mostra todas — é assim que o
+                  // avaliador inicia uma etapa nunca tocada.
+                  if (
+                    !canEdit &&
+                    answers.length === 0 &&
+                    evals.length === 0 &&
+                    !result
+                  )
+                    return null;
 
-                return (
-                  <StageSection
-                    key={stage.id}
-                    stage={stage}
-                    result={result}
-                    answers={answers}
-                    evals={evals}
-                  />
-                );
-              })}
-
-              {/* General notes */}
-              {app.notes && (
-                <div className="bg-surface border border-border rounded-block p-3 text-xs text-fg opacity-80 whitespace-pre-wrap">
-                  <strong className="block mb-1 opacity-60">
-                    Observações gerais:
-                  </strong>
-                  {app.notes}
-                </div>
-              )}
+                  return (
+                    <StageBlock
+                      key={stage.id}
+                      applicationId={appId}
+                      stage={stage}
+                      result={result}
+                      answers={answers}
+                      evals={evals}
+                      canEdit={canEdit}
+                      defaultOpen
+                      onSaved={setApp}
+                    />
+                  );
+                })}
+              </div>
 
               {/* Link to profile */}
               <button

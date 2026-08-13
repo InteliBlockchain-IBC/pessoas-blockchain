@@ -157,6 +157,7 @@ export default function SelectionProcessPage({
         <CandidateDetailModal
           appId={selectedAppId}
           stages={stages}
+          canEdit={canAccess}
           onClose={() => setSelectedAppId(null)}
         />
       )}
