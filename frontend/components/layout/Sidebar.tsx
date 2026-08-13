@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { LogOut, PanelLeftClose, PanelLeftOpen, UserRound, X } from "lucide-react";
+import { LogOut, PanelLeftClose, PanelLeftOpen, Search, UserRound, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { itensVisiveis, type Papel } from "./nav-config";
@@ -40,9 +40,10 @@ interface SidebarProps {
   onClose: () => void;
   colapsada: boolean;
   onColapsarChange: (colapsada: boolean) => void;
+  onOpenSearch: () => void;
 }
 
-export function Sidebar({ papel, email, isOpen, onClose, colapsada, onColapsarChange }: SidebarProps) {
+export function Sidebar({ papel, email, isOpen, onClose, colapsada, onColapsarChange, onOpenSearch }: SidebarProps) {
   const pathname = usePathname();
   const grupos = itensVisiveis(papel ?? "");
   const rotuloUsuario = email ?? (papel ? (ROTULO_PAPEL[papel] ?? papel) : "Usuário");
@@ -56,6 +57,14 @@ export function Sidebar({ papel, email, isOpen, onClose, colapsada, onColapsarCh
   }, []);
 
   const rotuloExibido = user ? (user.name ?? user.email) : rotuloUsuario;
+
+  const [shortcut, setShortcut] = useState("Ctrl K");
+
+  useEffect(() => {
+    // navigator só existe no cliente — SSR-safe.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (navigator.userAgent.includes("Mac")) setShortcut("⌘K");
+  }, []);
 
   function alternarColapsada() {
     const novoValor = !colapsada;
@@ -112,6 +121,30 @@ export function Sidebar({ papel, email, isOpen, onClose, colapsada, onColapsarCh
             className="hidden shrink-0 rounded-field p-1.5 text-fg-muted transition-colors hover:bg-surface hover:text-fg md:flex"
           >
             {colapsada ? <PanelLeftOpen size={18} aria-hidden="true" /> : <PanelLeftClose size={18} aria-hidden="true" />}
+          </button>
+        </div>
+
+        <div className="px-3 pt-3">
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              onOpenSearch();
+            }}
+            aria-label={efetivamenteColapsada ? "Buscar" : undefined}
+            title={efetivamenteColapsada ? "Buscar" : undefined}
+            className={cn(
+              "flex w-full items-center gap-2 rounded-field border border-border bg-surface-sunken px-3 py-2 text-fg-subtle transition-colors hover:border-border-interactive hover:text-fg cursor-pointer",
+              efetivamenteColapsada && "justify-center",
+            )}
+          >
+            <Search size={16} className="shrink-0" aria-hidden="true" />
+            {!efetivamenteColapsada && (
+              <>
+                <span className="flex-1 text-left text-sm">Buscar…</span>
+                <kbd className="text-xs text-fg-subtle">{shortcut}</kbd>
+              </>
+            )}
           </button>
         </div>
 

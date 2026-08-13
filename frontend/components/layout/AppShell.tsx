@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { Sidebar } from "./Sidebar";
+import { CommandPalette } from "./CommandPalette";
 import { Toaster } from "@/components/ui/toaster";
 import { DirtyGuard } from "@/components/ds/DirtyGuard";
 import { cn } from "@/lib/utils";
@@ -45,6 +46,7 @@ export function AppShell({
   // SSR-safe: null enquanto o localStorage não foi lido (CLAUDE.md, regra 2).
   const [papel, setPapel] = useState<Papel | null>(null);
   const [email, setEmail] = useState<string | null>(null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -53,6 +55,17 @@ export function AppShell({
     // rótulo do papel. Lido aqui (não no Sidebar) para manter um único dono
     // de leitura de localStorage, mesmo risco do papel (spec §13).
     setEmail(localStorage.getItem("x-user-email"));
+  }, []);
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setPaletteOpen(true);
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
 
   return (
@@ -65,7 +78,9 @@ export function AppShell({
           onClose={() => setMenuAberto(false)}
           colapsada={colapsada}
           onColapsarChange={setColapsada}
+          onOpenSearch={() => setPaletteOpen(true)}
         />
+        <CommandPalette isOpen={paletteOpen} onClose={() => setPaletteOpen(false)} papel={papel} />
 
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface-raised px-4 md:hidden">
