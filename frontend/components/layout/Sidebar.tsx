@@ -66,11 +66,10 @@ export function Sidebar({ papel, email, isOpen, onClose, colapsada, onColapsarCh
       >
         <div className="flex items-center justify-between gap-1 border-b border-border p-4">
           <Link href="/dashboard" onClick={onClose} className="flex min-w-0 items-center gap-3">
-            <Image src="/logo.png" alt="Inteli Blockchain" width={914} height={1062} priority className="h-9 w-auto shrink-0" />
-            {!efetivamenteColapsada && (
-              <h2 className="truncate font-heading text-lg font-bold leading-tight text-fg">
-                Inteli <span className="text-accent">Blockchain</span>
-              </h2>
+            {efetivamenteColapsada ? (
+              <Image src="/logo.png" alt="Inteli Blockchain" width={914} height={1062} priority className="h-9 w-auto shrink-0" />
+            ) : (
+              <Image src="/logo_texto.png" alt="Inteli Blockchain" width={3651} height={1194} priority className="h-8 w-auto" />
             )}
           </Link>
 
