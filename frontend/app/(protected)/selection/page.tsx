@@ -17,6 +17,7 @@ import { SectionCard } from "@/components/ds/SectionCard";
 import { EmptyState } from "@/components/ds/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 // ─── Stages content (rendered inside card) ────────────────────────────────────
 
@@ -203,14 +204,8 @@ export default function SelectionPage() {
   const [processes, setProcesses] = useState<SelectionProcess[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [canAccess, setCanAccess] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    // localStorage só existe no cliente — SSR-safe (CLAUDE.md, regra técnica 2).
-    const role = localStorage.getItem("x-user-role") ?? "";
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCanAccess(role === "ADMIN" || role === "PEOPLE");
-  }, []);
+  const { user } = useAuth();
+  const canAccess = user?.role === "ADMIN" || user?.role === "PEOPLE";
 
   const fetchProcesses = useCallback(async () => {
     try {
@@ -226,13 +221,11 @@ export default function SelectionPage() {
   }, []);
 
   useEffect(() => {
-    if (canAccess === null) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- dispara a busca inicial assim que canAccess resolve
     if (canAccess) fetchProcesses();
     else setLoading(false);
   }, [canAccess, fetchProcesses]);
 
-  if (canAccess === null) return null;
   if (!canAccess) {
     return (
       <EmptyState

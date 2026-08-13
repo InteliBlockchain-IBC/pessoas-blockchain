@@ -29,6 +29,7 @@ import {
 } from "@/lib/labels";
 import { InterestsTags } from "./_components/InterestsTags";
 import { ApplicationCard } from "./_components/ApplicationCard";
+import { useAuth } from "@/contexts/AuthContext";
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
@@ -76,14 +77,8 @@ export default function MemberProfilePage({
   const [applications, setApplications] = useState<Application[]>([]);
   const [loadingMember, setLoadingMember] = useState(true);
   const [loadingApps, setLoadingApps] = useState(true);
-  const [canEdit, setCanEdit] = useState(false);
-
-  useEffect(() => {
-    // localStorage só existe no cliente — SSR-safe (CLAUDE.md, regra técnica 2).
-    const role = localStorage.getItem("x-user-role") ?? "";
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCanEdit(["ADMIN", "PEOPLE"].includes(role));
-  }, []);
+  const { user } = useAuth();
+  const canEdit = user?.role === "ADMIN" || user?.role === "PEOPLE";
 
   useEffect(() => {
     membersService

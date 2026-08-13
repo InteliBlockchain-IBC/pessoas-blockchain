@@ -15,6 +15,7 @@ import { membersService, Member, MemberFilters } from "@/services/members.servic
 import { selectionService, SelectionProcess, Application } from "@/services/selection.service";
 import { MEMBER_STATUS_LABEL, DEPARTMENT_LABEL, POSITION_LABEL, label } from "@/lib/labels";
 import { notificar } from "@/components/ds/toast-helpers";
+import { useAuth } from "@/contexts/AuthContext";
 
 const STATUS_OPTIONS = [
   { value: "todos", label: "Todos os status" },
@@ -46,15 +47,8 @@ export default function MembersPage() {
   const [importing, setImporting] = useState(false);
   const router = useRouter();
 
-  const [canAccess, setCanAccess] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    // localStorage só existe no cliente — não dá para ler no lazy initializer
-    // do useState sem quebrar SSR (CLAUDE.md, regra técnica 2).
-    const role = localStorage.getItem("x-user-role") ?? "";
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCanAccess(role === "ADMIN" || role === "PEOPLE");
-  }, []);
+  const { user } = useAuth();
+  const canAccess = user?.role === "ADMIN" || user?.role === "PEOPLE";
 
   // Filter states
   const [search, setSearch] = useState("");
@@ -103,7 +97,6 @@ export default function MembersPage() {
 
   // Initial load
   useEffect(() => {
-    if (canAccess === null) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- dispara a busca inicial assim que canAccess resolve
     if (canAccess) fetchMembers({ limit: 200 });
     else setLoading(false);
@@ -266,7 +259,6 @@ export default function MembersPage() {
     },
   ];
 
-  if (canAccess === null) return null;
   if (!canAccess) {
     return (
       <EmptyState

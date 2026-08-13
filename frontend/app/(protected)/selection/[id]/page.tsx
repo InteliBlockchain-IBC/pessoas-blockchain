@@ -17,6 +17,7 @@ import { KpiRow } from "@/components/ds/KpiRow";
 import { KpiCard } from "@/components/ds/KpiCard";
 import { EmptyState } from "@/components/ds/EmptyState";
 import { STATUS_LABELS } from "@/components/ds/StatusBadge";
+import { useAuth } from "@/contexts/AuthContext";
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
@@ -65,13 +66,8 @@ export default function SelectionProcessPage({
     [applications, statusFilter],
   );
 
-  const [canAccess, setCanAccess] = useState<boolean | null>(null);
-  useEffect(() => {
-    // localStorage só existe no cliente — SSR-safe (CLAUDE.md, regra técnica 2).
-    const role = localStorage.getItem("x-user-role") ?? "";
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCanAccess(role === "ADMIN" || role === "PEOPLE");
-  }, []);
+  const { user } = useAuth();
+  const canAccess = user?.role === "ADMIN" || user?.role === "PEOPLE";
 
   const approvedCount = applications.filter(
     (a) => a.status === "APPROVED",
@@ -83,7 +79,6 @@ export default function SelectionProcessPage({
     (a) => a.status === "IN_REVIEW",
   ).length;
 
-  if (canAccess === null) return null;
   if (!canAccess) {
     return (
       <EmptyState
