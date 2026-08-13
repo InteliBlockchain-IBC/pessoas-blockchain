@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, ClipboardList, UserCog, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, Users, NotebookPen, ClipboardList, UserCog, type LucideIcon } from "lucide-react";
 
 /**
  * Extrai o array `links` que vivia dentro do Sidebar. Aqui ele é testável, e o
@@ -28,6 +28,7 @@ export const NAV: { grupo: string; itens: ItemNav[] }[] = [
     grupo: "PESSOAS",
     itens: [
       { href: "/members", label: "Membros", icon: Users, papeis: PESSOAS },
+      { href: "/pdi", label: "PDI", icon: NotebookPen, papeis: PESSOAS },
       { href: "/selection", label: "Processo Seletivo", icon: ClipboardList, papeis: PESSOAS },
       { href: "/admin/users", label: "Usuários", icon: UserCog, papeis: PESSOAS },
     ],

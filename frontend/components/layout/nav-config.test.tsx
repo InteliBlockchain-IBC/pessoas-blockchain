@@ -14,12 +14,14 @@ describe("itensVisiveis", () => {
     expect(h).not.toContain("/members");
     expect(h).not.toContain("/selection");
     expect(h).not.toContain("/admin/users");
+    expect(h).not.toContain("/pdi");
   });
 
   it("PEOPLE vê membros e seleção", () => {
     const h = hrefs("PEOPLE");
     expect(h).toContain("/members");
     expect(h).toContain("/selection");
+    expect(h).toContain("/pdi");
   });
 
   it("ADMIN vê tudo, inclusive usuários", () => {
