@@ -256,10 +256,18 @@ export class SelectionRepository {
     });
   }
 
-  updateApplicationStatus(id: string, status: string) {
+  // ponytail: `notes` entra na rota /status em vez de ganhar um PATCH genérico
+  // só para ele. Teto: se a candidatura ganhar um terceiro campo editável,
+  // migrar para PATCH /selection/applications/:id.
+  updateApplicationStatus(id: string, status: string, notes?: string) {
     return this.prisma.application.update({
       where: { id },
-      data: { status: status as ApplicationStatus },
+      data: {
+        status: status as ApplicationStatus,
+        // `undefined` é omitido pelo Prisma; `null` apagaria o valor. Enviar
+        // o campo ausente tem que preservar a observação existente.
+        ...(notes !== undefined && { notes }),
+      },
     });
   }
 

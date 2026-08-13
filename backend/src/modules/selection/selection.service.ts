@@ -136,8 +136,8 @@ export class SelectionService {
    * @param status - Novo status desejado.
    * @returns A candidatura com status atualizado.
    */
-  updateApplicationStatus(id: string, status: string) {
-    return this.selectionRepository.updateApplicationStatus(id, status);
+  updateApplicationStatus(id: string, status: string, notes?: string) {
+    return this.selectionRepository.updateApplicationStatus(id, status, notes);
   }
 
   submitApplication(id: string, payload: SubmitApplicationDto) {

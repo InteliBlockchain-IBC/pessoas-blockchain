@@ -263,6 +263,32 @@ describe('SelectionService', () => {
       expect(repository.updateApplicationStatus).toHaveBeenCalledWith(
         'a-1',
         'IN_REVIEW',
+        undefined,
+      );
+    });
+
+    it('updates application status with notes', async () => {
+      mockSelectionRepository.updateApplicationStatus.mockResolvedValue({
+        id: 'a-1',
+        status: 'APPROVED',
+        notes: 'Forte em comunidade',
+      });
+
+      const result = await service.updateApplicationStatus(
+        'a-1',
+        'APPROVED',
+        'Forte em comunidade',
+      );
+
+      expect(result).toEqual({
+        id: 'a-1',
+        status: 'APPROVED',
+        notes: 'Forte em comunidade',
+      });
+      expect(repository.updateApplicationStatus).toHaveBeenCalledWith(
+        'a-1',
+        'APPROVED',
+        'Forte em comunidade',
       );
     });
 

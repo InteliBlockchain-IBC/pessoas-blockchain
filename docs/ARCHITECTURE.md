@@ -493,7 +493,7 @@ GET    /selection/applications             filtros: processId, memberId, status
 POST   /selection/applications
 GET    /selection/applications/:id         inclui member, stages, questions, answers, evaluations, results
 PATCH  /selection/applications/:id/submit
-PATCH  /selection/applications/:id/status
+PATCH  /selection/applications/:id/status  corpo: { status: string, notes?: string } (notes omitido preserva o valor atual)
 
 GET    /selection/applications/:id/results
 PATCH  /selection/applications/:id/results/:stageId

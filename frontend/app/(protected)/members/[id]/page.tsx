@@ -311,7 +311,7 @@ export default function MemberProfilePage({
           ) : (
             <div className="flex flex-col gap-4">
               {applications.map((app) => (
-                <ApplicationCard key={app.id} app={app} />
+                <ApplicationCard key={app.id} app={app} canEdit={canEdit} />
               ))}
             </div>
           )
