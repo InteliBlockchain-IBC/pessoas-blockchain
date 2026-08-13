@@ -1,18 +1,58 @@
-import { useState } from "react";
-import { ArrowRight, ChevronDown, ChevronRight } from "lucide-react";
+"use client";
+
+import { useState, useEffect } from "react";
+import { ArrowRight, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
 import { StatusBadge } from "@/components/ds/StatusBadge";
-import { Application } from "@/services/selection.service";
+import {
+  selectionService,
+  Application,
+  Stage,
+} from "@/services/selection.service";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { APPLICATION_STATUS_LABEL } from "@/lib/labels";
 import { StageResultBadge } from "./StageResultBadge";
-import { ApplicationDetail } from "./ApplicationDetail";
+import { ApplicationSummary } from "@/components/selection/ApplicationSummary";
+import { StageBlock } from "@/components/selection/StageBlock";
 
 // ─── Application card with expandable detail ───────────────────────────────────
 
-export function ApplicationCard({ app }: { app: Application }) {
+export function ApplicationCard({
+  app,
+  canEdit,
+}: {
+  app: Application;
+  canEdit: boolean;
+}) {
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
+  const [detail, setDetail] = useState<Application | null>(null);
+  // Etapas com questões — só buscado quando canEdit. A leitura não precisa:
+  // cada resposta/avaliação já embute a questão inteira.
+  const [stagesWithQuestions, setStagesWithQuestions] = useState<Stage[] | null>(
+    null,
+  );
+
+  // A fatia mais fresca conhecida: o detalhe buscado ao expandir (e
+  // re-buscado após qualquer salvamento), com fallback pro resumo que a
+  // página já tinha. Enquanto `detail` é null e o card está expandido, o
+  // detalhe ainda está carregando — sem estado de loading próprio.
+  const current = detail ?? app;
+
+  useEffect(() => {
+    if (!expanded || detail) return;
+    selectionService
+      .getApplicationDetail(app.id)
+      .then(setDetail)
+      .catch(() => {});
+
+    if (canEdit) {
+      selectionService
+        .getProcess(app.processId)
+        .then((p) => setStagesWithQuestions(p?.stages ?? []))
+        .catch(() => {});
+    }
+  }, [expanded, detail, app.id, app.processId, canEdit]);
 
   return (
     <div className="flex flex-col gap-3 p-4 bg-surface border border-border rounded-block">
@@ -26,12 +66,15 @@ export function ApplicationCard({ app }: { app: Application }) {
               </span>
             )}
           </p>
-          {app.notes && (
-            <p className="text-xs opacity-60 mt-0.5">{app.notes}</p>
+          {current.notes && (
+            <p className="text-xs opacity-60 mt-0.5">{current.notes}</p>
           )}
         </div>
         <div className="flex items-center gap-2">
-          <StatusBadge status={app.status} label={APPLICATION_STATUS_LABEL[app.status] ?? app.status} />
+          <StatusBadge
+            status={current.status}
+            label={APPLICATION_STATUS_LABEL[current.status] ?? current.status}
+          />
           <button
             onClick={() => router.push(`/selection/${app.processId}`)}
             className="text-xs text-accent hover:underline flex items-center gap-0.5"
@@ -41,9 +84,9 @@ export function ApplicationCard({ app }: { app: Application }) {
         </div>
       </div>
 
-      {app.results && app.results.length > 0 && (
+      {current.results && current.results.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {app.results.map((r) => (
+          {current.results.map((r) => (
             <StageResultBadge key={r.id} result={r} />
           ))}
         </div>
@@ -66,7 +109,47 @@ export function ApplicationCard({ app }: { app: Application }) {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <ApplicationDetail appId={app.id} />
+            {!detail ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 size={16} className="animate-spin opacity-40" />
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2 pt-3">
+                <ApplicationSummary
+                  application={current}
+                  canEdit={canEdit}
+                  onSaved={setDetail}
+                />
+                {(current.results ?? [])
+                  .slice()
+                  .sort((a, b) => a.stage.order - b.stage.order)
+                  .map((r) => {
+                    const stage = stagesWithQuestions?.find(
+                      (s) => s.id === r.stageId,
+                    ) ?? {
+                      id: r.stageId,
+                      title: r.stage.title,
+                      order: r.stage.order,
+                    };
+                    return (
+                      <StageBlock
+                        key={r.id}
+                        applicationId={app.id}
+                        stage={stage}
+                        result={r}
+                        answers={(current.answers ?? []).filter(
+                          (a) => a.question.stageId === r.stageId,
+                        )}
+                        evals={(current.evaluations ?? []).filter(
+                          (e) => e.question.stageId === r.stageId,
+                        )}
+                        canEdit={canEdit}
+                        onSaved={setDetail}
+                      />
+                    );
+                  })}
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
