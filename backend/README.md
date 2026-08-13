@@ -249,7 +249,7 @@ Lê `data/[CENTRAL] BLOCKCHAIN INTEGRANTES.xlsx` e `data/Aprovados 2026.xlsx`:
 
 Admin UUID fixo: `00000000-0000-0000-0000-000000000001`
 
-O seed imprime todos os `x-user-id` criados — usar para autenticar localmente via `?userId=&role=`.
+Não há mais autenticação por query string. Login local é via Google OAuth normal (`GET /auth/google`, conta `@sou.inteli.edu.br`). O usuário admin do seed já nasce `status: APPROVED` — basta logar com esse e-mail. Qualquer outro e-mail nasce `PENDING` e precisa de aprovação (`PATCH /users/:id/approve`) por um ADMIN já aprovado.
 
 ## Testes
 
