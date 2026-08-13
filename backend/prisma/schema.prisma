@@ -76,7 +76,7 @@ model User {
     emailVerified DateTime?
     image         String?
 
-    role   UserRole   @default(PEOPLE)
+    role   UserRole   @default(INTERVIEWER)
     status UserStatus @default(PENDING)
 
     createdAt DateTime @default(now())
