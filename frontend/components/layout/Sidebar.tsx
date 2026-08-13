@@ -7,8 +7,9 @@ import { usePathname } from "next/navigation";
 import { LogOut, PanelLeftClose, PanelLeftOpen, Search, UserRound, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { authService } from "@/services/auth.service";
+import { useAuth, type AuthUser } from "@/contexts/AuthContext";
 import { itensVisiveis, type Papel } from "./nav-config";
-import { authService, type CurrentUser } from "@/services/auth.service";
 import { USER_ROLE_LABEL } from "@/lib/labels";
 import {
   DropdownMenu,
@@ -18,24 +19,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const ROTULO_PAPEL: Record<string, string> = {
-  ADMIN: "Administrador",
-  PEOPLE: "Pessoas",
-  INTERVIEWER: "Entrevistador",
-};
-
 /** "Messias Olivindo" → "MO"; sem nome, cai no email. */
-function initials(user: CurrentUser): string {
+function initials(user: AuthUser): string {
   const source = user.name?.trim() || user.email;
   const parts = source.split(/[\s@._-]+/).filter(Boolean);
   return `${parts[0]?.[0] ?? "?"}${parts[1]?.[0] ?? ""}`.toUpperCase();
 }
 
 interface SidebarProps {
-  /** Vem do AppShell, lido do localStorage uma única vez (spec §13). */
-  papel: Papel | null;
-  /** Idem — hoje sempre null, ninguém grava "x-user-email" ainda. */
-  email: string | null;
   isOpen: boolean;
   onClose: () => void;
   colapsada: boolean;
@@ -43,20 +34,14 @@ interface SidebarProps {
   onOpenSearch: () => void;
 }
 
-export function Sidebar({ papel, email, isOpen, onClose, colapsada, onColapsarChange, onOpenSearch }: SidebarProps) {
+export function Sidebar({ isOpen, onClose, colapsada, onColapsarChange, onOpenSearch }: SidebarProps) {
   const pathname = usePathname();
-  const grupos = itensVisiveis(papel ?? "");
-  const rotuloUsuario = email ?? (papel ? (ROTULO_PAPEL[papel] ?? papel) : "Usuário");
-
-  const [user, setUser] = useState<CurrentUser | null>(null);
-
-  useEffect(() => {
-    // Falha aqui não bloqueia nada: o rodapé cai no rótulo de papel de hoje.
-    // Sessão inválida já é tratada pelo interceptor de 401 em services/api.ts.
-    authService.getMe().then(setUser).catch(() => setUser(null));
-  }, []);
-
-  const rotuloExibido = user ? (user.name ?? user.email) : rotuloUsuario;
+  // useAuth() vem do AuthProvider, que envolve o AppShell inteiro e não
+  // renderiza filho nenhum enquanto a identidade não resolve — `user` aqui
+  // nunca é null na prática, mas o tipo permanece opcional por segurança.
+  const { user } = useAuth();
+  const grupos = itensVisiveis((user?.role ?? "") as Papel);
+  const rotuloExibido = user ? (user.name ?? user.email) : "Usuário";
 
   const [shortcut, setShortcut] = useState("Ctrl K");
 
@@ -73,10 +58,7 @@ export function Sidebar({ papel, email, isOpen, onClose, colapsada, onColapsarCh
   }
 
   function sair() {
-    localStorage.removeItem("x-user-id");
-    localStorage.removeItem("x-user-role");
-    localStorage.removeItem("x-user-email");
-    window.location.href = "/";
+    authService.logout();
   }
 
   // O drawer mobile é um overlay com fechar próprio, não uma barra

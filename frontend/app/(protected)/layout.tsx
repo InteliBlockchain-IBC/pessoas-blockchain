@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { AppShell } from "@/components/layout/AppShell";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 export default async function ProtectedLayout({
   children,
@@ -11,5 +12,9 @@ export default async function ProtectedLayout({
   const cookieStore = await cookies();
   const colapsadaInicial = cookieStore.get("sidebar-colapsada")?.value === "true";
 
-  return <AppShell colapsadaInicial={colapsadaInicial}>{children}</AppShell>;
+  return (
+    <AuthProvider>
+      <AppShell colapsadaInicial={colapsadaInicial}>{children}</AppShell>
+    </AuthProvider>
+  );
 }
