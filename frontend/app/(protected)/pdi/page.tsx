@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/ds/EmptyState";
 import { membersService, Member } from "@/services/members.service";
 import { pdiService, PdiEntry } from "@/services/pdi.service";
 import { MEMBER_STATUS_LABEL, label } from "@/lib/labels";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface MemberPdiRow {
   member: Member;
@@ -20,22 +21,16 @@ interface MemberPdiRow {
 
 export default function PdiListPage() {
   const router = useRouter();
-  const [canAccess, setCanAccess] = useState<boolean | null>(null);
+  const { user } = useAuth();
+  const canAccess = user?.role === "ADMIN" || user?.role === "PEOPLE";
   const [rows, setRows] = useState<MemberPdiRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    // localStorage só existe no cliente — SSR-safe (CLAUDE.md, regra técnica 2).
-    const role = localStorage.getItem("x-user-role") ?? "";
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCanAccess(role === "ADMIN" || role === "PEOPLE");
-  }, []);
-
-  useEffect(() => {
-    if (canAccess !== true) {
+    if (!canAccess) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- só desliga o loading quando o acesso já foi negado
-      if (canAccess === false) setLoading(false);
+      setLoading(false);
       return;
     }
     Promise.all([membersService.getMembers({ limit: 200 }), pdiService.getPdis()])
@@ -94,7 +89,6 @@ export default function PdiListPage() {
     },
   ];
 
-  if (canAccess === null) return null;
   if (!canAccess) {
     return (
       <EmptyState
