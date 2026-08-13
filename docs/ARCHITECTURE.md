@@ -451,7 +451,7 @@ Frontend deploy via Docker image (built by GitHub Actions, `frontend/Dockerfile`
 ```
 GET  /auth/google
 GET  /auth/google/callback
-GET  /auth/me                              [AuthGuard]
+GET  /auth/me                              [AuthGuard] → { id, name, email, image, role }
 ```
 
 ### Users [ADMIN, PEOPLE]

@@ -1,4 +1,4 @@
-import { itensVisiveis } from "./nav-config";
+import { itensVisiveis, PESSOAS } from "./nav-config";
 
 const hrefs = (papel: Parameters<typeof itensVisiveis>[0]) =>
   itensVisiveis(papel).flatMap((g) => g.itens.map((i) => i.href));
@@ -39,5 +39,13 @@ describe("itensVisiveis", () => {
     for (const papel of ["", "ADMIN", "PEOPLE", "INTERVIEWER"] as const) {
       expect(itensVisiveis(papel).every((g) => g.itens.length > 0)).toBe(true);
     }
+  });
+});
+
+describe("PESSOAS", () => {
+  it("inclui ADMIN e PEOPLE, nao INTERVIEWER", () => {
+    expect(PESSOAS).toContain("ADMIN");
+    expect(PESSOAS).toContain("PEOPLE");
+    expect(PESSOAS).not.toContain("INTERVIEWER");
   });
 });

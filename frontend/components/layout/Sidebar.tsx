@@ -1,16 +1,20 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { LogOut, PanelLeftClose, PanelLeftOpen, UserRound, X } from "lucide-react";
+import { LogOut, PanelLeftClose, PanelLeftOpen, Search, UserRound, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { itensVisiveis, type Papel } from "./nav-config";
+import { authService, type CurrentUser } from "@/services/auth.service";
+import { USER_ROLE_LABEL } from "@/lib/labels";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -19,6 +23,13 @@ const ROTULO_PAPEL: Record<string, string> = {
   PEOPLE: "Pessoas",
   INTERVIEWER: "Entrevistador",
 };
+
+/** "Messias Olivindo" → "MO"; sem nome, cai no email. */
+function initials(user: CurrentUser): string {
+  const source = user.name?.trim() || user.email;
+  const parts = source.split(/[\s@._-]+/).filter(Boolean);
+  return `${parts[0]?.[0] ?? "?"}${parts[1]?.[0] ?? ""}`.toUpperCase();
+}
 
 interface SidebarProps {
   /** Vem do AppShell, lido do localStorage uma única vez (spec §13). */
@@ -29,12 +40,31 @@ interface SidebarProps {
   onClose: () => void;
   colapsada: boolean;
   onColapsarChange: (colapsada: boolean) => void;
+  onOpenSearch: () => void;
 }
 
-export function Sidebar({ papel, email, isOpen, onClose, colapsada, onColapsarChange }: SidebarProps) {
+export function Sidebar({ papel, email, isOpen, onClose, colapsada, onColapsarChange, onOpenSearch }: SidebarProps) {
   const pathname = usePathname();
   const grupos = itensVisiveis(papel ?? "");
   const rotuloUsuario = email ?? (papel ? (ROTULO_PAPEL[papel] ?? papel) : "Usuário");
+
+  const [user, setUser] = useState<CurrentUser | null>(null);
+
+  useEffect(() => {
+    // Falha aqui não bloqueia nada: o rodapé cai no rótulo de papel de hoje.
+    // Sessão inválida já é tratada pelo interceptor de 401 em services/api.ts.
+    authService.getMe().then(setUser).catch(() => setUser(null));
+  }, []);
+
+  const rotuloExibido = user ? (user.name ?? user.email) : rotuloUsuario;
+
+  const [shortcut, setShortcut] = useState("Ctrl K");
+
+  useEffect(() => {
+    // navigator só existe no cliente — SSR-safe.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (navigator.userAgent.includes("Mac")) setShortcut("⌘K");
+  }, []);
 
   function alternarColapsada() {
     const novoValor = !colapsada;
@@ -66,11 +96,10 @@ export function Sidebar({ papel, email, isOpen, onClose, colapsada, onColapsarCh
       >
         <div className="flex items-center justify-between gap-1 border-b border-border p-4">
           <Link href="/dashboard" onClick={onClose} className="flex min-w-0 items-center gap-3">
-            <Image src="/logo.png" alt="Inteli Blockchain" width={914} height={1062} priority className="h-9 w-auto shrink-0" />
-            {!efetivamenteColapsada && (
-              <h2 className="truncate font-heading text-lg font-bold leading-tight text-fg">
-                Inteli <span className="text-accent">Blockchain</span>
-              </h2>
+            {efetivamenteColapsada ? (
+              <Image src="/logo.png" alt="Inteli Blockchain" width={914} height={1062} priority className="h-9 w-auto shrink-0" />
+            ) : (
+              <Image src="/logo_texto.png" alt="Inteli Blockchain" width={3651} height={1194} priority className="h-8 w-auto" />
             )}
           </Link>
 
@@ -92,6 +121,30 @@ export function Sidebar({ papel, email, isOpen, onClose, colapsada, onColapsarCh
             className="hidden shrink-0 rounded-field p-1.5 text-fg-muted transition-colors hover:bg-surface hover:text-fg md:flex"
           >
             {colapsada ? <PanelLeftOpen size={18} aria-hidden="true" /> : <PanelLeftClose size={18} aria-hidden="true" />}
+          </button>
+        </div>
+
+        <div className="px-3 pt-3">
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              onOpenSearch();
+            }}
+            aria-label={efetivamenteColapsada ? "Buscar" : undefined}
+            title={efetivamenteColapsada ? "Buscar" : undefined}
+            className={cn(
+              "flex w-full items-center gap-2 rounded-field border border-border bg-surface-sunken px-3 py-2 text-fg-subtle transition-colors hover:border-border-interactive hover:text-fg cursor-pointer",
+              efetivamenteColapsada && "justify-center",
+            )}
+          >
+            <Search size={16} className="shrink-0" aria-hidden="true" />
+            {!efetivamenteColapsada && (
+              <>
+                <span className="flex-1 text-left text-sm">Buscar…</span>
+                <kbd className="text-xs text-fg-subtle">{shortcut}</kbd>
+              </>
+            )}
           </button>
         </div>
 
@@ -136,17 +189,31 @@ export function Sidebar({ papel, email, isOpen, onClose, colapsada, onColapsarCh
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                aria-label={efetivamenteColapsada ? rotuloUsuario : undefined}
-                title={efetivamenteColapsada ? rotuloUsuario : undefined}
+                aria-label={efetivamenteColapsada ? rotuloExibido : undefined}
+                title={efetivamenteColapsada ? rotuloExibido : undefined}
                 className="flex w-full items-center gap-3 rounded-field px-2 py-2 text-left font-heading text-sm font-bold text-fg-muted transition-colors hover:bg-surface hover:text-fg"
               >
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface">
-                  <UserRound size={16} aria-hidden="true" />
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface">
+                  {user?.image ? (
+                    // unoptimized: o avatar vem do googleusercontent.com, e otimizar
+                    // exigiria cadastrar o host em next.config.ts por um icone de 32px.
+                    <Image src={user.image} alt="" width={32} height={32} unoptimized className="h-8 w-8 object-cover" />
+                  ) : user ? (
+                    <span className="font-heading text-xs font-bold text-fg-muted">{initials(user)}</span>
+                  ) : (
+                    <UserRound size={16} aria-hidden="true" />
+                  )}
                 </span>
-                {!efetivamenteColapsada && <span className="min-w-0 flex-1 truncate">{rotuloUsuario}</span>}
+                {!efetivamenteColapsada && <span className="min-w-0 flex-1 truncate">{rotuloExibido}</span>}
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" side="top" className="w-56">
+              {user && (
+                <DropdownMenuLabel className="font-normal">
+                  <p className="truncate font-heading text-sm font-bold text-fg">{user.name ?? user.email}</p>
+                  <p className="truncate text-xs text-fg-muted">{USER_ROLE_LABEL[user.role] ?? user.role}</p>
+                </DropdownMenuLabel>
+              )}
               <DropdownMenuItem variant="destructive" onSelect={sair}>
                 <LogOut size={16} aria-hidden="true" />
                 Sair

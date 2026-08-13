@@ -17,7 +17,7 @@ export interface ItemNav {
   papeis?: Papel[];
 }
 
-const PESSOAS: Papel[] = ["ADMIN", "PEOPLE"];
+export const PESSOAS: Papel[] = ["ADMIN", "PEOPLE"];
 
 export const NAV: { grupo: string; itens: ItemNav[] }[] = [
   {
