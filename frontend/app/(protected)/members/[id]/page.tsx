@@ -134,7 +134,9 @@ export default function MemberProfilePage({
         title={member.name}
         subtitle={member.email}
         icon={User}
-        onBack={() => router.push("/members")}
+        // history.length > 2 = há pra onde voltar dentro do app (a própria
+        // página conta como 1). Link direto/refresh cai no fallback fixo.
+        onBack={() => (window.history.length > 2 ? router.back() : router.push("/members"))}
         actions={
           <Button variant="outline" onClick={handleExportPDF}>
             <FileText size={16} aria-hidden="true" />

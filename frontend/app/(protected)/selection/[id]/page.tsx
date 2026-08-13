@@ -99,7 +99,9 @@ export default function SelectionProcessPage({
             ? `${process.year} · ${applications.length} candidato${applications.length !== 1 ? "s" : ""}`
             : undefined
         }
-        onBack={() => router.push("/selection")}
+        // history.length > 2 = há pra onde voltar dentro do app (a própria
+        // página conta como 1). Link direto/refresh cai no fallback fixo.
+        onBack={() => (window.history.length > 2 ? router.back() : router.push("/selection"))}
         actions={
           <SelectionToolbar processId={processId} onImported={setApplications} />
         }
