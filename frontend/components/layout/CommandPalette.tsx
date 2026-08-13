@@ -137,7 +137,7 @@ export function CommandPalette({ isOpen, onClose, papel }: CommandPaletteProps) 
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent showCloseButton={false} className="top-[12%] max-w-lg translate-y-0 overflow-hidden p-0">
+      <DialogContent showCloseButton={false} className="top-[12%] max-w-lg translate-y-0 overflow-hidden p-0"> {/* check-visual: ok — max-w-lg é o tamanho do modal, não largura de página (spec §5.1) */}
         <div className="flex items-center gap-3 border-b border-border px-4">
           <Search size={18} className="shrink-0 text-fg-subtle" aria-hidden="true" />
           <input
