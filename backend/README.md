@@ -8,7 +8,7 @@ API RESTful construída com NestJS 11 + Prisma 6 + PostgreSQL (auto-hospedado).
 - **Framework:** NestJS 11
 - **ORM:** Prisma 6.x
 - **Banco:** PostgreSQL 15 auto-hospedado na VPS (Docker, sem pooler)
-- **Auth:** Google OAuth 2.0 (`google-auth-library`) + DB-validated header guard
+- **Auth:** Google OAuth 2.0 (`google-auth-library`) + sessão em cookie httpOnly (model `Session`)
 - **Docs:** Swagger em `/docs`
 - **Testes:** Jest + ts-jest (59 testes unitários em 6 suites)
 - **Deploy:** Docker via GitHub Actions + Easypanel
@@ -39,6 +39,10 @@ GOOGLE_CLIENT_ID="<id>.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET="<secret>"
 GOOGLE_OAUTH_REDIRECT_URI="http://localhost:3001/auth/google/callback"
 FRONTEND_URL="http://localhost:3000"
+
+# Dominio do cookie de sessao. Vazio em dev (cookie fica preso ao host que
+# emitiu). Em producao: .inteliblockchain.org (front e API sao subdominios).
+COOKIE_DOMAIN=
 ```
 
 ## Arquitetura
@@ -48,7 +52,8 @@ FRONTEND_URL="http://localhost:3000"
 ```
 Controller → Service → Repository → PrismaService → PostgreSQL
      │
-     ├── AuthGuard (valida x-user-id no DB → seta request.user com role real)
+     ├── SessionGuard (valida cookie `session` contra o model Session → seta request.user)
+     ├── AuthGuard (estende SessionGuard → exige request.user.status === 'APPROVED')
      ├── RolesGuard (@Roles() → verifica request.user.role)
      └── DTOs (class-validator, whitelist, forbidNonWhitelisted)
 ```
@@ -57,7 +62,7 @@ Controller → Service → Repository → PrismaService → PostgreSQL
 
 | Módulo | Responsabilidade | Rotas |
 |--------|-----------------|-------|
-| `auth` | Google OAuth 2.0, guard DB-validated | 3 |
+| `auth` | Google OAuth 2.0, sessão em cookie httpOnly | 4 |
 | `users` | CRUD usuários, aprovação, roles | 4 |
 | `members` | CRUD membros, filtros, assignments | 8 |
 | `selection` | Processos, etapas, questões, candidaturas, resultados, avaliações, respostas | 24+ |
@@ -71,7 +76,8 @@ Controller → Service → Repository → PrismaService → PostgreSQL
 | `PrismaService` | `@Global()` — injetável em qualquer módulo sem importar PrismaModule |
 | `ResponseInterceptor` | Envelopa **todas** as respostas: `{status, message, success, data, error, meta}` |
 | `HttpExceptionFilter` | Mapeia erros para: `VALIDATION_ERROR`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `CONFLICT`, `INTERNAL_ERROR` |
-| `AuthGuard` | Valida `x-user-id` no banco — role lida do DB, ignora `x-user-role` header |
+| `SessionGuard` | Valida o cookie `session` contra o model `Session` — não checa `status` (usado por `/auth/me` e `/auth/logout`) |
+| `AuthGuard` | Estende `SessionGuard` — exige `status === 'APPROVED'`. Role e status sempre lidos do banco |
 | `RolesGuard` | Verifica `request.user.role` contra `@Roles()` decorator |
 
 ## Padrão de Resposta
@@ -91,17 +97,25 @@ Todas as respostas seguem o envelope (sucesso e erro):
 
 O frontend sempre lê `response.data?.data`.
 
-## Auth Guard (DB-Validated)
+## Autenticação por Sessão (Cookie httpOnly)
 
 ```
-Request → header x-user-id
-        → prisma.user.findUnique({ where: { id } })
-        → 401 se usuário não encontrado
-        → 403 se status != APPROVED
-        → request.user = { id, role }  ← role do banco, nunca do header
+GET /auth/google/callback (troca code, valida dominio, upsert User/Account)
+        → SessionService.create(userId): cria linha em Session, token opaco 256 bits
+        → res.cookie('session', token, { httpOnly, sameSite: lax, maxAge: 7d, secure em prod })
+        → redirect /dashboard (APPROVED) ou /pendente (PENDING)
+
+Request subsequente → cookie `session` (enviado pelo browser, sem header manual)
+        → SessionGuard: valida token contra Session, renova `expires` (sliding)
+          quando resta < metade da janela de 7 dias
+        → 401 se cookie ausente, sessao invalida ou expirada
+        → request.user = { id, role, status, name, email, image }  ← tudo do banco
+
+AuthGuard estende SessionGuard:
+        → 403 se request.user.status !== 'APPROVED'
 ```
 
-`x-user-role` header é **enviado** pelo frontend (para routing de UI), mas **ignorado** pelo backend para autorização.
+Role e status são sempre lidos do banco a cada request — não existe mais header de identidade (`x-user-id` foi removido). Ver `src/modules/auth/session.service.ts`, `session.guard.ts`, `session.cookie.ts`, `auth.guard.ts`.
 
 ## RBAC
 
@@ -121,9 +135,10 @@ Request → header x-user-id
 
 ### Auth
 ```
-GET  /auth/me                    → usuário autenticado (AuthGuard)
 GET  /auth/google                → redirect Google OAuth (público)
-GET  /auth/google/callback       → callback OAuth (público)
+GET  /auth/google/callback       → callback OAuth: cria Session, emite cookie (público)
+GET  /auth/me                    → usuário autenticado (SessionGuard — funciona com status PENDING)
+POST /auth/logout                → revoga a Session atual e limpa o cookie (SessionGuard)
 ```
 
 ### Users

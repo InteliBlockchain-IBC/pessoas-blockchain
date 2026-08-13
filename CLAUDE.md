@@ -47,8 +47,8 @@ Commits em conventional commits com descrição em português: `feat: adiciona B
 
 ## Regras técnicas críticas
 
-1. **AuthGuard valida `x-user-id` no DB e lê role do DB.** Header `x-user-role` é **ignorado** pelo backend (anti-escalada). Frontend usa role do localStorage só para UI gating. Ver `backend/src/modules/auth/auth.guard.ts`.
-2. **SSR-safe**: nunca `typeof window !== 'undefined'` no render. Padrão: `useState<boolean | null>(null)` + `useEffect` lendo localStorage. Páginas com guard retornam `null` enquanto carrega (sem flash).
+1. **Autenticação por cookie de sessão httpOnly.** O callback do Google cria uma linha em `Session` e emite o cookie `session` (7 dias deslizantes). `SessionGuard` valida a sessão; `AuthGuard` estende ele exigindo `status === 'APPROVED'`. Role é sempre lida do banco — nenhum header de cliente influencia identidade ou permissão. Ver `backend/src/modules/auth/session.guard.ts`.
+2. **SSR-safe**: nunca `typeof window !== 'undefined'` no render. Páginas com guard retornam `null` enquanto carrega (sem flash).
 3. **Resposta API**: tudo envelopado por `ResponseInterceptor` — `{status, message, success, data, error, meta}`. Frontend lê `response.data?.data`.
 4. **PDI auto-revisão**: `PATCH /pdi/:id` cria `PdiEntryRevision` em `$transaction` (timeout 30s) quando `content` muda. `authorId`/`editorId` **nullable** (`onDelete: SetNull`).
 5. **Paginação por cursor** em todas listagens: `cursor`, `limit`, `sort`, `direction`. `meta.nextCursor` no retorno.
