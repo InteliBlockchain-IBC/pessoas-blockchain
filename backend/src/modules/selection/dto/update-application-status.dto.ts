@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsIn, IsOptional, IsString } from 'class-validator';
 
 export class UpdateApplicationStatusDto {
   @ApiProperty({
@@ -22,4 +22,12 @@ export class UpdateApplicationStatusDto {
     'WITHDRAWN',
   ])
   status!: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Observações gerais da candidatura. Omitir mantém o valor atual.',
+  })
+  @IsOptional()
+  @IsString()
+  notes?: string;
 }
