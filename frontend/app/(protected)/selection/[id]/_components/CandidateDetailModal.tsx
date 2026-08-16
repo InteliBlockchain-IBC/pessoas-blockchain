@@ -35,6 +35,7 @@ export function CandidateDetailModal({
   const router = useRouter();
   const [app, setApp] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeStageId, setActiveStageId] = useState<string | undefined>();
 
   useEffect(() => {
     selectionService
@@ -68,7 +69,7 @@ export function CandidateDetailModal({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl"> {/* check-visual: ok — largura do dialog, não da página */}
         <DialogHeader>
           <DialogTitle>
             {loading
@@ -95,6 +96,9 @@ export function CandidateDetailModal({
               <ApplicationSummary
                 application={app}
                 canEdit={canEdit}
+                stages={stages}
+                activeStageId={activeStageId}
+                onSelectStage={setActiveStageId}
                 onSaved={setApp}
               />
 
@@ -154,6 +158,7 @@ export function CandidateDetailModal({
                       evals={evals}
                       canEdit={canEdit}
                       defaultOpen
+                      forceOpen={stage.id === activeStageId}
                       onSaved={setApp}
                     />
                   );

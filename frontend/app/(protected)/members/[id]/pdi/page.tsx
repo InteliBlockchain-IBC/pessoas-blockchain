@@ -156,7 +156,8 @@ export default function PDIPage({ params }: { params: Promise<{ id: string }> })
       <div className="flex flex-col gap-4">
         <h2 className="text-xl font-bold">Editar PDI (Suporta Markdown)</h2>
         {loadingPdi ? (
-          <div className="flex h-48 items-center justify-center text-sm opacity-50">
+          <div className="flex h-48 items-center justify-center gap-2 text-sm opacity-50">
+            <Loader2 size={16} className="animate-spin" aria-hidden="true" />
             Carregando PDI...
           </div>
         ) : (

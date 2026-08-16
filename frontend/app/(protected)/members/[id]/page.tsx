@@ -3,7 +3,7 @@
 import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FileText, User, ArrowRight } from "lucide-react";
+import { FileText, User, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -17,10 +17,12 @@ import { SectionCard } from "@/components/ds/SectionCard";
 import { DataRow } from "@/components/ds/DataRow";
 import { Field } from "@/components/ds/Field";
 import { StatusBadge } from "@/components/ds/StatusBadge";
-import { Moldura } from "@/components/ds/Moldura";
+import { MarkdownEditor } from "@/components/ds/MarkdownEditor";
+import { MarkdownViewer } from "@/components/ds/MarkdownViewer";
 import { notificar } from "@/components/ds/toast-helpers";
 import { membersService, Member } from "@/services/members.service";
 import { selectionService, Application } from "@/services/selection.service";
+import { pdiService, PdiEntry } from "@/services/pdi.service";
 import {
   MEMBER_STATUS_LABEL,
   DEPARTMENT_LABEL,
@@ -43,6 +45,15 @@ const RACE_OPTIONS = ["Branco", "Pardo", "Preto", "Amarelo", "Indígena", "Prefi
 // existiam porque o componente Input nunca chegou nesta página.
 const CAMPO =
   "h-10 w-full rounded-field border border-border-interactive bg-surface-sunken px-3 text-sm text-fg focus:border-accent focus:outline-none";
+
+interface PdiForm {
+  content: string;
+}
+
+// Mesmo texto padrão que /members/[id]/pdi/page.tsx usa quando não existe
+// PDI ainda — mantém as duas telas consistentes pra quem alterna entre elas.
+const DEFAULT_PDI_CONTENT =
+  "# Meu Plano de Desenvolvimento Individual\n\n## Metas do Semestre\n- \n\n## Pontos Fortes\n- \n\n## Áreas de Desenvolvimento\n- \n";
 
 function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return "";
@@ -75,8 +86,10 @@ export default function MemberProfilePage({
 
   const [member, setMember] = useState<Member | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [pdi, setPdi] = useState<PdiEntry | null>(null);
   const [loadingMember, setLoadingMember] = useState(true);
   const [loadingApps, setLoadingApps] = useState(true);
+  const [loadingPdi, setLoadingPdi] = useState(true);
   const { user } = useAuth();
   const canEdit = user?.role === "ADMIN" || user?.role === "PEOPLE";
 
@@ -95,6 +108,12 @@ export default function MemberProfilePage({
         if (status !== 404) console.error("getMemberApplications:", status, err?.message);
       })
       .finally(() => setLoadingApps(false));
+
+    pdiService
+      .getPdis(memberId)
+      .then((pdis) => setPdi(pdis.find((p) => p.isActive) ?? pdis[0] ?? null))
+      .catch(() => {})
+      .finally(() => setLoadingPdi(false));
   }, [memberId]);
 
   const handleExportPDF = async () => {
@@ -107,7 +126,8 @@ export default function MemberProfilePage({
 
   if (loadingMember) {
     return (
-      <div className="p-8 text-fg opacity-70">
+      <div className="flex items-center gap-2 p-8 text-fg opacity-70">
+        <Loader2 size={16} className="animate-spin" aria-hidden="true" />
         Carregando perfil...
       </div>
     );
@@ -127,6 +147,24 @@ export default function MemberProfilePage({
       return m ?? undefined;
     });
 
+  const pdiForm: PdiForm = { content: pdi?.content ?? DEFAULT_PDI_CONTENT };
+
+  const salvarPdi = async (
+    payload: Partial<PdiForm>,
+  ): Promise<PdiForm | void> => {
+    const content = payload.content ?? pdiForm.content;
+    const saved = pdi
+      ? await pdiService.updatePdi(pdi.id, pdi.title, content)
+      : await pdiService.savePdi(
+          memberId,
+          "Plano de Desenvolvimento Individual",
+          content,
+        );
+    if (!saved) return;
+    setPdi(saved);
+    return { content: saved.content };
+  };
+
   return (
     <div className="space-y-8">
       <PageHeader
@@ -145,6 +183,8 @@ export default function MemberProfilePage({
         }
       />
 
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+      <div className="md:col-span-2">
       <SectionCard label="IDENTIFICAÇÃO" editable={canEdit} values={member} onSave={salvar}>
         {({ editing, values, set, errors }) =>
           editing ? (
@@ -211,7 +251,9 @@ export default function MemberProfilePage({
           )
         }
       </SectionCard>
+      </div>
 
+      <div className="flex flex-col gap-8">
       <SectionCard label="DEMOGRÁFICOS" editable={canEdit} values={member} onSave={salvar}>
         {({ editing, values, set }) =>
           editing ? (
@@ -281,26 +323,49 @@ export default function MemberProfilePage({
           </>
         )}
       </SectionCard>
+      </div>
+      </div>
 
-      <Moldura shadow="ciano" interactive fill="educational">
-        <Link
-          href={`/members/${memberId}/pdi`}
-          className="flex items-center justify-between gap-4 p-6 focus-visible:outline-offset-[10px]"
-        >
-          <div>
-            <h2 className="font-heading text-lg font-bold">Plano de Desenvolvimento Individual</h2>
-            <p className="mt-1 text-sm opacity-80">
-              Acesse e edite o PDI deste membro, exporte em PDF ou CSV com o histórico de revisões.
-            </p>
+      <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-2">
+      <SectionCard
+        label="PLANO DE DESENVOLVIMENTO INDIVIDUAL"
+        editable={canEdit}
+        values={pdiForm}
+        onSave={salvarPdi}
+      >
+        {(ctx) => (
+          <div className="flex flex-col gap-4">
+            {loadingPdi ? (
+              <p className="flex items-center gap-2 text-sm text-fg-muted">
+                <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+                Carregando PDI...
+              </p>
+            ) : ctx.editing ? (
+              <MarkdownEditor
+                value={ctx.values.content}
+                onChange={(v) => ctx.set("content", v)}
+                placeholder="Suporta Markdown (ex.: **negrito**, - lista)"
+              />
+            ) : (
+              <MarkdownViewer content={ctx.values.content} />
+            )}
+            <Link
+              href={`/members/${memberId}/pdi`}
+              className="flex items-center gap-1 self-start text-xs text-accent hover:underline"
+            >
+              Ver histórico e exportar <ArrowRight size={12} aria-hidden="true" />
+            </Link>
           </div>
-          <ArrowRight size={20} aria-hidden="true" className="shrink-0" />
-        </Link>
-      </Moldura>
+        )}
+      </SectionCard>
 
       <SectionCard label="PROCESSOS SELETIVOS" values={{}}>
         {() =>
           loadingApps ? (
-            <p className="text-sm text-fg-muted">Carregando histórico...</p>
+            <p className="flex items-center gap-2 text-sm text-fg-muted">
+              <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+              Carregando histórico...
+            </p>
           ) : applications.length === 0 ? (
             <p className="text-sm text-fg-muted">
               Nenhum processo seletivo registrado para este membro.
@@ -314,6 +379,7 @@ export default function MemberProfilePage({
           )
         }
       </SectionCard>
+      </div>
     </div>
   );
 }
