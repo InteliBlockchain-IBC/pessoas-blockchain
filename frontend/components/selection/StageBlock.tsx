@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SectionCard } from "@/components/ds/SectionCard";
+import { DataRow } from "@/components/ds/DataRow";
 import { Field } from "@/components/ds/Field";
 import { STATUS_LABELS } from "@/components/ds/StatusBadge";
 import {
@@ -81,6 +82,41 @@ function notesForApi(v: string | null | undefined): string | null | undefined {
   return v;
 }
 
+/** União dos IDs de questão que têm resposta e/ou avaliação, ordenada. Uma
+ * questão pode ter só avaliação (ex.: entrevista sem resposta de texto). */
+function stageRows(answers: AnswerItem[], evals: EvaluationItem[]) {
+  const byId = new Map<
+    string,
+    {
+      questionId: string;
+      order: number;
+      title: string;
+      answer?: AnswerItem;
+      evaluation?: EvaluationItem;
+    }
+  >();
+  for (const a of answers) {
+    byId.set(a.questionId, {
+      questionId: a.questionId,
+      order: a.question.order,
+      title: a.question.title,
+      answer: a,
+    });
+  }
+  for (const e of evals) {
+    const existing = byId.get(e.questionId);
+    if (existing) existing.evaluation = e;
+    else
+      byId.set(e.questionId, {
+        questionId: e.questionId,
+        order: e.question.order,
+        title: e.question.title,
+        evaluation: e,
+      });
+  }
+  return [...byId.values()].sort((a, b) => a.order - b.order);
+}
+
 function StageReadOnly({
   result,
   answers,
@@ -97,68 +133,42 @@ function StageReadOnly({
       </p>
     );
   }
+
+  const rows = stageRows(answers, evals);
+
   return (
-    <div className="flex flex-col gap-4 pb-1">
-      {result?.notes && (
-        <div className="text-xs bg-surface border border-border rounded-block px-3 py-2.5 text-fg whitespace-pre-wrap">
-          <span className="font-semibold opacity-50 block mb-1">
-            Observação da etapa:
-          </span>
-          {result.notes}
-        </div>
-      )}
-      {answers.length > 0 && (
-        <div className="flex flex-col gap-3">
-          <p className="text-xs font-semibold opacity-50 uppercase tracking-wide">
-            Respostas
-          </p>
-          {[...answers]
-            .sort((a, b) => a.question.order - b.question.order)
-            .map((a) => (
-              <div key={a.id} className="flex flex-col gap-1">
-                <p className="text-xs font-semibold text-accent">
-                  {a.question.order}. {a.question.title}
-                </p>
-                <p className="text-sm text-fg bg-surface border border-border rounded-block px-3 py-2 whitespace-pre-wrap leading-relaxed">
-                  {a.answerText}
-                </p>
-              </div>
-            ))}
-        </div>
-      )}
-      {evals.length > 0 && (
-        <div className="flex flex-col gap-3">
-          <p className="text-xs font-semibold opacity-50 uppercase tracking-wide">
-            Avaliações
-          </p>
-          {[...evals]
-            .sort((a, b) => a.question.order - b.question.order)
-            .map((e) => (
-              <div key={e.id} className="flex flex-col gap-1">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-semibold text-accent">
-                    {e.question.order}. {e.question.title}
-                  </p>
-                  {e.score != null && (
-                    <span className="text-xs font-mono font-bold text-fg bg-surface-raised border border-border px-2 py-0.5 rounded">
-                      {e.score}
-                      {e.question.maxScore > 0 && (
-                        <span className="opacity-50">
-                          /{e.question.maxScore}
-                        </span>
-                      )}
-                    </span>
-                  )}
-                </div>
-                {e.notes && (
-                  <p className="text-sm text-fg bg-surface border border-border rounded-block px-3 py-2 whitespace-pre-wrap leading-relaxed">
-                    {e.notes}
-                  </p>
+    <div className="flex flex-col gap-4">
+      {result?.notes && <DataRow label="Observação" value={result.notes} />}
+
+      {rows.map((row) => (
+        <div key={row.questionId} className="flex flex-col gap-1">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs font-semibold text-accent">
+              {row.order}. {row.title}
+            </p>
+            {row.evaluation?.score != null && (
+              <span className="shrink-0 text-xs font-mono font-bold text-fg">
+                {row.evaluation.score}
+                {row.evaluation.question.maxScore > 0 && (
+                  <span className="opacity-50">
+                    /{row.evaluation.question.maxScore}
+                  </span>
                 )}
-              </div>
-            ))}
+              </span>
+            )}
+          </div>
+          {row.answer && (
+            <p className="border-l-2 border-border pl-3 text-sm text-fg whitespace-pre-wrap leading-relaxed">
+              {row.answer.answerText}
+            </p>
+          )}
+          {row.evaluation?.notes && (
+            <p className="pl-3 text-xs italic text-fg-muted whitespace-pre-wrap">
+              {row.evaluation.notes}
+            </p>
+          )}
         </div>
-      )}
+      ))}
     </div>
   );
 }
@@ -306,7 +316,6 @@ export function StageBlock({
 
       {open &&
         (canEdit ? (
-          <div className="px-4 pb-4">
             <SectionCard
               label="Detalhes da etapa"
               editable
@@ -423,7 +432,6 @@ export function StageBlock({
                 )
               }
             </SectionCard>
-          </div>
         ) : (
           <div className="px-4 pb-4">
             <StageReadOnly result={result} answers={answers} evals={evals} />
