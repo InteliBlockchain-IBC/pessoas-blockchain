@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, Users, UserCheck, FileText, ClipboardList } from "lucide-react";
+import { LayoutDashboard, Users, UserCheck, FileText, ClipboardList, Loader2 } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import { setupApiClient } from "@/services/api";
 import { dashboardService, type DashboardMetrics } from "@/services/dashboard.service";
@@ -87,7 +87,14 @@ function DashboardContent() {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-fg">Carregando dashboard...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex items-center gap-2 p-8 text-fg">
+          <Loader2 size={16} className="animate-spin opacity-60" aria-hidden="true" />
+          Carregando dashboard...
+        </div>
+      }
+    >
       <DashboardContent />
     </Suspense>
   );
