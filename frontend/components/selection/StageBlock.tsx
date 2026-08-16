@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronUp, ChevronDown, Clock } from "lucide-react";
 import {
   Select,
@@ -173,6 +173,9 @@ export interface StageBlockProps {
   evals: EvaluationItem[];
   canEdit: boolean;
   defaultOpen?: boolean;
+  /** Quando vira `true`, força a etapa a abrir e rola até ela — usado pelo
+   * clique num nó do StageRail. */
+  forceOpen?: boolean;
   /** Chamado com a Application inteira, recém-buscada, após salvar. */
   onSaved: (app: Application) => void;
 }
@@ -185,9 +188,18 @@ export function StageBlock({
   evals,
   canEdit,
   defaultOpen = false,
+  forceOpen = false,
   onSaved,
 }: StageBlockProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!forceOpen) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza com o clique num nó do StageRail (prop externa), não deriva de outro estado; mesmo padrão já usado em members/[id]/page.tsx e ds/SectionCard.tsx
+    setOpen(true);
+    containerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [forceOpen]);
 
   const questions = useMemo(
     () => [...(stage.questions ?? [])].sort((a, b) => a.order - b.order),
@@ -269,7 +281,7 @@ export function StageBlock({
   };
 
   return (
-    <div className="flex flex-col border-b border-border last:border-b-0">
+    <div ref={containerRef} className="flex flex-col border-b border-border last:border-b-0">
       <button
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-3 px-4 py-3 bg-surface-raised hover:bg-surface transition-colors text-left"

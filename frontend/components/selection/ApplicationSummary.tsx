@@ -10,7 +10,16 @@ import {
 import { SectionCard } from "@/components/ds/SectionCard";
 import { Field } from "@/components/ds/Field";
 import { StatusBadge, STATUS_LABELS } from "@/components/ds/StatusBadge";
-import { selectionService, Application } from "@/services/selection.service";
+import {
+  selectionService,
+  Application,
+  Stage,
+} from "@/services/selection.service";
+import {
+  StageRail,
+  railStagesFromResults,
+  railStagesFromStages,
+} from "./StageRail";
 import { getTotalScore, CAMPO } from "./helpers";
 
 const STATUS_OPTIONS = [
@@ -30,6 +39,12 @@ interface CandidacyForm {
 export interface ApplicationSummaryProps {
   application: Application;
   canEdit: boolean;
+  /** Presente só quando o chamador já tem o processo inteiro em memória
+   * (/selection/[id]) — a trilha então inclui etapas sem resultado. Ausente
+   * no perfil, que não carrega o processo inteiro. */
+  stages?: Stage[];
+  activeStageId?: string;
+  onSelectStage?: (id: string) => void;
   /** Chamado com a Application inteira, recém-buscada, após salvar. */
   onSaved: (app: Application) => void;
 }
@@ -37,6 +52,9 @@ export interface ApplicationSummaryProps {
 export function ApplicationSummary({
   application,
   canEdit,
+  stages,
+  activeStageId,
+  onSelectStage,
   onSaved,
 }: ApplicationSummaryProps) {
   const form: CandidacyForm = {
@@ -44,6 +62,9 @@ export function ApplicationSummary({
     notes: application.notes,
   };
   const totalScore = getTotalScore(application);
+  const railStages = stages
+    ? railStagesFromStages(stages, application.results)
+    : railStagesFromResults(application.results);
 
   const handleSave = async (
     payload: Partial<CandidacyForm>,
@@ -85,6 +106,12 @@ export function ApplicationSummary({
           </span>
         )}
       </div>
+
+      <StageRail
+        stages={railStages}
+        activeStageId={activeStageId}
+        onSelect={onSelectStage}
+      />
 
       {canEdit ? (
         <SectionCard

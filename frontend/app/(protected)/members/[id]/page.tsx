@@ -148,6 +148,8 @@ export default function MemberProfilePage({
         }
       />
 
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+      <div className="md:col-span-2">
       <SectionCard label="IDENTIFICAÇÃO" editable={canEdit} values={member} onSave={salvar}>
         {({ editing, values, set, errors }) =>
           editing ? (
@@ -214,7 +216,9 @@ export default function MemberProfilePage({
           )
         }
       </SectionCard>
+      </div>
 
+      <div className="flex flex-col gap-8">
       <SectionCard label="DEMOGRÁFICOS" editable={canEdit} values={member} onSave={salvar}>
         {({ editing, values, set }) =>
           editing ? (
@@ -284,7 +288,10 @@ export default function MemberProfilePage({
           </>
         )}
       </SectionCard>
+      </div>
+      </div>
 
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
       <Moldura shadow="ciano" interactive fill="educational">
         <Link
           href={`/members/${memberId}/pdi`}
@@ -317,6 +324,7 @@ export default function MemberProfilePage({
           )
         }
       </SectionCard>
+      </div>
     </div>
   );
 }

@@ -32,6 +32,7 @@ export function ApplicationCard({
   const [stagesWithQuestions, setStagesWithQuestions] = useState<Stage[] | null>(
     null,
   );
+  const [activeStageId, setActiveStageId] = useState<string | undefined>();
 
   // A fatia mais fresca conhecida: o detalhe buscado ao expandir (e
   // re-buscado após qualquer salvamento), com fallback pro resumo que a
@@ -118,6 +119,8 @@ export function ApplicationCard({
                 <ApplicationSummary
                   application={current}
                   canEdit={canEdit}
+                  activeStageId={activeStageId}
+                  onSelectStage={setActiveStageId}
                   onSaved={setDetail}
                 />
                 {(current.results ?? [])
@@ -144,6 +147,7 @@ export function ApplicationCard({
                           (e) => e.question.stageId === r.stageId,
                         )}
                         canEdit={canEdit}
+                        forceOpen={r.stageId === activeStageId}
                         onSaved={setDetail}
                       />
                     );
