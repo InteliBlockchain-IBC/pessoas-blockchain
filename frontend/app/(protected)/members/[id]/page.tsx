@@ -3,7 +3,7 @@
 import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FileText, User, ArrowRight } from "lucide-react";
+import { FileText, User, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -131,7 +131,8 @@ export default function MemberProfilePage({
 
   if (loadingMember) {
     return (
-      <div className="p-8 text-fg opacity-70">
+      <div className="flex items-center gap-2 p-8 text-fg opacity-70">
+        <Loader2 size={16} className="animate-spin" aria-hidden="true" />
         Carregando perfil...
       </div>
     );
@@ -328,7 +329,7 @@ export default function MemberProfilePage({
       </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+      <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-2">
       <SectionCard
         label="PLANO DE DESENVOLVIMENTO INDIVIDUAL"
         editable={canEdit}
@@ -338,7 +339,10 @@ export default function MemberProfilePage({
         {(ctx) => (
           <div className="flex flex-col gap-4">
             {loadingPdi ? (
-              <p className="text-sm text-fg-muted">Carregando PDI...</p>
+              <p className="flex items-center gap-2 text-sm text-fg-muted">
+                <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+                Carregando PDI...
+              </p>
             ) : ctx.editing ? (
               <MarkdownEditor
                 value={ctx.values.content}
@@ -361,7 +365,10 @@ export default function MemberProfilePage({
       <SectionCard label="PROCESSOS SELETIVOS" values={{}}>
         {() =>
           loadingApps ? (
-            <p className="text-sm text-fg-muted">Carregando histórico...</p>
+            <p className="flex items-center gap-2 text-sm text-fg-muted">
+              <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+              Carregando histórico...
+            </p>
           ) : applications.length === 0 ? (
             <p className="text-sm text-fg-muted">
               Nenhum processo seletivo registrado para este membro.
