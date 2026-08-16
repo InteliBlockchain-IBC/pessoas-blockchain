@@ -42,7 +42,7 @@ export function Field({
   return (
     <div className={cn(LINHA_ALTURA, "flex flex-col gap-1 border-b border-border last:border-b-0", className)}>
       <div className="flex items-center gap-4">
-        <label htmlFor={id} className="w-36 shrink-0 text-sm text-fg-muted">
+        <label htmlFor={id} className="w-28 shrink-0 text-sm text-fg-muted sm:w-36">
           {label}
         </label>
         <div className="min-w-0 flex-1">{campo}</div>
