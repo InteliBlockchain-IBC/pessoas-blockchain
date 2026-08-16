@@ -157,7 +157,7 @@ export function SectionCard<T extends object>({
 
   return (
     <section
-      className={cn("rounded-none border border-border bg-surface-raised p-6", className)}
+      className={cn("rounded-block border border-border bg-surface-raised p-6", className)}
     >
       <div className="mb-4 flex items-center justify-between gap-4 border-b border-border pb-3">
         <h2 className="rotulo-em-card">{label}</h2>
