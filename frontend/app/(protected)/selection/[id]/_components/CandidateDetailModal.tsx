@@ -69,7 +69,7 @@ export function CandidateDetailModal({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl"> {/* check-visual: ok — largura do dialog, não da página */}
         <DialogHeader>
           <DialogTitle>
             {loading
