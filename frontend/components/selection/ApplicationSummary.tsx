@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SectionCard } from "@/components/ds/SectionCard";
+import { DataRow } from "@/components/ds/DataRow";
 import { Field } from "@/components/ds/Field";
 import { StatusBadge, STATUS_LABELS } from "@/components/ds/StatusBadge";
 import {
@@ -82,10 +83,14 @@ export function ApplicationSummary({
     return { status: fresh.status, notes: fresh.notes };
   };
 
-  const notesReadOnly = application.notes && (
-    <p className="text-xs text-fg opacity-70 whitespace-pre-wrap">
-      {application.notes}
-    </p>
+  const readOnlyRows = (
+    <>
+      <DataRow
+        label="Status"
+        value={STATUS_LABELS[application.status] ?? application.status}
+      />
+      <DataRow label="Observações" value={application.notes} />
+    </>
   );
 
   return (
@@ -154,12 +159,12 @@ export function ApplicationSummary({
                 </Field>
               </>
             ) : (
-              notesReadOnly
+              readOnlyRows
             )
           }
         </SectionCard>
       ) : (
-        notesReadOnly
+        readOnlyRows
       )}
     </div>
   );
