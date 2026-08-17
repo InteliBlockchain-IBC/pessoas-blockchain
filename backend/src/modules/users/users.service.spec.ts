@@ -44,7 +44,7 @@ describe('UsersService', () => {
 
       const result = await service.list({});
       
-      expect(result).toEqual({ items: users });
+      expect(result).toEqual(users);
       expect(repository.findMany).toHaveBeenCalledWith({
         role: undefined,
         status: undefined,
