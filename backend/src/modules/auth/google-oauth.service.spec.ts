@@ -60,7 +60,6 @@ describe('GoogleOAuthService', () => {
       expect(url).toBe('https://accounts.google.com/o/oauth2/v2/auth?...');
       expect(mockGenerateAuthUrl).toHaveBeenCalledWith({
         access_type: 'offline',
-        prompt: 'consent',
         scope: [
           'openid',
           'email',

@@ -46,6 +46,10 @@ export class AuthRepository {
    *
    * Uses a Prisma transaction to guarantee atomicity.
    *
+   * O status NAO e escrito aqui: no create vale o default PENDING do schema
+   * (aprovacao por admin), e no update ele e deliberadamente preservado —
+   * escrever APPROVED aqui desfazia a rejeicao a cada novo login.
+   *
    * @param profile - Google user profile data.
    * @param tokens  - OAuth tokens returned by Google.
    * @returns The upserted User record.
@@ -75,13 +79,11 @@ export class AuthRepository {
           name: profile.name ?? null,
           image: profile.picture ?? null,
           emailVerified: new Date(),
-          status: 'APPROVED',
         },
         update: {
           name: profile.name ?? undefined,
           image: profile.picture ?? undefined,
           emailVerified: new Date(),
-          status: 'APPROVED',
         },
       });
 

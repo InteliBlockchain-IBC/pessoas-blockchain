@@ -1,6 +1,6 @@
 # Arquitetura — Inteli Blockchain Gestão de Pessoas
 
-**Última atualização:** 2026-08-06
+**Última atualização:** 2026-08-12
 
 ## Sumário
 
@@ -15,7 +15,7 @@
 5. [Backend (NestJS)](#5-backend-nestjs)
    - [Módulos](#51-módulos)
    - [Padrão de Resposta](#52-padrão-de-resposta)
-   - [Auth Guard (DB-Validated)](#53-auth-guard-db-validated)
+   - [Autenticação por Sessão (Cookie httpOnly)](#53-autenticação-por-sessão-cookie-httponly)
    - [RBAC](#54-rbac)
    - [Paginação por Cursor](#55-paginação-por-cursor)
 6. [Frontend (Next.js)](#6-frontend-nextjs)
@@ -35,7 +35,7 @@ Plataforma interna para gerenciar a jornada dos integrantes do clube Inteli Bloc
 
 **Escopo MVP implementado:** Membros, Processo Seletivo completo (processes/stages/questions/applications/results/evaluations/answers), PDI com histórico de revisões, Import/Export xlsx/csv/pdf.
 
-**Fora do MVP:** Google Calendar, autenticação por cookie/sessão (Session model existe mas não está ativo).
+**Fora do MVP:** Google Calendar (schema e escopo OAuth `calendar.events` já preparados).
 
 ---
 
@@ -47,7 +47,7 @@ Plataforma interna para gerenciar a jornada dos integrantes do clube Inteli Bloc
 | Backend | NestJS, TypeScript, Swagger | NestJS 11 | Docker (Easypanel) |
 | ORM | Prisma | 6.x | — |
 | Banco | PostgreSQL 15 (auto-hospedado) | — | Easypanel (VPS) |
-| Auth | Google OAuth 2.0 + DB-validated header guard | `google-auth-library` 10 | — |
+| Auth | Google OAuth 2.0 + sessão em cookie httpOnly (model `Session`) | `google-auth-library` 10 | — |
 | Animações | Framer Motion | 12 | — |
 | PDF | pdfkit | 0.18 | — |
 | Excel | xlsx | 0.18 | — |
@@ -136,7 +136,7 @@ model User {
   email         String     @unique
   emailVerified DateTime?
   image         String?
-  role          UserRole   @default(PEOPLE)
+  role          UserRole   @default(INTERVIEWER)
   status        UserStatus @default(PENDING)
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
@@ -147,6 +147,8 @@ model User {
   evaluations   CandidateEvaluation[]
 }
 ```
+
+Todo usuário criado via login Google nasce `status: PENDING` e `role: INTERVIEWER` (defaults do schema). Ele só ganha acesso aos endpoints protegidos por `AuthGuard` depois que um `ADMIN` ou `PEOPLE` aprova via `PATCH /users/:id/approve`.
 
 #### Account (OAuth tokens)
 ```prisma
@@ -161,6 +163,19 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 ```
+
+#### Session (sessão de cookie httpOnly)
+```prisma
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+```
+
+Token opaco (256 bits, `crypto.randomBytes`), guardado em claro — não é derivado de segredo do usuário nem reutilizável em outro sistema, então um hash só protegeria contra leitura direta do banco. `expires` é renovado (sliding renewal) só quando resta menos da metade da janela de 7 dias, para não gerar um `UPDATE` por request. Sessão expirada é apagada de forma preguiçosa, na primeira validação que a encontra (sem job periódico). Ver `backend/src/modules/auth/session.service.ts`.
 
 #### Member
 ```prisma
@@ -269,7 +284,8 @@ O script `backend/scripts/seed.ts` popula o banco a partir das planilhas em `dat
 ```
 Controller → Service → Repository → PrismaService → PostgreSQL
      │
-     ├── AuthGuard (valida x-user-id no DB, seta request.user com role real)
+     ├── SessionGuard (valida cookie `session` contra o model Session, seta request.user)
+     ├── AuthGuard (estende SessionGuard, exige request.user.status === 'APPROVED')
      ├── RolesGuard (verifica request.user.role contra @Roles())
      └── DTOs (class-validator, whitelist=true, forbidNonWhitelisted=true)
 ```
@@ -295,20 +311,27 @@ Controller → Service → Repository → PrismaService → PostgreSQL
 
 Frontend sempre lê `response.data?.data`.
 
-### 5.3. Auth Guard (DB-Validated)
+### 5.3. Autenticação por Sessão (Cookie httpOnly)
+
+O callback do Google (`GET /auth/google/callback`) cria uma linha em `Session` e emite o cookie `session` — httpOnly, `sameSite: lax`, 7 dias com renovação deslizante (`session.cookie.ts`, `session.service.ts`). O browser passa a enviar esse cookie sozinho em todo request (`withCredentials: true` no frontend); nenhum header de identidade é montado manualmente.
 
 ```typescript
-// Fluxo do AuthGuard (src/modules/auth/auth.guard.ts)
-const userId = request.header('x-user-id');
+// SessionGuard (src/modules/auth/session.guard.ts) — valida a sessão
+const token = request.cookies?.session;
 // → 401 se ausente
-const user = await prisma.user.findUnique({ where: { id: userId } });
-// → 401 se não encontrado
-// → 403 se user.status != 'APPROVED'
-request.user = { id: user.id, role: user.role };
-// role vem do DB — header x-user-role é IGNORADO para autorização
+const user = await sessionService.validate(token); // busca Session por token, checa expires
+// → 401 se sessão inválida ou expirada
+request.user = { id: user.id, role: user.role, status: user.status, name, email, image };
+// NÃO checa status — usado por /auth/me e /auth/logout, que precisam
+// funcionar mesmo para uma conta PENDING (permite o frontend redirecionar
+// para /pendente em vez de estourar erro)
+
+// AuthGuard (src/modules/auth/auth.guard.ts) — estende o SessionGuard
+await super.canActivate(context); // roda a validação de sessão acima
+// → 403 se request.user.status !== 'APPROVED'
 ```
 
-**Segurança:** impossível escalar privilégios via header forjado. Role escalation foi uma vulnerabilidade crítica no design anterior (header trust).
+**Segurança:** `role` e `status` são sempre lidos do banco a cada request (via `session.user` do Prisma) — nenhum header de cliente influencia identidade ou permissão. O antigo header `x-user-id` deixou de existir; role escalation via header forjado foi a vulnerabilidade que motivou a migração para sessão.
 
 ### 5.4. RBAC
 
@@ -351,37 +374,31 @@ GET /members?cursor=<uuid>&limit=20&sort=createdAt&direction=asc
 
 ### 6.2. Auth no Frontend
 
+Não há mais header manual nem `localStorage` de identidade. `contexts/AuthContext.tsx` é o dono único da identidade no frontend:
+
 ```
-localStorage:
-  x-user-id    → UUID do usuário (header obrigatório em todo request)
-  x-user-role  → ADMIN|PEOPLE|INTERVIEWER (apenas routing de UI)
+AuthProvider (envolve todo o layout protegido, app/(protected)/layout.tsx):
+  → GET /auth/me uma vez ao montar (cookie httpOnly vai junto via withCredentials)
+  → status !== APPROVED → router.replace("/pendente")
+  → NÃO renderiza `children` enquanto loading — evita qualquer página/Sidebar
+    calcular canAccess com user ainda null e piscar "Acesso negado"
 
-Axios interceptor 401:
-  → limpa localStorage → redirect /login (auth.ts)
+useAuth() → { user, loading }, consumido por AppShell → Sidebar e pelas páginas
+  (ex.: `const canAccess = user?.role === "ADMIN" || user?.role === "PEOPLE"`,
+  já seguro porque o Provider garante user resolvido antes de renderizar).
 
-Inicializar sessão (pós-seed ou primeiro acesso):
-  /dashboard?userId=<uuid>&role=<role>
+Axios interceptor de resposta (services/api.ts):
+  401 (sem sessão)              → redirect /login
+  403 (sessão válida, PENDING)  → redirect /pendente
+
+Logout: POST /auth/logout → revoga a linha em Session e limpa o cookie.
 ```
 
 ### 6.3. Padrão SSR-Safe
 
-**Problema:** `typeof window !== 'undefined'` no corpo do componente causa hydration mismatch (SSR renderiza role="" → client renderiza com role real → React falha na hidratação).
+**Problema:** `typeof window !== 'undefined'` no corpo do componente causa hydration mismatch (SSR renderiza um estado → client renderiza outro → React falha na hidratação).
 
-**Solução aplicada em todos os arquivos:**
-
-```tsx
-const [canAccess, setCanAccess] = useState<boolean | null>(null);
-
-useEffect(() => {
-  const role = localStorage.getItem("x-user-role") ?? "";
-  setCanAccess(role === "ADMIN" || role === "PEOPLE");
-}, []);
-
-if (canAccess === null) return null;    // invisível enquanto verifica (sem flash)
-if (!canAccess) return <AccessDenied />;
-```
-
-Arquivos com esse padrão: `Sidebar.tsx`, `members/page.tsx`, `members/[id]/page.tsx`, `selection/page.tsx`, `selection/[id]/page.tsx`, `admin/users/page.tsx`.
+**Solução atual:** a identidade não é mais lida de `localStorage` por cada página — vem uma única vez de `AuthProvider`, que já bloqueia a renderização de `children` até `/auth/me` resolver (ver 6.2). Isso elimina a necessidade do antigo padrão `useState<boolean | null>(null)` por página: como o Provider garante `user` resolvido, páginas como `members/page.tsx` e `selection/page.tsx` derivam `canAccess` direto de `user?.role` no corpo do componente, sem `useEffect` nem flash. O `colapsadaInicial` do `AppShell` segue o mesmo princípio para outro dado antes lido de client-state: vem de um cookie (`sidebar-colapsada`) lido em Server Component (`app/(protected)/layout.tsx`) e passado pronto, sem esperar hidratação.
 
 ### 6.4. Responsividade Mobile
 
@@ -406,17 +423,19 @@ Arquivos com esse padrão: `Sidebar.tsx`, `members/page.tsx`, `members/[id]/page
    → valida domínio @sou.inteli.edu.br
    → upsert User por email (status preservado no update — não sobrescreve)
    → upsert Account com tokens OAuth
-   → se user.status == PENDING → redirect /pending
-   → se user.status == APPROVED → redirect /dashboard?userId=&role=
+   → cria uma linha em Session (SessionService.create) e emite o cookie
+     httpOnly `session` (7 dias deslizantes)
+   → se user.status == PENDING → redirect /pendente
+   → se user.status == APPROVED → redirect /dashboard
+   (sem userId/role na URL: o cookie já carrega a identidade)
 
 4. Frontend:
-   → /dashboard lê ?userId e ?role da URL
-   → persiste no localStorage
-   → setupApiClient() configura interceptor Axios
-   → router.replace("/dashboard") para limpar URL
+   → AuthProvider chama GET /auth/me ao montar o layout protegido
+   → status PENDING → router.replace("/pendente")
+   → status APPROVED → renderiza a área autenticada normalmente
 ```
 
-**Nota:** O seed cria usuários com `status: APPROVED` explicitamente. Novos usuários via OAuth começam com `status: PENDING` (default do schema) até aprovação manual em `/admin/users`.
+**Nota:** O seed cria usuários com `status: APPROVED` explicitamente. Novos usuários via OAuth começam com `status: PENDING` e `role: INTERVIEWER` (defaults do schema) até um `ADMIN` ou `PEOPLE` aprovar via `PATCH /users/:id/approve` (UI em `/admin/users`).
 
 ---
 
@@ -447,11 +466,12 @@ Frontend deploy via Docker image (built by GitHub Actions, `frontend/Dockerfile`
 
 ## 9. Endpoints Completos
 
-### Auth (público)
+### Auth
 ```
-GET  /auth/google
-GET  /auth/google/callback
-GET  /auth/me                              [AuthGuard]
+GET  /auth/google                          público — redirect para consent do Google
+GET  /auth/google/callback                 público — cria Session, emite cookie, redirect
+GET  /auth/me                              [SessionGuard] → { id, name, email, image, role, status } — funciona mesmo com status PENDING
+POST /auth/logout                          [SessionGuard] — revoga Session, limpa cookie
 ```
 
 ### Users [ADMIN, PEOPLE]
@@ -493,7 +513,7 @@ GET    /selection/applications             filtros: processId, memberId, status
 POST   /selection/applications
 GET    /selection/applications/:id         inclui member, stages, questions, answers, evaluations, results
 PATCH  /selection/applications/:id/submit
-PATCH  /selection/applications/:id/status
+PATCH  /selection/applications/:id/status  corpo: { status: string, notes?: string } (notes omitido preserva o valor atual)
 
 GET    /selection/applications/:id/results
 PATCH  /selection/applications/:id/results/:stageId

@@ -173,6 +173,23 @@
     color: var(--text-muted);
   }
 
+  /* Ícone 3D da landing — o site oficial usa Three.js/WebGL para o mesmo
+     efeito; aqui é CSS puro (perspective + rotateY contínuo) sobre o
+     logo.png plano, sem dependência nova. Pausa com prefers-reduced-motion. */
+  .icone-3d {
+    animation: girar-3d 9s linear infinite;
+    transform-style: preserve-3d;
+  }
+  @keyframes girar-3d {
+    from { transform: rotateY(0deg); }
+    to { transform: rotateY(360deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .icone-3d {
+      animation: none;
+    }
+  }
+
   /* Título de página — Montserrat 300 caixa alta.
      O piso de 1.5rem (24px) do clamp é OBRIGATÓRIO: o DESIGN_SYSTEM.md §2
      proíbe Montserrat 300 abaixo disso, porque no tema escuro o peso Light

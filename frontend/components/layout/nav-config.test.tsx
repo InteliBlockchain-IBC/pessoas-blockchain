@@ -1,4 +1,4 @@
-import { itensVisiveis } from "./nav-config";
+import { itensVisiveis, PESSOAS } from "./nav-config";
 
 const hrefs = (papel: Parameters<typeof itensVisiveis>[0]) =>
   itensVisiveis(papel).flatMap((g) => g.itens.map((i) => i.href));
@@ -14,12 +14,14 @@ describe("itensVisiveis", () => {
     expect(h).not.toContain("/members");
     expect(h).not.toContain("/selection");
     expect(h).not.toContain("/admin/users");
+    expect(h).not.toContain("/pdi");
   });
 
   it("PEOPLE vê membros e seleção", () => {
     const h = hrefs("PEOPLE");
     expect(h).toContain("/members");
     expect(h).toContain("/selection");
+    expect(h).toContain("/pdi");
   });
 
   it("ADMIN vê tudo, inclusive usuários", () => {
@@ -37,5 +39,13 @@ describe("itensVisiveis", () => {
     for (const papel of ["", "ADMIN", "PEOPLE", "INTERVIEWER"] as const) {
       expect(itensVisiveis(papel).every((g) => g.itens.length > 0)).toBe(true);
     }
+  });
+});
+
+describe("PESSOAS", () => {
+  it("inclui ADMIN e PEOPLE, nao INTERVIEWER", () => {
+    expect(PESSOAS).toContain("ADMIN");
+    expect(PESSOAS).toContain("PEOPLE");
+    expect(PESSOAS).not.toContain("INTERVIEWER");
   });
 });

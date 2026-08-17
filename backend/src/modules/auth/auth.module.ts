@@ -4,10 +4,19 @@ import { AuthGuard } from './auth.guard';
 import { AuthRepository } from './auth.repository';
 import { AuthService } from './auth.service';
 import { GoogleOAuthService } from './google-oauth.service';
+import { SessionGuard } from './session.guard';
+import { SessionService } from './session.service';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, AuthGuard, GoogleOAuthService, AuthRepository],
-  exports: [AuthGuard, AuthService, GoogleOAuthService],
+  providers: [
+    AuthService,
+    AuthGuard,
+    SessionGuard,
+    SessionService,
+    GoogleOAuthService,
+    AuthRepository,
+  ],
+  exports: [AuthGuard, SessionGuard, SessionService, AuthService, GoogleOAuthService],
 })
 export class AuthModule {}

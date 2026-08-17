@@ -25,7 +25,7 @@ export function DataRow({
         className
       )}
     >
-      <span className="w-36 shrink-0 text-sm text-fg-muted">{label}</span>
+      <span className="w-28 shrink-0 text-sm text-fg-muted sm:w-36">{label}</span>
       <span className="min-w-0 flex-1 text-sm text-fg">
         {vazio ? <span className="text-fg-subtle">—</span> : value}
       </span>

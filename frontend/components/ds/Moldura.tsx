@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
  * │                                                              │
  * │  1. Card de login          — shadow="magenta", estático      │
  * │  2. EmptyState com mascote — shadow="ciano",   estático      │
- * │  3. Card do PDI no perfil  — shadow="ciano",   interactive   │
+ * │  3. CTA da landing page    — shadow="ciano",   interactive   │
  * │                                                              │
  * │  Máximo UM por tela. Nunca em elemento repetido de lista.     │
  * │  Um quarto uso exige decisão de design, não só um import.    │

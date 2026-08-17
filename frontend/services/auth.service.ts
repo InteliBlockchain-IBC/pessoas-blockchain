@@ -1,21 +1,14 @@
-import { getBaseUrl } from "./api";
+import { api, getBaseUrl } from "./api";
 
 export const authService = {
-  getGoogleAuthUrl: () => {
-    return `${getBaseUrl()}/auth/google`;
-  },
-  
-  logout: () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("x-user-id");
-      localStorage.removeItem("x-user-role");
-    }
-  },
+  getGoogleAuthUrl: () => `${getBaseUrl()}/auth/google`,
 
-  isAuthenticated: () => {
-    if (typeof window !== "undefined") {
-      return !!localStorage.getItem("x-user-id");
+  /** Revoga a sessao no servidor antes de sair. */
+  logout: async () => {
+    try {
+      await api.post("/auth/logout");
+    } finally {
+      window.location.href = "/login";
     }
-    return false;
-  }
+  },
 };

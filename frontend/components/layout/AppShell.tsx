@@ -5,9 +5,11 @@ import Image from "next/image";
 import { Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { Sidebar } from "./Sidebar";
+import { CommandPalette } from "./CommandPalette";
 import { Toaster } from "@/components/ui/toaster";
 import { DirtyGuard } from "@/components/ds/DirtyGuard";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Papel } from "./nav-config";
 
 /**
@@ -42,30 +44,38 @@ export function AppShell({
 
   const [menuAberto, setMenuAberto] = useState(false);
   const [colapsada, setColapsada] = useState(colapsadaInicial);
-  // SSR-safe: null enquanto o localStorage não foi lido (CLAUDE.md, regra 2).
-  const [papel, setPapel] = useState<Papel | null>(null);
-  const [email, setEmail] = useState<string | null>(null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+
+  // Identidade vem do AuthProvider (contexts/AuthContext.tsx), que já
+  // envolve este componente — não sobra localStorage a ler. AppShell só
+  // renderiza depois que o provider resolveu `/auth/me` (loading=false),
+  // então `user` aqui nunca é null. `papel` alimenta o CommandPalette; o
+  // Sidebar consome `useAuth()` diretamente (não recebe mais papel/email).
+  const { user } = useAuth();
+  const papel = (user?.role ?? "") as Papel;
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setPapel((localStorage.getItem("x-user-role") ?? "") as Papel);
-    // Ninguém grava "x-user-email" ainda hoje — fica null e o Sidebar cai no
-    // rótulo do papel. Lido aqui (não no Sidebar) para manter um único dono
-    // de leitura de localStorage, mesmo risco do papel (spec §13).
-    setEmail(localStorage.getItem("x-user-email"));
+    function onKeyDown(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setPaletteOpen(true);
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
 
   return (
     <DirtyGuard>
       <div className="flex min-h-screen bg-surface"> {/* check-visual: ok — o shell é quem decide a altura */}
         <Sidebar
-          papel={papel}
-          email={email}
           isOpen={menuAberto}
           onClose={() => setMenuAberto(false)}
           colapsada={colapsada}
           onColapsarChange={setColapsada}
+          onOpenSearch={() => setPaletteOpen(true)}
         />
+        <CommandPalette isOpen={paletteOpen} onClose={() => setPaletteOpen(false)} papel={papel} />
 
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface-raised px-4 md:hidden">

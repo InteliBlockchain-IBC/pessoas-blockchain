@@ -275,7 +275,11 @@ export class SelectionController {
     @Param('id') id: string,
     @Body() body: UpdateApplicationStatusDto,
   ) {
-    return this.selectionService.updateApplicationStatus(id, body.status);
+    return this.selectionService.updateApplicationStatus(
+      id,
+      body.status,
+      body.notes,
+    );
   }
 
   /**

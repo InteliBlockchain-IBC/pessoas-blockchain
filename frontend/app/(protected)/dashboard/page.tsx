@@ -1,10 +1,8 @@
 "use client";
 
-import { LayoutDashboard, Users, UserCheck, FileText, ClipboardList } from "lucide-react";
+import { LayoutDashboard, Users, UserCheck, FileText, ClipboardList, Loader2 } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
-import { setupApiClient } from "@/services/api";
 import { dashboardService, type DashboardMetrics } from "@/services/dashboard.service";
-import { useSearchParams, useRouter } from "next/navigation";
 import { PageHeader } from "@/components/ds/PageHeader";
 import { KpiRow } from "@/components/ds/KpiRow";
 import { KpiCard } from "@/components/ds/KpiCard";
@@ -14,22 +12,8 @@ import { StatusBadge } from "@/components/ds/StatusBadge";
 function DashboardContent() {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [loading, setLoading] = useState(true);
-  const searchParams = useSearchParams();
-  const router = useRouter();
 
   useEffect(() => {
-    const userIdFromUrl = searchParams.get("userId");
-    const roleFromUrl = searchParams.get("role");
-
-    if (userIdFromUrl && roleFromUrl) {
-      localStorage.setItem("x-user-id", userIdFromUrl);
-      localStorage.setItem("x-user-role", roleFromUrl);
-      setupApiClient(userIdFromUrl, roleFromUrl);
-      router.replace("/dashboard");
-    } else {
-      setupApiClient();
-    }
-
     const fetchMetrics = async () => {
       try {
         const data = await dashboardService.getMetrics();
@@ -41,7 +25,7 @@ function DashboardContent() {
       }
     };
     fetchMetrics();
-  }, [searchParams, router]);
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -87,7 +71,14 @@ function DashboardContent() {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-fg">Carregando dashboard...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex min-h-[50vh] items-center justify-center gap-2 text-fg">
+          <Loader2 size={16} className="animate-spin opacity-60" aria-hidden="true" />
+          Carregando dashboard...
+        </div>
+      }
+    >
       <DashboardContent />
     </Suspense>
   );
