@@ -4,15 +4,16 @@ import Image from "next/image";
 import { Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import { authService } from "@/services/auth.service";
+import { Button } from "@/components/ui/button";
 
 export default function PendentePage() {
   return (
-    <div className="min-h-screen flex justify-center items-center p-4">
+    <div className="min-h-screen flex justify-center items-center p-4"> {/* check-visual: ok — a página de aprovação pendente está fora do AppShell */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="bg-surface-raised border border-border rounded-block w-full max-w-md text-center flex flex-col items-center gap-6 p-8"
+        className="bg-surface-raised border border-border rounded-block w-full max-w-md text-center flex flex-col items-center gap-6 p-8" // check-visual: ok — a página de aprovação pendente está fora do AppShell
       >
         <Image
           src="/logo_texto.png"
@@ -32,12 +33,9 @@ export default function PendentePage() {
           Você não precisa fazer nada — assim que for aprovado, é só entrar
           novamente.
         </p>
-        <button
-          onClick={() => authService.logout()}
-          className="font-heading font-bold rounded-block transition-all text-fg-muted hover:text-fg cursor-pointer"
-        >
+        <Button variant="ghost" onClick={() => authService.logout()}>
           Sair
-        </button>
+        </Button>
       </motion.div>
     </div>
   );
