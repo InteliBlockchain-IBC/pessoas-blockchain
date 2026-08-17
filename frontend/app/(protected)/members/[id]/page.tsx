@@ -31,6 +31,7 @@ import {
 } from "@/lib/labels";
 import { InterestsTags } from "./_components/InterestsTags";
 import { ApplicationCard } from "./_components/ApplicationCard";
+import { useAuth } from "@/contexts/AuthContext";
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
@@ -89,14 +90,8 @@ export default function MemberProfilePage({
   const [loadingMember, setLoadingMember] = useState(true);
   const [loadingApps, setLoadingApps] = useState(true);
   const [loadingPdi, setLoadingPdi] = useState(true);
-  const [canEdit, setCanEdit] = useState(false);
-
-  useEffect(() => {
-    // localStorage só existe no cliente — SSR-safe (CLAUDE.md, regra técnica 2).
-    const role = localStorage.getItem("x-user-role") ?? "";
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCanEdit(["ADMIN", "PEOPLE"].includes(role));
-  }, []);
+  const { user } = useAuth();
+  const canEdit = user?.role === "ADMIN" || user?.role === "PEOPLE";
 
   useEffect(() => {
     membersService
@@ -177,7 +172,9 @@ export default function MemberProfilePage({
         title={member.name}
         subtitle={member.email}
         icon={User}
-        onBack={() => router.push("/members")}
+        // history.length > 2 = há pra onde voltar dentro do app (a própria
+        // página conta como 1). Link direto/refresh cai no fallback fixo.
+        onBack={() => (window.history.length > 2 ? router.back() : router.push("/members"))}
         actions={
           <Button variant="outline" onClick={handleExportPDF}>
             <FileText size={16} aria-hidden="true" />

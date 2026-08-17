@@ -6,15 +6,22 @@ import { ArrowRight, ShieldCheck, Database, FileSpreadsheet } from "lucide-react
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { api } from "@/services/api";
 import { Moldura } from "@/components/ds/Moldura";
 
 export default function LandingPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (localStorage.getItem("x-user-id")) {
-      router.push("/dashboard");
-    }
+    api
+      .get("/auth/me")
+      .then((res) => {
+        const status = res.data?.data?.status;
+        router.replace(status === "APPROVED" ? "/dashboard" : "/pendente");
+      })
+      .catch(() => {
+        // Sem sessao: e o caso normal da landing, fica na propria pagina.
+      });
   }, [router]);
 
   return (

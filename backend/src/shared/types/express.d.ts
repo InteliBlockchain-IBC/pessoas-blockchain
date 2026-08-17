@@ -5,6 +5,10 @@ declare module 'express' {
     user?: {
       id: string;
       role: string;
+      status: string;
+      name: string | null;
+      email: string;
+      image: string | null;
     };
   }
 }

@@ -2,10 +2,12 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  HttpCode,
+  HttpStatus,
+  Post,
   Query,
   Req,
   Res,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
@@ -15,14 +17,16 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthGuard } from './auth.guard';
-import { AuthRepository } from './auth.repository';
 import { GoogleOAuthService } from './google-oauth.service';
+import { SESSION_COOKIE, sessionCookieOptions } from './session.cookie';
+import { SessionGuard } from './session.guard';
+import { SessionService } from './session.service';
 
 /**
  * Authentication endpoints for the API.
  *
- * - `GET /auth/me` — returns the currently authenticated user (via headers).
+ * - `GET /auth/me` — returns the currently authenticated user (via a session cookie).
+ * - `POST /auth/logout` — revoga a sessao atual e limpa o cookie.
  * - `GET /auth/google` — redirects to Google's OAuth consent screen.
  * - `GET /auth/google/callback` — handles the Google OAuth callback.
  */
@@ -31,7 +35,7 @@ import { GoogleOAuthService } from './google-oauth.service';
 export class AuthController {
   constructor(
     private readonly googleOAuthService: GoogleOAuthService,
-    private readonly authRepository: AuthRepository,
+    private readonly sessionService: SessionService,
   ) {}
 
   private getFrontendBaseUrl(): string {
@@ -62,36 +66,37 @@ export class AuthController {
   }
 
   /**
-   * Return the authenticated user based on request headers.
+   * Return the authenticated user based on the session cookie.
    *
-   * O AuthGuard só injeta { id, role } em req.user — o rodapé da sidebar
-   * precisa de name/email/image, então buscamos o usuário aqui em vez de
-   * alargar o select do guard, que roda em toda requisição autenticada.
+   * O SessionGuard já injeta { id, role, status, name, email, image } em
+   * req.user (via SessionService.validate, que traz o User inteiro junto da
+   * Session) — nenhuma query adicional é necessária aqui.
    *
-   * @param req - Request with user data injected by the AuthGuard.
+   * @param req - Request with user data injected by the SessionGuard.
    * @returns The current user.
    */
   @Get('me')
-  @UseGuards(AuthGuard)
+  @UseGuards(SessionGuard)
   @ApiOperation({ summary: 'Return the authenticated user' })
   @ApiOkResponse({ description: 'Authenticated user payload.' })
-  async getMe(@Req() req: Request) {
-    const userId = req.user?.id;
-    const user = userId ? await this.authRepository.findUserById(userId) : null;
+  getMe(@Req() req: Request) {
+    return req.user ?? {};
+  }
 
-    if (!user) {
-      throw new UnauthorizedException('Usuario nao encontrado.');
+  /**
+   * Encerra a sessao: apaga a linha em Session e limpa o cookie.
+   */
+  @Post('logout')
+  @UseGuards(SessionGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Encerra a sessao atual' })
+  async logout(@Req() req: Request, @Res() res: Response) {
+    const token = req.cookies?.[SESSION_COOKIE] as string | undefined;
+    if (token) {
+      await this.sessionService.revoke(token);
     }
-
-    // Mapeamento explícito: findUserById traz `accounts` junto, e o cliente
-    // não tem nada que ver com dado de conta OAuth.
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      image: user.image,
-      role: user.role,
-    };
+    res.clearCookie(SESSION_COOKIE, sessionCookieOptions());
+    return res.send();
   }
 
   /**
@@ -178,15 +183,15 @@ export class AuthController {
 
     try {
       const user = await this.googleOAuthService.handleCallback(code);
+      const sessionToken = await this.sessionService.create(user.id);
 
-      // No MVP, redirecionamos de volta para o dashboard apos salvar no BD.
-      // Futuramente aqui criariamos a sessao/cookie JWT.
       if (res) {
+        res.cookie(SESSION_COOKIE, sessionToken, sessionCookieOptions());
+        // Sem userId/role na URL: o cookie ja carrega a identidade.
         return res.redirect(
-          this.buildFrontendUrl('/dashboard', {
-            userId: user.id,
-            role: user.role,
-          }),
+          this.buildFrontendUrl(
+            user.status === 'APPROVED' ? '/dashboard' : '/pendente',
+          ),
         );
       }
       return user;

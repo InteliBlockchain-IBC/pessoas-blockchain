@@ -1,19 +1,18 @@
-import { UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { AuthController } from './auth.controller';
-import { AuthGuard } from './auth.guard';
-import { AuthRepository } from './auth.repository';
 import { GoogleOAuthService } from './google-oauth.service';
+import { SessionGuard } from './session.guard';
+import { SessionService } from './session.service';
+import { SESSION_COOKIE } from './session.cookie';
 
 describe('AuthController', () => {
   let controller: AuthController;
 
-  const mockAuthRepository = { findUserById: jest.fn() };
-  const mockGoogleOAuthService = {};
+  const mockGoogleOAuthService = { handleCallback: jest.fn() };
+  const mockSessionService = { create: jest.fn(), revoke: jest.fn() };
 
-  const requestFor = (id: string) =>
-    ({ user: { id, role: 'ADMIN' } }) as unknown as Request;
+  const requestFor = (user: unknown) => ({ user, cookies: {} }) as unknown as Request;
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -22,13 +21,14 @@ describe('AuthController', () => {
       controllers: [AuthController],
       providers: [
         { provide: GoogleOAuthService, useValue: mockGoogleOAuthService },
-        { provide: AuthRepository, useValue: mockAuthRepository },
+        { provide: SessionService, useValue: mockSessionService },
       ],
     })
-      // getMe tem @UseGuards(AuthGuard), que depende do PrismaService. O
-      // teste chama o método do controller direto (sem pipeline HTTP), então
-      // o guard nunca roda — só precisa existir pra o Nest compilar o módulo.
-      .overrideGuard(AuthGuard)
+      // getMe/logout tem @UseGuards(SessionGuard), que depende do PrismaService
+      // via SessionService. O teste chama o método do controller direto (sem
+      // pipeline HTTP), então o guard nunca roda — só precisa existir pra o
+      // Nest compilar o módulo.
+      .overrideGuard(SessionGuard)
       .useValue({ canActivate: () => true })
       .compile();
 
@@ -36,65 +36,51 @@ describe('AuthController', () => {
   });
 
   describe('getMe', () => {
-    const dbUser = {
-      id: 'user-1',
-      name: 'Messias Olivindo',
-      email: 'messias@sou.inteli.edu.br',
-      image: 'https://lh3.googleusercontent.com/foto',
-      role: 'ADMIN',
-      status: 'APPROVED',
-      memberId: null,
-      emailVerified: null,
-      createdAt: new Date('2026-01-01'),
-      updatedAt: new Date('2026-01-01'),
-      accounts: [
-        { id: 'acc-1', provider: 'google', providerAccountId: '123', scope: 'openid email' },
-      ],
-    };
-
-    it('devolve id, name, email, image e role do usuario autenticado', async () => {
-      mockAuthRepository.findUserById.mockResolvedValue(dbUser);
-
-      const result = await controller.getMe(requestFor('user-1'));
-
-      expect(mockAuthRepository.findUserById).toHaveBeenCalledWith('user-1');
-      expect(result).toEqual({
+    it('devolve req.user direto — o SessionGuard ja injeta id, name, email, image, role e status', () => {
+      const user = {
         id: 'user-1',
         name: 'Messias Olivindo',
         email: 'messias@sou.inteli.edu.br',
         image: 'https://lh3.googleusercontent.com/foto',
         role: 'ADMIN',
-      });
+        status: 'APPROVED',
+      };
+
+      const result = controller.getMe(requestFor(user));
+
+      expect(result).toEqual(user);
     });
 
-    it('nao vaza accounts nem status na resposta', async () => {
-      mockAuthRepository.findUserById.mockResolvedValue(dbUser);
+    it('devolve objeto vazio quando req.user nao foi injetado', () => {
+      expect(controller.getMe(requestFor(undefined))).toEqual({});
+    });
+  });
 
-      const result = await controller.getMe(requestFor('user-1'));
+  describe('logout', () => {
+    it('revoga a sessao e limpa o cookie quando ha token', async () => {
+      const clearCookie = jest.fn();
+      const send = jest.fn();
+      const res = { clearCookie, send } as unknown as Response;
+      const req = { cookies: { [SESSION_COOKIE]: 'tok' } } as unknown as Request;
 
-      expect(result).not.toHaveProperty('accounts');
-      expect(result).not.toHaveProperty('status');
+      await controller.logout(req, res);
+
+      expect(mockSessionService.revoke).toHaveBeenCalledWith('tok');
+      expect(clearCookie).toHaveBeenCalledWith(SESSION_COOKIE, expect.any(Object));
+      expect(send).toHaveBeenCalled();
     });
 
-    it('devolve name nulo quando o usuario nunca teve nome no Google', async () => {
-      mockAuthRepository.findUserById.mockResolvedValue({
-        ...dbUser,
-        name: null,
-        image: null,
-      });
+    it('nao chama revoke quando nao ha cookie, mas ainda limpa e responde', async () => {
+      const clearCookie = jest.fn();
+      const send = jest.fn();
+      const res = { clearCookie, send } as unknown as Response;
+      const req = { cookies: {} } as unknown as Request;
 
-      const result = await controller.getMe(requestFor('user-1'));
+      await controller.logout(req, res);
 
-      expect(result.name).toBeNull();
-      expect(result.image).toBeNull();
-    });
-
-    it('lanca 401 quando o usuario sumiu entre o guard e a busca', async () => {
-      mockAuthRepository.findUserById.mockResolvedValue(null);
-
-      await expect(controller.getMe(requestFor('user-1'))).rejects.toThrow(
-        UnauthorizedException,
-      );
+      expect(mockSessionService.revoke).not.toHaveBeenCalled();
+      expect(clearCookie).toHaveBeenCalled();
+      expect(send).toHaveBeenCalled();
     });
   });
 });
