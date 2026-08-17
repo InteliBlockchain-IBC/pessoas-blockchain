@@ -126,7 +126,7 @@ export default function MemberProfilePage({
 
   if (loadingMember) {
     return (
-      <div className="flex items-center gap-2 p-8 text-fg opacity-70">
+      <div className="flex min-h-[50vh] items-center justify-center gap-2 text-fg opacity-70">
         <Loader2 size={16} className="animate-spin" aria-hidden="true" />
         Carregando perfil...
       </div>
@@ -336,7 +336,7 @@ export default function MemberProfilePage({
         {(ctx) => (
           <div className="flex flex-col gap-4">
             {loadingPdi ? (
-              <p className="flex items-center gap-2 text-sm text-fg-muted">
+              <p className="flex items-center justify-center gap-2 py-6 text-sm text-fg-muted">
                 <Loader2 size={14} className="animate-spin" aria-hidden="true" />
                 Carregando PDI...
               </p>
@@ -362,7 +362,7 @@ export default function MemberProfilePage({
       <SectionCard label="PROCESSOS SELETIVOS" values={{}}>
         {() =>
           loadingApps ? (
-            <p className="flex items-center gap-2 text-sm text-fg-muted">
+            <p className="flex items-center justify-center gap-2 py-6 text-sm text-fg-muted">
               <Loader2 size={14} className="animate-spin" aria-hidden="true" />
               Carregando histórico...
             </p>
