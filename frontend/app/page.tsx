@@ -34,16 +34,14 @@ export default function LandingPage() {
           className="flex flex-col gap-4 items-center"
         >
           <div className="flex items-center gap-3">
-            <div className="perspective-[900px]">
-              <Image
-                src="/logo.png"
-                alt=""
-                width={200}
-                height={200}
-                priority
-                className="icone-3d h-14 w-14 md:h-16 md:w-16 drop-shadow-md"
-              />
-            </div>
+            <Image
+              src="/logo.png"
+              alt=""
+              width={200}
+              height={200}
+              priority
+              className="h-14 w-14 md:h-16 md:w-16 drop-shadow-md"
+            />
             <h1 className="font-heading text-3xl md:text-4xl uppercase text-fg">
               <span className="font-light">inteli</span>
               <span className="font-bold">Blockchain</span>
