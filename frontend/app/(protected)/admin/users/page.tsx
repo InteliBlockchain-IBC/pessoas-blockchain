@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/ds/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { notificar } from "@/components/ds/toast-helpers";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ROLE_FILTER_OPTIONS = [
   { value: "todos", label: "Todos os papéis" },
@@ -46,13 +47,8 @@ export default function AdminUsersPage() {
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    // localStorage só existe no cliente — SSR-safe (CLAUDE.md, regra técnica 2).
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsAdmin(localStorage.getItem("x-user-role") === "ADMIN");
-  }, []);
+  const { user } = useAuth();
+  const isAdmin = user?.role === "ADMIN";
 
   const fetchUsers = useCallback(
     async (filters: { q?: string; role?: string; status?: string }) => {

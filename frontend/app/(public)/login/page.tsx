@@ -5,6 +5,7 @@ import { LogIn } from "lucide-react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/services/auth.service";
+import { api } from "@/services/api";
 import { Moldura } from "@/components/ds/Moldura";
 import { Button } from "@/components/ui/button";
 
@@ -12,9 +13,15 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (authService.isAuthenticated()) {
-      router.push("/dashboard");
-    }
+    api
+      .get("/auth/me")
+      .then((res) => {
+        const status = res.data?.data?.status;
+        router.replace(status === "APPROVED" ? "/dashboard" : "/pendente");
+      })
+      .catch(() => {
+        // Sem sessao: e o caso normal da landing, fica na propria pagina.
+      });
   }, [router]);
 
   const handleLogin = () => {

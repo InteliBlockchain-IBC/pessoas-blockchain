@@ -12,7 +12,7 @@ export interface MarkdownEditorProps {
 
 export function MarkdownEditor({ value, onChange, placeholder, className = "" }: MarkdownEditorProps) {
   return (
-    <Tabs defaultValue="editar" className={`gap-0 overflow-hidden rounded-none border border-border ${className}`}>
+    <Tabs defaultValue="editar" className={`gap-0 rounded-none border border-border ${className}`}>
       <TabsList variant="line" className="h-auto w-full justify-start gap-0 rounded-none border-b border-border bg-surface-raised p-0">
         <TabsTrigger
           value="editar"
@@ -33,14 +33,14 @@ export function MarkdownEditor({ value, onChange, placeholder, className = "" }:
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder || "Suporta Markdown (ex: **negrito**, - lista)"}
-          className="min-h-[180px] w-full resize-y bg-transparent p-4 text-fg placeholder:text-fg-subtle"
+          className="min-h-[420px] w-full resize-y bg-transparent p-4 text-fg placeholder:text-fg-subtle"
         />
         <div className="border-t border-border px-4 py-1.5 text-right text-xs text-fg-muted">
           {value.length} caractere{value.length === 1 ? "" : "s"}
         </div>
       </TabsContent>
 
-      <TabsContent value="visualizar" className="mt-0 min-h-[200px] bg-surface-sunken p-4">
+      <TabsContent value="visualizar" className="mt-0 min-h-[420px] bg-surface-sunken p-4">
         <MarkdownViewer content={value} />
       </TabsContent>
     </Tabs>

@@ -62,16 +62,18 @@ export class GoogleOAuthService {
    * Generates the Google authorization URL.
    *
    * - `access_type: 'offline'` ensures a refresh_token is returned.
-   * - `prompt: 'consent'` forces re-consent so we always get a refresh_token
-   *   (Google only returns it on first auth or when consent is explicitly requested).
    * - `hd` parameter hints Google to show only the institutional domain.
+   *
+   * Nao usamos `prompt: 'consent'`: ele forcava a tela de consentimento em
+   * TODO login, nao so no primeiro. O refresh_token do Google ja esta
+   * persistido e `auth.repository.ts` so o sobrescreve quando o Google manda
+   * um novo, entao o acesso ao Calendar continua intacto.
    *
    * @returns The full Google consent URL to redirect the user to.
    */
   getAuthUrl(): string {
     return this.oauth2Client.generateAuthUrl({
       access_type: 'offline',
-      prompt: 'consent',
       scope: this.SCOPES,
       include_granted_scopes: true,
       // Hint to Google login page to restrict to the institutional domain

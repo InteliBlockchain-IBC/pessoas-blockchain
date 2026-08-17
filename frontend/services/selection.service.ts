@@ -114,6 +114,55 @@ export const selectionService = {
     return Array.isArray(response.data?.data) ? response.data.data : [];
   },
 
+  // As quatro rotas abaixo são upsert/update: `score`/`notes` aceitam
+  // explicitamente `null` pra limpar um valor já lançado — `@IsOptional()`
+  // no backend pula a validação seguinte tanto pra `null` quanto pra
+  // `undefined` (confirmado no pacote class-validator instalado). `undefined`
+  // (campo omitido) preserva o valor atual; `null` apaga.
+  upsertAnswer: async (
+    applicationId: string,
+    questionId: string,
+    answerText: string,
+  ): Promise<void> => {
+    await api.patch(
+      `/selection/applications/${applicationId}/answers/${questionId}`,
+      { answerText },
+    );
+  },
+
+  upsertEvaluation: async (
+    applicationId: string,
+    questionId: string,
+    payload: { score?: number | null; notes?: string | null },
+  ): Promise<void> => {
+    await api.patch(
+      `/selection/applications/${applicationId}/evaluations/${questionId}`,
+      payload,
+    );
+  },
+
+  upsertStageResult: async (
+    applicationId: string,
+    stageId: string,
+    payload: { status: string; score?: number | null; notes?: string | null },
+  ): Promise<void> => {
+    await api.patch(
+      `/selection/applications/${applicationId}/results/${stageId}`,
+      payload,
+    );
+  },
+
+  updateApplicationStatus: async (
+    applicationId: string,
+    status: string,
+    notes?: string | null,
+  ): Promise<void> => {
+    await api.patch(`/selection/applications/${applicationId}/status`, {
+      status,
+      notes,
+    });
+  },
+
   importCandidates: async (
     processId: string,
     file: File,

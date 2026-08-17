@@ -1,46 +1,31 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Request } from 'express';
-import { PrismaService } from '../../shared/database/prisma/prisma.service';
+import { SessionGuard } from './session.guard';
+import { SessionService } from './session.service';
 
 /**
- * Auth guard that validates x-user-id against the database.
+ * Guard dos endpoints protegidos: sessao valida E conta aprovada.
  *
- * Role is read from the DB — the x-user-role header is intentionally ignored
- * to prevent privilege escalation by a client-side header forgery.
- * Only APPROVED users can access protected endpoints.
+ * Role continua vindo do banco (via SessionGuard), nunca de header — o
+ * `x-user-id` deixou de existir nesta versao.
  */
 @Injectable()
-export class AuthGuard implements CanActivate {
-  constructor(private readonly prisma: PrismaService) {}
+export class AuthGuard extends SessionGuard {
+  // Construtor explicito de proposito: uma subclasse sem construtor proprio
+  // nao emite `design:paramtypes`, e o Nest injetaria `undefined` no
+  // SessionService — falha so em runtime, no primeiro request.
+  constructor(sessionService: SessionService) {
+    super(sessionService);
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    await super.canActivate(context);
+
     const request = context.switchToHttp().getRequest<Request>();
-    const userId = request.header('x-user-id');
 
-    if (!userId) {
-      throw new UnauthorizedException('Usuario nao autenticado.');
-    }
-
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true, role: true, status: true },
-    });
-
-    if (!user) {
-      throw new UnauthorizedException('Usuario nao encontrado.');
-    }
-
-    if (user.status !== 'APPROVED') {
+    if (request.user?.status !== 'APPROVED') {
       throw new ForbiddenException('Conta pendente de aprovacao.');
     }
-
-    request.user = { id: user.id, role: user.role } as Request['user'];
 
     return true;
   }

@@ -6,35 +6,50 @@ import { ArrowRight, ShieldCheck, Database, FileSpreadsheet } from "lucide-react
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { api } from "@/services/api";
+import { Moldura } from "@/components/ds/Moldura";
 
 export default function LandingPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (localStorage.getItem("x-user-id")) {
-      router.push("/dashboard");
-    }
+    api
+      .get("/auth/me")
+      .then((res) => {
+        const status = res.data?.data?.status;
+        router.replace(status === "APPROVED" ? "/dashboard" : "/pendente");
+      })
+      .catch(() => {
+        // Sem sessao: e o caso normal da landing, fica na propria pagina.
+      });
   }, [router]);
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center p-8 relative overflow-hidden"> {/* check-visual: ok — a página de entrada está fora do AppShell */}
-      <main className="z-10 max-w-4xl w-full flex flex-col items-center text-center gap-8"> {/* check-visual: ok — a página de entrada está fora do AppShell */}
+      <main className="z-10 max-w-3xl w-full flex flex-col items-center text-center gap-8"> {/* check-visual: ok — a página de entrada está fora do AppShell */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="flex flex-col gap-4 items-center"
         >
-          <Image
-            src="/logo_texto.png"
-            alt="Inteli Blockchain"
-            width={4000}
-            height={2000}
-            priority
-            className="h-56 md:h-80 w-auto mb-2 drop-shadow-md "
-          />
-          <p className="text-xl md:text-2xl text-fg max-w-2xl font-light"> {/* check-visual: ok — legibilidade do parágrafo, não largura de página */}
+          <div className="flex items-center gap-3">
+            <div className="perspective-[900px]">
+              <Image
+                src="/logo.png"
+                alt=""
+                width={200}
+                height={200}
+                priority
+                className="icone-3d h-14 w-14 md:h-16 md:w-16 drop-shadow-md"
+              />
+            </div>
+            <h1 className="font-heading text-3xl md:text-4xl uppercase text-fg">
+              <span className="font-light">inteli</span>
+              <span className="font-bold">Blockchain</span>
+            </h1>
+          </div>
+          <p className="text-lg md:text-xl text-fg max-w-xl font-light"> {/* check-visual: ok — legibilidade do parágrafo, não largura de página */}
             Plataforma centralizada para Gestão de Pessoas, Processos Seletivos e Planos de Desenvolvimento Individual.
           </p>
         </motion.div>
@@ -43,27 +58,27 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mt-8"
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full"
         >
-          <div className="bg-surface-raised border border-border p-6 rounded-none flex flex-col items-center text-center gap-3">
-            <Database size={32} className="text-fg-muted" />
-            <h3 className="text-xl font-bold">Gestão Centralizada</h3>
-            <p className="text-sm opacity-80">
-              Gerencie membros ativos e inativos, funções e departamentos com controle de permissões.
+          <div className="bg-surface-raised border border-border p-4 rounded-block flex flex-col items-center text-center gap-2">
+            <Database size={22} className="text-fg-muted" />
+            <h3 className="text-sm font-bold">Gestão Centralizada</h3>
+            <p className="text-xs opacity-80">
+              Membros ativos e inativos, funções e departamentos com controle de permissões.
             </p>
           </div>
-          <div className="bg-surface-raised border border-border p-6 rounded-none flex flex-col items-center text-center gap-3">
-            <FileSpreadsheet size={32} className="text-fg-muted" />
-            <h3 className="text-xl font-bold">Processo Seletivo</h3>
-            <p className="text-sm opacity-80">
-              Acompanhe candidaturas, avalie candidatos e importe resultados de planilhas.
+          <div className="bg-surface-raised border border-border p-4 rounded-block flex flex-col items-center text-center gap-2">
+            <FileSpreadsheet size={22} className="text-fg-muted" />
+            <h3 className="text-sm font-bold">Processo Seletivo</h3>
+            <p className="text-xs opacity-80">
+              Candidaturas, avaliação de candidatos e importação de resultados de planilhas.
             </p>
           </div>
-          <div className="bg-surface-raised border border-border p-6 rounded-none flex flex-col items-center text-center gap-3">
-            <ShieldCheck size={32} className="text-fg-muted" />
-            <h3 className="text-xl font-bold">PDI Contínuo</h3>
-            <p className="text-sm opacity-80">
-              Crie históricos de desenvolvimento versionados para todos os membros do clube.
+          <div className="bg-surface-raised border border-border p-4 rounded-block flex flex-col items-center text-center gap-2">
+            <ShieldCheck size={22} className="text-fg-muted" />
+            <h3 className="text-sm font-bold">PDI Contínuo</h3>
+            <p className="text-xs opacity-80">
+              Históricos de desenvolvimento versionados para todos os membros do clube.
             </p>
           </div>
         </motion.div>
@@ -72,14 +87,17 @@ export default function LandingPage() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4, delay: 0.4 }}
-          className="mt-12 flex flex-col sm:flex-row gap-4 items-center"
+          className="mt-4"
         >
-          <Button asChild size="lg">
-            <Link href="/login">
+          <Moldura shadow="ciano" interactive>
+            <Link
+              href="/login"
+              className="flex items-center gap-2 px-6 py-3 font-heading text-sm font-bold uppercase tracking-wide text-fg focus-visible:outline-offset-[10px]"
+            >
               Acesso Institucional
-              <ArrowRight size={20} />
+              <ArrowRight size={18} aria-hidden="true" />
             </Link>
-          </Button>
+          </Moldura>
         </motion.div>
       </main>
 
