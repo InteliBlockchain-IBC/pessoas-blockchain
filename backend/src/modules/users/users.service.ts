@@ -32,7 +32,7 @@ export class UsersService {
       limit,
     });
 
-    return { items: users };
+    return users;
   }
 
   /**
